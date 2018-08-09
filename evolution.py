@@ -27,7 +27,8 @@ matplotlib.use('TkAgg')
 
 # define starting variables
 # amino acids - every fitness value string references residues string
-residues = ["R", "H", "K", "D", "E", "S", "T", "N", "Q", "C", "G", "P", "A", "V", "I", "L", "M", "F", "Y", "W"]
+residues = ["R", "H", "K", "D", "E", "S", "T", "N", "Q", "C",
+            "G", "P", "A", "V", "I", "L", "M", "F", "Y", "W"]
 
 # parameters for normal distribution used to select fitness values
 mu = -1.2
@@ -46,7 +47,7 @@ startingfitness = 'medium'  # high, medium or low; must be lower case. If select
 fitnessthreshold = 0  # arbitrary number for fitness threshold
 amountofaminos = 79  # number of amino acids in the protein after the start methionine
 mutationrate = 0.001  # should be small!
-amountofmutations = int((amountofclones*(amountofaminos+1)*mutationrate))  # number of mutations per generation
+amountofmutations = int(amountofclones*(amountofaminos+1)*mutationrate)  # number of mutations per generation
 writerate = 50  # write a new fasta file every x generations
 amountofanchors = int((amountofaminos+1)/10)  # amount of invariant sites in a generation (not including root)
 trackrate = 50  # track every x generations
@@ -60,7 +61,8 @@ trackhistfitness = False  # True or False.
 trackinvariants = False  # if True, invariants are tracked in the histogram analysis. If false, invariants are ignored.
 
 # create folder and subfolders
-paths = ['runsettings', 'start', 'fastas', 'fitnessgraph', 'fitnessdotmatrix', 'fitnessdistribution', 'treefastas']
+paths = ['runsettings', 'start', 'fastas', 'fitnessgraph', 'fitnessdotmatrix',
+         'fitnessdistribution', 'treefastas']
 runpath = "/Users/Adam/Documents/PhD/PhDyear2/Modelling/run%s" % datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
 for path in paths:
     os.makedirs(os.path.join(runpath, path))

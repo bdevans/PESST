@@ -2,14 +2,14 @@
 import numpy as np
 from numpy import median
 from numpy.random import gamma
-import scipy.special as sps
+# import scipy.special as sps
 import matplotlib
 import copy
 import os.path
-import shutil
+# import shutil
 import csv
 import datetime
-import json
+# import json
 from random import randint, sample, choice, shuffle
 from numpy.random import normal, uniform
 from scipy.stats import anderson, normaltest, skew, skewtest, kurtosistest
@@ -19,8 +19,8 @@ from scipy.stats import ks_2samp as kosmo
 from matplotlib import pyplot as plt
 from textwrap import wrap
 from tqdm import tqdm
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
+# from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+# from matplotlib.figure import Figure
 matplotlib.use('TkAgg')
 
 # define starting variables

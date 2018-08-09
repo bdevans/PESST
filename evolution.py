@@ -98,7 +98,7 @@ LGmatrix = np.delete(LGmatrix, 0, 0)  # trim first line of the array as its not 
 
 
 # This module generates an original starting protein 20aa long, with a start methionine
-def proteingenerator(a):
+def generate_protein(a):
     amino = a
     firstresidue = "M"
     original_protein = []
@@ -110,7 +110,7 @@ def proteingenerator(a):
 
 
 # This module is unused, but generates a graph to test normal distribution shape if required
-def normaldistributiontester():
+def test_normal_distribution():
     # generate distribution
     s = normal(mu, sigma, 2000)
     # plot distribuiton
@@ -118,11 +118,11 @@ def normaldistributiontester():
     plt.plot(bins, 1/(sigma * np.sqrt(2 * np.pi)) * np.exp(- (bins - mu)**2 / (2 * sigma**2)), linewidth=2, color='r')
     return plt.show()
 
-# normaldistributiontester()
+# test_normal_distribution()
 
 
 # This module generates a string of fitness values for each amino acid in residues argument
-def fitmodule():
+def fit_module():
     fitness = []
     for j in range(len(residues)):
         fitnessvalue = normal(mu, sigma)
@@ -130,10 +130,10 @@ def fitmodule():
     return fitness
 
 # This module generates a dictionary describing list of fitness values at each position of the generated protein
-def proteinfitnessdefiner(x):  # x=protein;
+def get_protein_fitness(x):  # x=protein;
     fitnesslib = {}
     for k in range(len(x)):
-        fitvalues = fitmodule()
+        fitvalues = fit_module()
         fitnesslib.update({k: fitvalues}) # dictionary contains position in the protein as keys and the string of fitness values for each amino acids as variable
         # extra section to remove fitness value for start methionine, hash out line above and unhash lines below if to be used.
         # if k = 0:
@@ -168,11 +168,11 @@ def clones(x, y):  # x= number of clones to generate, y = protein
     return cloneslib
 
 
-firstprotein = proteingenerator(amountofaminos)  # make first protein
-proteinfitness = proteinfitnessdefiner(firstprotein)  # make first fitness dictionary
+firstprotein = generate_protein(amountofaminos)  # make first protein
+proteinfitness = get_protein_fitness(firstprotein)  # make first fitness dictionary
 
 # This function selects invariant sites in the initially generated protein
-def invariantselector(a, b): # a = amountofaminos, b = amountofanchors; this module defines the invariant sites within the protein.
+def get_allowed_sites(a, b): # a = amountofaminos, b = amountofanchors; this module defines the invariant sites within the protein.
     anchoredsequences = sample(list(range(1, a)), b)  # randomly define invariant sites
     allowedvalues = list(range(1, a+1))  # keys for sites that can be modified by mutation
     for i in anchoredsequences:
@@ -296,7 +296,7 @@ def gammaray(a, b, c, d, e):  # a = iterations to run gamma sampling, b = number
 
 
 # This module mutates a residue to another residue based on the LG matrix
-def matrixmutator(a, b):  # a = matrix, b = current amino acid
+def mutate_matrix(a, b):  # a = matrix, b = current amino acid
     aminolist = []  # space for the order of the aminos corresponding to the values in the dictionaries this code makes from the numpy matrix
     for i in a:
         aminolist.append(i[0])
@@ -335,7 +335,7 @@ def matrixmutator(a, b):  # a = matrix, b = current amino acid
 
     return newresidue
 
-def fitcalculator(z):  # z=protein input. calculates fitness of a protein given the fitness values and the sequence.
+def calculate_fitness(z):  # z=protein input. calculates fitness of a protein given the fitness values and the sequence.
     protein = z
     aminofitnesses = []  # where fitness values will be added
     for m in range(len(protein)):
@@ -416,7 +416,7 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=firstprot
     # If it cannot make a fitter protein with the 5 residues its mutating it reverts back to the previous state and picks 5 new residues.
     if q == 'medium':
         startprotein = p
-        startproteinfitness = fitcalculator(startprotein)
+        startproteinfitness = calculate_fitness(startprotein)
         variantstochoosefrom = o
         secondprotein = startprotein
 
@@ -427,18 +427,18 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=firstprot
             secondprotein[choiceofvariants[2]] = choice(residues)
             secondprotein[choiceofvariants[3]] = choice(residues)
             secondprotein[choiceofvariants[4]] = choice(residues)
-            secondproteinfitness = fitcalculator(secondprotein)
+            secondproteinfitness = calculate_fitness(secondprotein)
             counting = 0
 
             while secondproteinfitness < startproteinfitness:
                 secondprotein = startprotein
-                secondproteinfitness = fitcalculator(secondprotein)
+                secondproteinfitness = calculate_fitness(secondprotein)
                 secondprotein[choiceofvariants[0]] = choice(residues)
                 secondprotein[choiceofvariants[1]] = choice(residues)
                 secondprotein[choiceofvariants[2]] = choice(residues)
                 secondprotein[choiceofvariants[3]] = choice(residues)
                 secondprotein[choiceofvariants[4]] = choice(residues)
-                secondproteinfitness = fitcalculator(secondprotein)
+                secondproteinfitness = calculate_fitness(secondprotein)
                 counting += 1
 
                 if counting > 99:
@@ -447,13 +447,13 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=firstprot
                     break
 
             startprotein = secondprotein
-            startproteinfitness = fitcalculator(startprotein)
+            startproteinfitness = calculate_fitness(startprotein)
         afitprotein = startprotein
 
 
     return afitprotein
 
-variantaminos = invariantselector(amountofaminos, amountofanchors)  # generate invariant sites
+variantaminos = get_allowed_sites(amountofaminos, amountofanchors)  # generate invariant sites
 firstprotein = superfit(proteinfitness, variantaminos, firstprotein, startingfitness)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
 gammacategories = gammaray(gammaiterations, gammasamples, gammashape, gammascale, amountofaminos)  # generate gamma categories for every site
 
@@ -471,32 +471,32 @@ for prot in firstprotein:
 
 
 
-# print 'fitness of the first protein:', fitcalculator(firstprotein)
+# print 'fitness of the first protein:', calculate_fitness(firstprotein)
 
 # Not used but availalble to generate and plot fitness values for f proteins
 def histfitness(f):
     graphnumbers = []  # numbers to plot
     for p in range(f):  # generate the fitness values
-        aprotein = proteingenerator()
-        toplot = fitcalculator(aprotein)
+        aprotein = generate_protein()
+        toplot = calculate_fitness(aprotein)
         graphnumbers.append(toplot)
     plt.hist(graphnumbers, density=True)  # plot fitnesses as histogram
     return plt.show()
 
 
 # This module makes a protein with a fitness value above a defined threshold (takes a long time if thresh is too high)
-def threshfit(b, c):  # b=startingfitness, c=firstprotein;
-    f = fitcalculator(c)
+def get_thresholded_protein(b, c):  # b=startingfitness, c=firstprotein;
+    f = calculate_fitness(c)
     while f < b:  # keep making proteins until the protein's fitness satisfies the fitness threshold.
-        proteintoevolve = proteingenerator()
-        f = fitcalculator(proteintoevolve)
+        proteintoevolve = generate_protein()
+        f = calculate_fitness(proteintoevolve)
     return f
 
 
 somestartingclones = clones(amountofclones, firstprotein)  # make some clones to seed evolution
 
 # this function mutates a given sequence based on the LG+I+G model of amino acid substitution
-def mutator(a, b, c, d, e):  # a = number of mutations in the generation; b = protein generation, c = allowed sites, d = assignedgammas, e = matrix
+def mutate(a, b, c, d, e):  # a = number of mutations in the generation; b = protein generation, c = allowed sites, d = assignedgammas, e = matrix
 
     currentgeneration = copy.deepcopy(b)  # make a deep copy of the library so changing the library in the function doesnt change the library outside the function
     summedgammas = []
@@ -528,7 +528,7 @@ def mutator(a, b, c, d, e):  # a = number of mutations in the generation; b = pr
         mutationtarget = copy.deepcopy(clonetomutate)  # make a deep copy of the libaries value as to not change it in the library until we want to
         # residuetomutate = choice(c) # pick a random residue in the selected mutant to mutate that isnt the start M or an anchor (old)
         targetresidue = mutationtarget[residuetomutate[0]]
-        newresidue = matrixmutator(e, targetresidue)  # implement LG
+        newresidue = mutate_matrix(e, targetresidue)  # implement LG
 
         # old way of selecting random residues to mutate to below
         # x = randint(0, len(residues)-1)
@@ -557,12 +557,12 @@ def mutator(a, b, c, d, e):  # a = number of mutations in the generation; b = pr
 
 
 # This module records the fitness of every protein in the generation and stores in dictionary. It also can generate data and figures about fitness if required.
-def generationfitnessrecorder(c, d, e, f, g, h, m, n, o):  # c=protein generation; d=trackdotfitness, e=generationtotrack, f=generationnumber, g=proteinfitness, h=trackhistfitnessstats, m=trackhistfitness, n=track invariants, o= invariant sites
+def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generation; d=trackdotfitness, e=generationtotrack, f=generationnumber, g=proteinfitness, h=trackhistfitnessstats, m=trackhistfitness, n=track invariants, o= invariant sites
     keycounter = -1  # loop over each key - unelegent but it works
     fitnessdict = {}
     for r in range(len(c)):  # record calculated fitness for each protein in dictionary
         keycounter += 1
-        fitnessofprotein = fitcalculator(c[keycounter])
+        fitnessofprotein = calculate_fitness(c[keycounter])
         fitnessdict.update({keycounter: fitnessofprotein})
 
     if (d is True) and (f % e == 0 or f == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
@@ -955,7 +955,7 @@ def generationfitnessrecorder(c, d, e, f, g, h, m, n, o):  # c=protein generatio
 
 
 # This module writes fasta alignment from sequences provided
-def fastawriter(x, y):  # x = current generation of sequence, y = generation number
+def write_fasta_alignment(x, y):  # x = current generation of sequence, y = generation number
     fastafilepath = '%s/fastas' % runpath
     fastafilename = "generation_%s" % y  # define dynamic filename
     fullname = os.path.join(fastafilepath, fastafilename+".fasta")
@@ -994,7 +994,7 @@ def finalfastawriter(x, y, z):  # x = current generation, y = bifurication state
         treefastafile.write(m)
 
 # this module is the generation generator - it mutates a protein for a defined number of generations according to an LG matrix and gamma distribution
-def generationator (d, e, f, g, h, z):  # d = number of generations to run; e = protein generation to start; f = fitnessthreshold; g = amount of mutations per generation, h = writerate, z = matrix
+def generationator(d, e, f, g, h, z):  # d = number of generations to run; e = protein generation to start; f = fitnessthreshold; g = amount of mutations per generation, h = writerate, z = matrix
 
     clonelist = []  # generate list of clone keys for bifurication
     for n in range(amountofclones):
@@ -1033,14 +1033,14 @@ def generationator (d, e, f, g, h, z):  # d = number of generations to run; e = 
     genfitdict = {}  # where the final output dictionary of format {generationkey:{[dictionary of mutatants],[dictionary of fitness]}}
     generation = copy.deepcopy(e)  # current generation
     generationcounter = 0  # count generation for filenames
-    generationfitness = generationfitnessrecorder(generation, trackdotfitness, trackrate, generationcounter, proteinfitness, trackhistfitnessstats, trackhistfitness, trackinvariants, variantaminos)  # current generation fitness
+    generationfitness = record_generation_fitness(generation, trackdotfitness, trackrate, generationcounter, proteinfitness, trackhistfitnessstats, trackhistfitness, trackinvariants, variantaminos)  # current generation fitness
     generationdict.update({0: generation})  # append fitness of starting generation
     generationfitdict.update({0: generationfitness})  # append fitness of starting generation
     fitnessthresh = f
 
     for i in tqdm(list(range(d))):  # run evolution for d generations
         if i == 0 or (i % h) == 0:  # record fasta every x generations
-            fastawriter(generation, generationcounter)
+            write_fasta_alignment(generation, generationcounter)
         if i % bifurgeneration == 0 and i != 0 and len(clonelistlist[0]) > 3:  # Bifuricationmaker. Bifuricates in even generation numbers so every branch on tree has 3 leaves that have been evolving by the last generation
             lists = []  # space to store bifurcations before adding them to clonelistlist
             for j in clonelistlist:  # bifuricate each set of leaves
@@ -1053,9 +1053,9 @@ def generationator (d, e, f, g, h, z):  # d = number of generations to run; e = 
             del clonelistlist[:]
             for k in lists:  # append bifurcations to a cleared clonelistlist
                 clonelistlist.append(k)
-        generation = mutator(g, generation, variantaminos, gammacategories, z)  # mutate generation
+        generation = mutate(g, generation, variantaminos, gammacategories, z)  # mutate generation
         generationcounter += 1
-        generationfitness = generationfitnessrecorder(generation, trackdotfitness, trackrate, generationcounter, proteinfitness, trackhistfitnessstats, trackhistfitness, trackinvariants, variantaminos)  # re-calculate fitness
+        generationfitness = record_generation_fitness(generation, trackdotfitness, trackrate, generationcounter, proteinfitness, trackhistfitnessstats, trackhistfitness, trackinvariants, variantaminos)  # re-calculate fitness
         duplicationcounter = 0  # need to fix the counter
         if any(j < fitnessthresh for j in list(generationfitness.values())):  # check if any of the current generations fitness values are below the threshold
             for k in range(len(generationfitness)):  # if there are, start loop on generationfitness
@@ -1085,7 +1085,7 @@ def generationator (d, e, f, g, h, z):  # d = number of generations to run; e = 
 
         generationdict.update({i + 1: generation})  # add next generation to dictionary
         generationfitdict.update({i + 1: generationfitness})  # add next generation fitness to dictionary
-    fastawriter(generation, generationcounter)
+    write_fasta_alignment(generation, generationcounter)
     finalfastawriter(generation, clonelistlist, rootlist)
     for l in range(len(generationdict)):  # combine fitness and generation dictionaries into one.
         dictlist = [generationdict[l], generationfitdict[l]]
@@ -1127,13 +1127,13 @@ def fitbit(a, b, c):  # a=evolution dictionary; b=amount of generations; c=amoun
         averagefitness.append(avgfitness)
     plt.plot([0, b], [fitnessthreshold, fitnessthreshold], 'k-', lw=2)
     plt.plot(averagefitness, "k--", lw=2)
-    #plt.ylim([fitnessthreshold-25, fitcalculator(firstprotein)+10])  # not suitable for "low or med" graphs
+    #plt.ylim([fitnessthreshold-25, calculate_fitness(firstprotein)+10])  # not suitable for "low or med" graphs
     #plt.ylim([fitnessthreshold-5, ((amountofaminos+1)*mu)+80]) # for low graphs
-    plt.ylim([fitnessthreshold-25, fitcalculator(firstprotein)+100])  # suitable for med graphs
+    plt.ylim([fitnessthreshold-25, calculate_fitness(firstprotein)+100])  # suitable for med graphs
     plt.xlabel("Generations", fontweight='bold')
     plt.ylabel("Fitness", fontweight='bold')
     plt.title("\n".join(wrap('Fitness change for %s randomly generated "superfit" clones of %s amino acids, mutated over %s generations' % (amountofclones, (amountofaminos+1), amountofgenerations), 60)), fontweight='bold')
-    plt.text(amountofgenerations-1000, fitcalculator(firstprotein)+50, "$\mu$ = %s\n$\sigma$ = %s\n$\delta$ = %s" % (mu, sigma, mutationrate))
+    plt.text(amountofgenerations-1000, calculate_fitness(firstprotein)+50, "$\mu$ = %s\n$\sigma$ = %s\n$\delta$ = %s" % (mu, sigma, mutationrate))
 
     fitgraphfilepath = '%s/fitnessgraph' % runpath
     fitgraphfilename = "fitness_change_over %s generations" % b # define dynamic filename

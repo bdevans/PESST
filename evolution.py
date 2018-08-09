@@ -1,4 +1,4 @@
-from __future__ import division
+
 import numpy as np
 from numpy import median
 from numpy.random import gamma
@@ -169,7 +169,7 @@ proteinfitness = proteinfitnessdefiner(firstprotein)  # make first fitness dicti
 
 # This function selects invariant sites in the initially generated protein
 def invariantselector(a, b): # a = amountofaminos, b = amountofanchors; this module defines the invariant sites within the protein.
-    anchoredsequences = sample(range(1, a), b)  # randomly define invariant sites
+    anchoredsequences = sample(list(range(1, a)), b)  # randomly define invariant sites
     allowedvalues = list(range(1, a+1))  # keys for sites that can be modified by mutation
     for i in anchoredsequences:
         invariant = i
@@ -196,7 +196,7 @@ def gammaray(a, b, c, d, e):  # a = iterations to run gamma sampling, b = number
     topmidquarts = []
     topquarts = []
 
-    for i in (range(a)):
+    for i in (list(range(a))):
         # sample gamma i times
         samples = gamma(c, d, b)
 
@@ -1034,7 +1034,7 @@ def generationator (d, e, f, g, h, z):  # d = number of generations to run; e = 
     generationfitdict.update({0: generationfitness})  # append fitness of starting generation
     fitnessthresh = f
 
-    for i in tqdm(range(d)):  # run evolution for d generations
+    for i in tqdm(list(range(d))):  # run evolution for d generations
         if i == 0 or (i % h) == 0:  # record fasta every x generations
             fastawriter(generation, generationcounter)
         if i % bifurgeneration == 0 and i != 0 and len(clonelistlist[0]) > 3:  # Bifuricationmaker. Bifuricates in even generation numbers so every branch on tree has 3 leaves that have been evolving by the last generation
@@ -1053,7 +1053,7 @@ def generationator (d, e, f, g, h, z):  # d = number of generations to run; e = 
         generationcounter += 1
         generationfitness = generationfitnessrecorder(generation, trackdotfitness, trackrate, generationcounter, proteinfitness, trackhistfitnessstats, trackhistfitness, trackinvariants, variantaminos)  # re-calculate fitness
         duplicationcounter = 0  # need to fix the counter
-        if any(j < fitnessthresh for j in generationfitness.values()):  # check if any of the current generations fitness values are below the threshold
+        if any(j < fitnessthresh for j in list(generationfitness.values())):  # check if any of the current generations fitness values are below the threshold
             for k in range(len(generationfitness)):  # if there are, start loop on generationfitness
                 if generationfitness[k] < fitnessthreshold:  # if fitness is less than threshold clone a random sequence in its place.
 
@@ -1072,11 +1072,11 @@ def generationator (d, e, f, g, h, z):  # d = number of generations to run; e = 
                         while clonekey == k or generationfitness[clonekey] < fitnessthreshold:
                             clonekey = choice(rootlist)  # ensure you don't clone the target unfit generation or another clone that is also of fitness below the threshold
                     if generationfitness[clonekey] < fitnessthreshold:  # make warning messages if code breaks
-                        print "clone %s is unfit with a value of %s, it will be replaced by:" % (k, generationfitness[k])
-                        print "clone %s with a fitness of %s" % (clonekey, generationfitness[clonekey])
-                        print 'WARNING: clonekey fitness is too low or mutation rate is too high'  # Bug in this section that causes infinite loop if mutation rate is too high. Happens when a bifurication has a small number of clones to be replaced by, and the high mutation rate causes all clones to dip below the threshold in one generation.
-                        print generationfitness
-                        print clonelistlist
+                        print("clone %s is unfit with a value of %s, it will be replaced by:" % (k, generationfitness[k]))
+                        print("clone %s with a fitness of %s" % (clonekey, generationfitness[clonekey]))
+                        print('WARNING: clonekey fitness is too low or mutation rate is too high')  # Bug in this section that causes infinite loop if mutation rate is too high. Happens when a bifurication has a small number of clones to be replaced by, and the high mutation rate causes all clones to dip below the threshold in one generation.
+                        print(generationfitness)
+                        print(clonelistlist)
                     generation[unfitkey] = generation[clonekey]   # swap out unfit clone for fit clone
 
         generationdict.update({i + 1: generation})  # add next generation to dictionary

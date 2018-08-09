@@ -54,7 +54,7 @@ def matrixmutator(a, b):  # a = matrix, b = current amino acid
     return newresidue
 
 
-print 'Mutation: %s -> %s' % (aminoacid, matrixmutator(LGmatrix, aminoacid))
+print('Mutation: %s -> %s' % (aminoacid, matrixmutator(LGmatrix, aminoacid)))
 
 
 # This produces a bar chart of selections from X mutation events of a pre-defined amino acid.

@@ -1,4 +1,4 @@
-from __future__ import division
+
 import numpy as np
 from numpy import median
 from numpy.random import gamma
@@ -133,7 +133,7 @@ f=10
 e=2
 
 if trackfitness == ("point" or "both") and (f%e==0 or f==0):
-    print "hi"
+    print("hi")
     pathforpointfittrack = "/Users/Adam/Documents/PhD/PhDyear2/Modelling/pointfittrackfromrun"
     if not os.path.exists(pathforpointfittrack):
         os.makedirs(pathforpointfittrack)
@@ -264,7 +264,7 @@ if trackfitness == ("dist" or "both"):
     confone = []
     reject = []
     for i in distandersonlist:
-        print i
+        print(i)
         if i.statistic < i.critical_values[0]:
             conffifteen.append(1)
         elif i.critical_values[0] < i.statistic < i.critical_values[1]:

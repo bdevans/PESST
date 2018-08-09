@@ -14,8 +14,8 @@ import shutil
 # /Users/Adam/Documents/PhD/PhDyear2/Modelling/mildfitness_ancescon/mildfitnessrun1/start/fitnesslibrary.csv
 # /Users/Adam/Documents/PhD/PhDyear2/Modelling/mildfitness_ancescon/mildfitnessrun1/FastML_full_dataset_reconstruction.fas
 
-fitnessmatrix = raw_input("Fitness matrix location (must be CSV from previous evolution run): ")
-fasta = raw_input("input fasta file location (must be a sequence or list of sequences in fasta format): ")
+fitnessmatrix = input("Fitness matrix location (must be CSV from previous evolution run): ")
+fasta = input("input fasta file location (must be a sequence or list of sequences in fasta format): ")
 
 
 fitnessmatrixreader = csv.reader(open(fitnessmatrix), delimiter=",")
@@ -48,7 +48,7 @@ firstline = fitnessmatrix[0]
 
 dictoffitness = {}
 
-for key, value in seqlib.iteritems():
+for key, value in seqlib.items():
     #print key
     #print value
     seqlist = []
@@ -68,10 +68,10 @@ for key, value in seqlib.iteritems():
     dictlist.append(fitnesssum)
     dictoffitness[key] = dictlist
 
-print dictoffitness
+print(dictoffitness)
 
 calcfile.write("clone,fitness,sequence\n")
-for key, value in dictoffitness.iteritems():
+for key, value in dictoffitness.items():
     calcfile.write("%s,%s,%s\n" % (key, value[1], value[0]))
 
 

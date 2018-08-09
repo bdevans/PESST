@@ -16,7 +16,7 @@ for i in bifurlist:
 amountofbifurs = len(bifurlist)
 
 bifurgeneration = generations/amountofbifurs+1
-print bifurgeneration
+print(bifurgeneration)
 
 clonelist = []
 for i in range(clones):
@@ -31,8 +31,8 @@ for i in range(roots):
     clonelist.remove(integertosplit)
     rootlist.append(integertosplit)
 
-print clonelist
-print rootlist
+print(clonelist)
+print(rootlist)
 
 clonelistlist = []
 clonelistlist.append(clonelist)
@@ -49,4 +49,4 @@ for j in range(len(bifurlist)-1):
     del clonelistlist[:]
     for k in lists:
         clonelistlist.append(k)
-    print clonelistlist
+    print(clonelistlist)

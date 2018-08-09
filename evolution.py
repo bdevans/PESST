@@ -1,24 +1,26 @@
+import copy
+import os.path
+import csv
+import datetime
+from random import randint, sample, choice, shuffle  # TODO: Consolidate with numpy
+from textwrap import wrap
+# import shutil
+# import json
 
 import numpy as np
 from numpy import median
 from numpy.random import gamma
-# import scipy.special as sps
-import matplotlib
-import copy
-import os.path
-# import shutil
-import csv
-import datetime
-# import json
-from random import randint, sample, choice, shuffle
 from numpy.random import normal, uniform
 from scipy.stats import anderson, normaltest, skew, skewtest, kurtosistest
 from scipy.stats import shapiro as shp
 from scipy.stats import kurtosis as kurt
 from scipy.stats import ks_2samp as kosmo
+# import scipy.special as sps
+import matplotlib
 from matplotlib import pyplot as plt
-from textwrap import wrap
+
 from tqdm import tqdm
+
 # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 # from matplotlib.figure import Figure
 matplotlib.use('TkAgg')

@@ -1099,8 +1099,8 @@ if __name__ == '__main__':
     # matplotlib.use('TkAgg')
 
     # create folder and subfolders
-    paths = ['runsettings', 'start', 'fastas', 'fitnessgraph', 'fitnessdotmatrix',
-             'fitnessdistribution', 'treefastas']
+    paths = ['runsettings', 'start', 'fastas', 'fitnessgraph',
+             'fitnessdotmatrix', 'fitnessdistribution', 'treefastas']
 
     runpath = "results/run%s" % datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
     for path in paths:

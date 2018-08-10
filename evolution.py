@@ -16,7 +16,7 @@ from scipy.stats import shapiro as shp
 from scipy.stats import kurtosis as kurt
 from scipy.stats import ks_2samp as kosmo
 # import scipy.special as sps
-import matplotlib
+# import matplotlib
 from matplotlib import pyplot as plt
 
 from tqdm import tqdm
@@ -1096,7 +1096,7 @@ if __name__ == '__main__':
 
     # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
     # from matplotlib.figure import Figure
-    matplotlib.use('TkAgg')
+    # matplotlib.use('TkAgg')
 
     # create folder and subfolders
     paths = ['runsettings', 'start', 'fastas', 'fitnessgraph', 'fitnessdotmatrix',

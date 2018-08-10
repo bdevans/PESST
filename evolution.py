@@ -38,8 +38,6 @@ gamma_shape = 1.9  # Most phylogenetic systems that use gamma only let you set k
 gamma_scale = 1/gamma_shape
 
 # parameters of protein evolution
-writerate = 50  # write a new fasta file every x generations
-trackrate = 50  # track every x generations
 n_clones = 52  # amount of clones that will be generated in the first generation #5 10 20 40 80
 n_generations = 2000  # amount of generations the protein evolves for
 fitness_start = 'medium'  # high, medium or low; must be lower case. If selecting low, fitness threshold needs to be significantly smaller (i.e. 4x) than #positions*mu
@@ -51,10 +49,12 @@ n_anchors = int((n_amino_acids+1)/10)  # amount of invariant sites in a generati
 n_roots = 4
 
 # set what to record
-trackdotfitness = False  # True or False.
-trackhistfitnessstats = False  # True or False.
-trackhistfitness = False  # True or False.
-trackinvariants = False  # if True, invariants are tracked in the histogram analysis. If false, invariants are ignored.
+write_rate = 50  # write a new fasta file every x generations
+track_rate = 50  # track every x generations
+track_dot_fitness = False  # True or False.
+track_hist_fitness_stats = False  # True or False.
+track_hist_fitness = False  # True or False.
+track_invariants = False  # if True, invariants are tracked in the histogram analysis. If false, invariants are ignored.
 
 
 def generate_protein(a):
@@ -514,7 +514,7 @@ def mutate(a, b, c, d, e):  # a = number of mutations in the generation; b = pro
     return currentgeneration
 
 
-def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generation; d=trackdotfitness, e=generationtotrack, f=generationnumber, g=proteinfitness, h=trackhistfitnessstats, m=trackhistfitness, n=track invariants, o= invariant sites
+def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generation; d=track_dot_fitness, e=generationtotrack, f=generationnumber, g=proteinfitness, h=track_hist_fitness_stats, m=track_hist_fitness, n=track invariants, o= invariant sites
     """Record the fitness of every protein in the generation and store them in
     dictionary. Optionally generate data and figures about fitness.
     """
@@ -944,7 +944,7 @@ def finalfastawriter(x, y, z):  # x = current generation, y = bifurication state
         treefastafile.write(m)
 
 
-def generationator(d, e, f, g, h, z):  # d = number of generations to run; e = protein generation to start; f = fitness_threshold; g = amount of mutations per generation, h = writerate, z = matrix
+def generationator(d, e, f, g, h, z):  # d = number of generations to run; e = protein generation to start; f = fitness_threshold; g = amount of mutations per generation, h = write_rate, z = matrix
     """Generation generator - mutate a protein for a defined number of
     generations according to an LG matrix and gamma distribution.
     """
@@ -986,7 +986,7 @@ def generationator(d, e, f, g, h, z):  # d = number of generations to run; e = p
     genfitdict = {}  # where the final output dictionary of format {generationkey:{[dictionary of mutatants],[dictionary of fitness]}}
     generation = copy.deepcopy(e)  # current generation
     generationcounter = 0  # count generation for filenames
-    generationfitness = record_generation_fitness(generation, trackdotfitness, trackrate, generationcounter, proteinfitness, trackhistfitnessstats, trackhistfitness, trackinvariants, variantaminos)  # current generation fitness
+    generationfitness = record_generation_fitness(generation, track_dot_fitness, track_rate, generationcounter, proteinfitness, track_hist_fitness_stats, track_hist_fitness, track_invariants, variantaminos)  # current generation fitness
     generationdict.update({0: generation})  # append fitness of starting generation
     generationfitdict.update({0: generationfitness})  # append fitness of starting generation
     fitnessthresh = f
@@ -1008,7 +1008,7 @@ def generationator(d, e, f, g, h, z):  # d = number of generations to run; e = p
                 clonelistlist.append(k)
         generation = mutate(g, generation, variantaminos, gammacategories, z)  # mutate generation
         generationcounter += 1
-        generationfitness = record_generation_fitness(generation, trackdotfitness, trackrate, generationcounter, proteinfitness, trackhistfitnessstats, trackhistfitness, trackinvariants, variantaminos)  # re-calculate fitness
+        generationfitness = record_generation_fitness(generation, track_dot_fitness, track_rate, generationcounter, proteinfitness, track_hist_fitness_stats, track_hist_fitness, track_invariants, variantaminos)  # re-calculate fitness
         duplicationcounter = 0  # need to fix the counter
         if any(j < fitnessthresh for j in list(generationfitness.values())):  # check if any of the current generations fitness values are below the threshold
             for k in range(len(generationfitness)):  # if there are, start loop on generationfitness
@@ -1124,9 +1124,9 @@ if __name__ == '__main__':
     settingsfile.write("\nFitness threshold: %s" % fitness_threshold)
     settingsfile.write("\n\nNormal distribution properties: mu = %s, sigma = %s" % (mu, sigma))
     settingsfile.write("\nGamma distribution properties: kappa = %s, theta = %s" % (gamma_shape, gamma_scale))
-    settingsfile.write("\n\nWrite rate for FASTA: every %s generations" % writerate)
-    settingsfile.write("\n\nTrack rate for graphing and statistics: every %s generations" % trackrate)
-    settingsfile.write("\nTracking state: Fitness dot matrix = %s; Fitness histrogram = %s; Fitness normality statistics = %s" % (trackdotfitness, trackhistfitness, trackhistfitnessstats))
+    settingsfile.write("\n\nWrite rate for FASTA: every %s generations" % write_rate)
+    settingsfile.write("\n\nTrack rate for graphing and statistics: every %s generations" % track_rate)
+    settingsfile.write("\nTracking state: Fitness dot matrix = %s; Fitness histrogram = %s; Fitness normality statistics = %s" % (track_dot_fitness, track_hist_fitness, track_hist_fitness_stats))
 
     # load matrix
     aamatrix = "data/LGaa.csv"  # .csv file defining aa substitution probabilities calculated from R matrix multiplied by PI matrix, with diagonals forced to zero as mutation has to happen then conferted to event rates p(lambda) where lambda = sum Qx and p(lambda)x=Qxy/lambda
@@ -1155,7 +1155,7 @@ if __name__ == '__main__':
     somestartingclones = clones(n_clones, firstprotein)  # make some clones to seed evolution
 
     evolution = generationator(n_generations, somestartingclones,
-                               fitness_threshold, n_mutations_per_generation, writerate,
+                               fitness_threshold, n_mutations_per_generation, write_rate,
                                LGmatrix)
 
     fitbit(evolution, n_generations, n_clones)

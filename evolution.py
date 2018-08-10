@@ -24,8 +24,8 @@ from tqdm import tqdm
 
 # define starting variables
 # amino acids - every fitness value string references residues string
-residues = ["R", "H", "K", "D", "E", "S", "T", "N", "Q", "C",
-            "G", "P", "A", "V", "I", "L", "M", "F", "Y", "W"]
+RESIDUES = ("R", "H", "K", "D", "E", "S", "T", "N", "Q", "C",
+            "G", "P", "A", "V", "I", "L", "M", "F", "Y", "W")
 
 # parameters for normal distribution used to select fitness values
 mu = -1.2
@@ -65,8 +65,8 @@ def generate_protein(a):
     original_protein = []
     original_protein.append(firstresidue)
     for i in range(amino):
-        x = randint(0, len(residues)-1)
-        original_protein.append(residues[x])
+        x = randint(0, len(RESIDUES)-1)
+        original_protein.append(RESIDUES[x])
     return original_protein
 
 
@@ -84,7 +84,7 @@ def test_normal_distribution():
 def fit_module():
     """Generates a string of fitness values for each amino acid in residues."""
     fitness = []
-    for j in range(len(residues)):
+    for j in range(len(RESIDUES)):
         fitnessvalue = normal(mu, sigma)
         fitness.append(fitnessvalue)
     return fitness
@@ -100,7 +100,7 @@ def get_protein_fitness(x):  # x=protein;
         fitnesslib.update({k: fitvalues}) # dictionary contains position in the protein as keys and the string of fitness values for each amino acids as variable
         # extra section to remove fitness value for start methionine, hash out line above and unhash lines below if to be used.
         # if k = 0:
-            # mposition = residues.index("M")
+            # mposition = RESIDUES.index("M")
             # fitvalues[mposition] = 0
             # fitnesslib.update({k: fitvalues}) #dictionary contains position in the protein as keys and the string of fitness values for each amino acids as variable
         # else
@@ -111,7 +111,7 @@ def get_protein_fitness(x):  # x=protein;
     aminofitfullname = os.path.join(aminofitsavepath, aminofitfilename + ".csv")
     aminofile = open(aminofitfullname, "w+")  # open file
     aminofile.write("aminoposition"),
-    for i in residues:
+    for i in RESIDUES:
         aminofile.write(",%s" % i)
     for j in range(n_amino_acids+1):
         keytowrite = j
@@ -310,7 +310,7 @@ def calculate_fitness(z):  # z=protein input. calculates fitness of a protein gi
     aminofitnesses = []  # where fitness values will be added
     for m in range(len(protein)):
         amino = protein[m]  # find ith amino acid
-        fitindex = residues.index(amino)  # find index of first amino acid in residues list
+        fitindex = RESIDUES.index(amino)  # find index of first amino acid in RESIDUES list
         fitstring = proteinfitness[m]  # find fitness values for ith amino acid position
         fitvalue = fitstring[fitindex]  # find fitness value corresponding to amino acid at position
         aminofitnesses.append(fitvalue)  # append these to string
@@ -339,16 +339,16 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=firstprot
             elif i not in o and not 0:
                 toappend = p[i]
                 unfittestaminos.append([toappend, toappend, toappend])  # add invariant sites if an anchor position is defined
-            else:  # find the indexes of the 3 least fit amino acids in residues and record then as lists for each position
+            else:  # find the indexes of the 3 least fit amino acids in RESIDUES and record then as lists for each position
                 unfitaminos = []
                 amin = n[i]
                 aminsort = sorted(amin)
                 unfittestaminoposition = amin.index(aminsort[0])
                 secondunfittestaminoposition = amin.index(aminsort[1])
                 thirdunfittestaminoposition = amin.index(aminsort[2])
-                unfittestamino = residues[unfittestaminoposition]
-                secondunfittestamino = residues[secondunfittestaminoposition]
-                thirdunfittestamino = residues[thirdunfittestaminoposition]
+                unfittestamino = RESIDUES[unfittestaminoposition]
+                secondunfittestamino = RESIDUES[secondunfittestaminoposition]
+                thirdunfittestamino = RESIDUES[thirdunfittestaminoposition]
                 unfitaminos.append(unfittestamino)
                 unfitaminos.append(secondunfittestamino)
                 unfitaminos.append(thirdunfittestamino)
@@ -367,16 +367,16 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=firstprot
             elif i not in o and not 0:
                 toappend = p[i]
                 fittestaminos.append([toappend, toappend, toappend])  # add invariant sites if an anchor position is defined
-            else:  # find the indexes of the 3 fittest amino acids in residues and record then as lists for each position
+            else:  # find the indexes of the 3 fittest amino acids in RESIDUES and record then as lists for each position
                 fitaminos = []
                 amin = n[i]
                 aminsort = sorted(amin)
                 fittestaminoposition = amin.index(max(amin))
                 secondfittestaminoposition = amin.index(aminsort[-2])
                 thirdfittestaminoposition = amin.index(aminsort[-3])
-                fittestamino = residues[fittestaminoposition]
-                secondfittestamino = residues[secondfittestaminoposition]
-                thirdfittestamino = residues[thirdfittestaminoposition]
+                fittestamino = RESIDUES[fittestaminoposition]
+                secondfittestamino = RESIDUES[secondfittestaminoposition]
+                thirdfittestamino = RESIDUES[thirdfittestaminoposition]
                 fitaminos.append(fittestamino)
                 fitaminos.append(secondfittestamino)
                 fitaminos.append(thirdfittestamino)
@@ -397,22 +397,22 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=firstprot
 
         while startproteinfitness < fitness_threshold+30:
             choiceofvariants = sample(variantstochoosefrom, 5)
-            secondprotein[choiceofvariants[0]] = choice(residues)
-            secondprotein[choiceofvariants[1]] = choice(residues)
-            secondprotein[choiceofvariants[2]] = choice(residues)
-            secondprotein[choiceofvariants[3]] = choice(residues)
-            secondprotein[choiceofvariants[4]] = choice(residues)
+            secondprotein[choiceofvariants[0]] = choice(RESIDUES)
+            secondprotein[choiceofvariants[1]] = choice(RESIDUES)
+            secondprotein[choiceofvariants[2]] = choice(RESIDUES)
+            secondprotein[choiceofvariants[3]] = choice(RESIDUES)
+            secondprotein[choiceofvariants[4]] = choice(RESIDUES)
             secondproteinfitness = calculate_fitness(secondprotein)
             counting = 0
 
             while secondproteinfitness < startproteinfitness:
                 secondprotein = startprotein
                 secondproteinfitness = calculate_fitness(secondprotein)
-                secondprotein[choiceofvariants[0]] = choice(residues)
-                secondprotein[choiceofvariants[1]] = choice(residues)
-                secondprotein[choiceofvariants[2]] = choice(residues)
-                secondprotein[choiceofvariants[3]] = choice(residues)
-                secondprotein[choiceofvariants[4]] = choice(residues)
+                secondprotein[choiceofvariants[0]] = choice(RESIDUES)
+                secondprotein[choiceofvariants[1]] = choice(RESIDUES)
+                secondprotein[choiceofvariants[2]] = choice(RESIDUES)
+                secondprotein[choiceofvariants[3]] = choice(RESIDUES)
+                secondprotein[choiceofvariants[4]] = choice(RESIDUES)
                 secondproteinfitness = calculate_fitness(secondprotein)
                 counting += 1
 
@@ -489,11 +489,11 @@ def mutate(a, b, c, d, e):  # a = number of mutations in the generation; b = pro
         newresidue = mutate_matrix(e, targetresidue)  # implement LG
 
         # old way of selecting random residues to mutate to below
-        # x = randint(0, len(residues)-1)
-        # newresidue = residues[x]  # pick a random residue to replace the mutable residue
+        # x = randint(0, len(RESIDUES)-1)
+        # newresidue = RESIDUES[x]  # pick a random residue to replace the mutable residue
         # while newresidue == clonetomutate[residuetomutate[0]]:  # ensure the new residue is different to the current residue
-        #    x = randint(0, len(residues)-1)
-        #    newresidue = residues[x]
+        #    x = randint(0, len(RESIDUES)-1)
+        #    newresidue = RESIDUES[x]
 
         # below are print functions to check the above part of the fucntion is working correctly
         # print "generation", i+1
@@ -564,7 +564,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
                 amino = Y2aminos[k]  # find ith amino acid
                 if amino is not 'X':
                     pointsright += 1
-                    fitindex = residues.index(amino)  # find index of first amino acid in residues list
+                    fitindex = RESIDUES.index(amino)  # find index of first amino acid in RESIDUES list
                     fitstring = proteinfitness[k]  # find fitness values for ith amino acid position
                     fitvalue = fitstring[fitindex]  # find fitness value corresponding to amino acid at position
                     additionright += fitvalue
@@ -618,7 +618,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
                 amino = disttotalaminos[k]  # find ith amino acid
                 if amino is not 'X':
                     pointsdist += 1
-                    distindex = residues.index(amino)  # find index of first amino acid in residues list
+                    distindex = RESIDUES.index(amino)  # find index of first amino acid in RESIDUES list
                     diststring = proteinfitness[k]  # find fitness values for ith amino acid position
                     distvalue = diststring[distindex]  # find fitness value corresponding to amino acid at position
                     additiondist += distvalue

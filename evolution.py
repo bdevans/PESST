@@ -62,12 +62,12 @@ trackinvariants = False  # if True, invariants are tracked in the histogram anal
 # create folder and subfolders
 paths = ['runsettings', 'start', 'fastas', 'fitnessgraph', 'fitnessdotmatrix',
          'fitnessdistribution', 'treefastas']
-runpath = "/Users/Adam/Documents/PhD/PhDyear2/Modelling/run%s" % datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
+runpath = "results/run%s" % datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
 for path in paths:
     os.makedirs(os.path.join(runpath, path))
 
 innerpaths = ['statistics', 'histograms']
-innerrunpath = '%s/fitnessdistribution' %runpath
+innerrunpath = '%s/fitnessdistribution' % runpath
 for innerpath in innerpaths:
     os.makedirs(os.path.join(innerrunpath, innerpath))
 
@@ -89,7 +89,7 @@ settingsfile.write("\n\nTrack rate for graphing and statistics: every %s generat
 settingsfile.write("\nTracking state: Fitness dot matrix = %s; Fitness histrogram = %s; Fitness normality statistics = %s" % (trackdotfitness, trackhistfitness, trackhistfitnessstats))
 
 # load matrix
-aamatrix = "/Users/Adam/Documents/PhD/PhDyear2/Modelling/LGaa.csv"  # .csv file defining aa substitution probabilities calculated from R matrix multiplied by PI matrix, with diagonals forced to zero as mutation has to happen then conferted to event rates p(lambda) where lambda = sum Qx and p(lambda)x=Qxy/lambda
+aamatrix = "data/LGaa.csv"  # .csv file defining aa substitution probabilities calculated from R matrix multiplied by PI matrix, with diagonals forced to zero as mutation has to happen then conferted to event rates p(lambda) where lambda = sum Qx and p(lambda)x=Qxy/lambda
 LGmatrixreader = csv.reader(open(aamatrix), delimiter=",")
 LGmatrixlist = list(LGmatrixreader)
 LGmatrix = np.array(LGmatrixlist)  # load matrix into a numpy array

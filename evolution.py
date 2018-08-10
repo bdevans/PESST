@@ -131,7 +131,8 @@ def fit_module():
 
 def get_protein_fitness(x):  # x=protein;
     """Generate a dictionary describing list of fitness values at each position
-    of the generated protein."""
+    of the generated protein.
+    """
     fitnesslib = {}
     for k in range(len(x)):
         fitvalues = fit_module()
@@ -165,7 +166,6 @@ def clones(x, y):  # x= number of clones to generate, y = protein
     """Generate a dictionary containing X clones of generated protein
     - this contains the evolving dataset.
     """
-
     cloneslib = {}
     for l in range(x):
         cloneslib.update({l: y})
@@ -180,7 +180,6 @@ def get_allowed_sites(a, b): # a = amountofaminos, b = amountofanchors; this mod
     """Select invariant sites in the initially generated protein and return
     allowed values.
     """
-
     anchoredsequences = sample(list(range(1, a)), b)  # randomly define invariant sites
     allowedvalues = list(range(1, a+1))  # keys for sites that can be modified by mutation
     for i in anchoredsequences:
@@ -190,16 +189,18 @@ def get_allowed_sites(a, b): # a = amountofaminos, b = amountofanchors; this mod
     return allowedvalues
 
 
-# This function makes a set number of gamma rate categories
-# Does so by sampling many times from a gamma distribution
-# Tests of the trade-off between computing time and variance led me to set this to 10000 samples from the distribution
-# Computes quartiles from the data with equal likelihood by finding bounds for quartiles and collecting values between bounds.
-# Finds discrete rate values by sorting collected values and taking the median
-# The code then iterates for a predefined set of runs, recording the median values
-# Tests of the tradeoff between computing time and variance led me to set this to 100 independent runs (1 million total samples from distribution).
 def gammaray(a, b, c, d, e):  # a = iterations to run gamma sampling, b = number of gamma samples per iteration, c = gamma shape (kappa), d = gamma scale (theta), e = amount of aminos
     """Generate a set of gamma rate categories.
 
+    Does so by sampling many times from a gamma distribution.
+    Tests of the trade-off between computing time and variance led me to set
+    this to 10000 samples from the distribution.
+    Computes quartiles from the data with equal likelihood by finding bounds
+    for quartiles and collecting values between bounds.
+    Finds discrete rate values by taking the median of sorted collected values.
+    Then iterates for a predefined set of runs, recording the median values.
+    Tests of the tradeoff between computing time and variance led me to set
+    this to 100 independent runs (1 million total samples from distribution).
     """
     medians = []
     medianlower = []
@@ -346,6 +347,7 @@ def mutate_matrix(a, b):  # a = matrix, b = current amino acid
 
     return newresidue
 
+
 def calculate_fitness(z):  # z=protein input. calculates fitness of a protein given the fitness values and the sequence.
     protein = z
     aminofitnesses = []  # where fitness values will be added
@@ -399,7 +401,6 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=firstprot
             randombin = randint(0, 2)
             possibleaminos = unfittestaminos[j]
             afitprotein.append(possibleaminos[randombin])
-
 
     if q == 'high':  # generate superfit protein
         fittestaminos = []
@@ -467,8 +468,8 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=firstprot
             startproteinfitness = calculate_fitness(startprotein)
         afitprotein = startprotein
 
-
     return afitprotein
+
 
 variantaminos = get_allowed_sites(amountofaminos, amountofanchors)  # generate invariant sites
 firstprotein = superfit(proteinfitness, variantaminos, firstprotein, startingfitness)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
@@ -483,6 +484,7 @@ for prot in firstprotein:
     firstproteinfile.write(prot)
 #print 'first superfit protein:', firstprotein
 # print 'fitness of the first protein:', calculate_fitness(firstprotein)
+
 
 # NOTE: Not used
 def histfitness(f):
@@ -585,7 +587,6 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
         fitnessdict.update({keycounter: fitnessofprotein})
 
     if (d is True) and (f % e == 0 or f == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
-        #print 'hi'
         plt.figure()  # make individual figure in pyplot
 
         fittrackeryaxis = []  # store values for the left side of the figure
@@ -640,16 +641,14 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
         murightdistdp = "%.3f" % avgtoplotright
         plt.text(0, 8.7, "$\mu$1 = %s\n$\mu$2 = %s\nthreshold = %s" % (muleftdistdp, murightdistdp, fitnessthreshold), size = 6.5)
 
-        plt.xticks([])  #remove x axis ticks
+        plt.xticks([])  # remove x axis ticks
         fitfilename = "generation_%s" % f  # define dynamic filename
         fitsavepath = '%s/fitnessdotmatrix' % runpath
         fitfullname = os.path.join(fitsavepath, fitfilename + ".png")
         plt.savefig(fitfullname)
         plt.close()  # close plot (so you dont generate 100 individual figures)
 
-
-
-    disttrackerlist = [] # build fitness space numbers
+    disttrackerlist = []  # build fitness space numbers
     disttrackeryaxis = []
     for i in range(amountofaminos+1):
         disttrackerlist.append(proteinfitness[i])
@@ -713,15 +712,11 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
         skewness = skew(np.asarray(disttotalfitness))
         # skewstats = skewtest(np.asarray(disttotalfitness))
         distclonetrackfile.write("\nThe skewness of the data is %s\n\n\n" % skewness)
-
-
         distclonetrackfile.write("Kurtosis: \n")
 
         clonekurtosis = kurt(disttotalfitness)
         # kurtclonestats = kurtosistest(disttotalfitness)
         distclonetrackfile.write("\nThe kurtosis of the data is %s\n\n\n" % clonekurtosis)
-
-
         distclonetrackfile.write('Shapiro-Wilk test of non-normality: \n')
 
         totalcloneshapiro = shp(disttotalfitness)
@@ -814,7 +809,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
         cloneskewkurtpercent = (sum(cloneskewkurtpass) / len(cloneskewkurtpass)) * 100
         distclonetrackfile.write("\n\nAccording to the skewness-kurtosis all test, %s%% of sites do not differ significantly from a normal distribution" % cloneskewkurtpercent)
 
-        #Kolmogorov-Smirnov test of similarity to original distributuion
+        # Kolmogorov-Smirnov test of similarity to original distributuion
         ksdata = kosmo(np.asarray(disttotalfitness), np.asarray(disttrackeryaxis))
         ksp = ksdata.pvalue
         distclonetrackfile.write("\n\n\n2-sided Kolmogorov-Smirnov test of similarity between the fitness space and evolving protein")
@@ -952,7 +947,6 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
         plt.title("\n".join(wrap('Fitness distribution of the total fitness space', 60)), fontweight='bold')
         plt.axvline(x=mudistspace, color="#404040", linestyle=":")
 
-
         mudistspace2 = additiondist / pointsdist
         plt.hist(disttotalfitness, 50, density=True, color='r', alpha=0.4)
         plt.title("\n".join(wrap('Fitness distribution of the total fitness space vs changing fitness distribution across every evolving clone', 60)), fontweight='bold')
@@ -992,7 +986,7 @@ def finalfastawriter(x, y, z):  # x = current generation, y = bifurication state
     for bifs in y:
         bifsize += len(bifs)
     bifursize = bifsize/len(y)
-    amountofclonestotake = int((bifursize-1)/2)# if 5, gives 2, if 4 gives 2, if 3 gives 1.
+    amountofclonestotake = int((bifursize-1)/2)  # if 5, gives 2, if 4 gives 2, if 3 gives 1.
     generationnumbers = []
     for i in y:
         cloneselection = sample(set(i), amountofclonestotake)
@@ -1132,7 +1126,7 @@ def fitbit(a, b, c):  # a=evolution dictionary; b=amount of generations; c=amoun
         clonefitness = []  # list describing how a clone changes over each generation (y axis to plot)
         gen = -1  # generation counter
         genlist = []  # list containing each generation (x axis to plot)
-        for l in range(len(fitnessarray)): # for each generation
+        for l in range(len(fitnessarray)):  # for each generation
             gen += 1  # advance generation counter
             genlist.append(gen)  # append to x axis
             fitnessofclone = fitnessarray[l]  # access lth generation list
@@ -1160,5 +1154,6 @@ def fitbit(a, b, c):  # a=evolution dictionary; b=amount of generations; c=amoun
     fitgraphfullname = os.path.join(fitgraphfilepath, fitgraphfilename + ".png")
 
     return plt.savefig(fitgraphfullname)
+
 
 fitbit(evolution, amountofgenerations, amountofclones)

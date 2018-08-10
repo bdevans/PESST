@@ -53,7 +53,6 @@ amountofanchors = int((amountofaminos+1)/10)  # amount of invariant sites in a g
 trackrate = 50  # track every x generations
 roots = 4
 
-
 # set what to record
 trackdotfitness = False  # True or False.
 trackhistfitnessstats = False  # True or False.
@@ -113,10 +112,8 @@ def generate_protein(a):
 # NOTE: unused
 def test_normal_distribution():
     """Plot a distribution to test normalality."""
-    # generate distribution
-    s = normal(mu, sigma, 2000)
-    # plot distribuiton
-    count, bins, ignored = plt.hist(s, 30, density=True)
+    s = normal(mu, sigma, 2000)  # generate distribution
+    count, bins, ignored = plt.hist(s, 30, density=True)  # plot distribuiton
     plt.plot(bins, 1/(sigma * np.sqrt(2 * np.pi)) * np.exp(- (bins - mu)**2 / (2 * sigma**2)), linewidth=2, color='r')
     return plt.show()
 
@@ -166,7 +163,9 @@ def get_protein_fitness(x):  # x=protein;
 
 def clones(x, y):  # x= number of clones to generate, y = protein
     """Generate a dictionary containing X clones of generated protein
-    - this contains the evolving dataset."""
+    - this contains the evolving dataset.
+    """
+
     cloneslib = {}
     for l in range(x):
         cloneslib.update({l: y})
@@ -179,7 +178,9 @@ proteinfitness = get_protein_fitness(firstprotein)  # make first fitness diction
 
 def get_allowed_sites(a, b): # a = amountofaminos, b = amountofanchors; this module defines the invariant sites within the protein.
     """Select invariant sites in the initially generated protein and return
-    allowed values."""
+    allowed values.
+    """
+
     anchoredsequences = sample(list(range(1, a)), b)  # randomly define invariant sites
     allowedvalues = list(range(1, a+1))  # keys for sites that can be modified by mutation
     for i in anchoredsequences:

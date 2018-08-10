@@ -32,10 +32,10 @@ mu = -1.2
 sigma = 2.5
 
 # parameters for forming discrete gamma distribution used for evolution of protein
-gammaiterations = 100
-gammasamples = 10000
-gammashape = 1.9  # Most phylogenetic systems that use gamma only let you set kappa (often called shape alpha) and calculate theta as 1/kappa giving mean of 1
-gammascale = 1/gammashape
+gamma_iterations = 100
+gamma_samples = 10000
+gamma_shape = 1.9  # Most phylogenetic systems that use gamma only let you set kappa (often called shape alpha) and calculate theta as 1/kappa giving mean of 1
+gamma_scale = 1/gamma_shape
 
 # parameters of protein evolution
 amountofclones = 52  # amount of clones that will be generated in the first generation #5 10 20 40 80
@@ -240,7 +240,7 @@ def gammaray(a, b, c, d, e):  # a = iterations to run gamma sampling, b = number
     # xtoplot = [np.mean(bottomquartlowerbounds), np.mean(bottomquartupperbounds), np.mean(bottommidquartupperbounds),
                # np.mean(topmidquartupperbounds), np.mean(topquartupperbounds)]
     # x = np.linspace(0, 6, 1000)
-    # y = x ** (gammashape - 1) * (np.exp(-x / gammascale) / (sps.gamma(gammashape) * gammascale ** gammashape))
+    # y = x ** (gamma_shape - 1) * (np.exp(-x / gamma_scale) / (sps.gamma(gamma_shape) * gamma_scale ** gamma_shape))
     # plt.plot(x, y, linewidth=2, color='k', alpha=0)
     # plt.fill_between(x, y, where=x > xtoplot[0], color='#4c4cff')
     # plt.fill_between(x, y, where=x > xtoplot[1], color='#7f7fff')
@@ -250,8 +250,8 @@ def gammaray(a, b, c, d, e):  # a = iterations to run gamma sampling, b = number
     # plt.axvline(x=finalmedians[1], color="#404040", linestyle=":")
     # plt.axvline(x=finalmedians[2], color="#404040", linestyle=":")
     # plt.axvline(x=finalmedians[3], color="#404040", linestyle=":")
-    # plt.title("\n".join(wrap('gamma rate categories calculated as the the average of %s median values of 4 equally likely quartiles of %s randomly sampled vaules' % (gammaiterations, gammasamples), 60)), fontweight='bold', fontsize=10)
-    # plt.text(5, 0.6, "$\kappa$ = %s\n$\\theta$ = $\\frac{1}{\kappa}$" % (gammashape))
+    # plt.title("\n".join(wrap('gamma rate categories calculated as the the average of %s median values of 4 equally likely quartiles of %s randomly sampled vaules' % (gamma_iterations, gamma_samples), 60)), fontweight='bold', fontsize=10)
+    # plt.text(5, 0.6, "$\kappa$ = %s\n$\\theta$ = $\\frac{1}{\kappa}$" % (gamma_shape))
     # plt.show()
 
     gammaaminos = []
@@ -1123,7 +1123,7 @@ if __name__ == '__main__':
     settingsfile.write("\nAmount of generations simulation is run for: %s" % amountofgenerations)
     settingsfile.write("\nFitness threshold: %s" % fitnessthreshold)
     settingsfile.write("\n\nNormal distribution properties: mu = %s, sigma = %s" % (mu, sigma))
-    settingsfile.write("\nGamma distribution properties: kappa = %s, theta = %s" % (gammashape, gammascale))
+    settingsfile.write("\nGamma distribution properties: kappa = %s, theta = %s" % (gamma_shape, gamma_scale))
     settingsfile.write("\n\nWrite rate for FASTA: every %s generations" % writerate)
     settingsfile.write("\n\nTrack rate for graphing and statistics: every %s generations" % trackrate)
     settingsfile.write("\nTracking state: Fitness dot matrix = %s; Fitness histrogram = %s; Fitness normality statistics = %s" % (trackdotfitness, trackhistfitness, trackhistfitnessstats))
@@ -1140,7 +1140,7 @@ if __name__ == '__main__':
 
     variantaminos = get_allowed_sites(amountofaminos, amountofanchors)  # generate invariant sites
     firstprotein = superfit(proteinfitness, variantaminos, firstprotein, startingfitness)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
-    gammacategories = gammaray(gammaiterations, gammasamples, gammashape, gammascale, amountofaminos)  # generate gamma categories for every site
+    gammacategories = gammaray(gamma_iterations, gamma_samples, gamma_shape, gamma_scale, amountofaminos)  # generate gamma categories for every site
 
     firstproteinsavepath = '%s/start' % runpath
     firstproteinfilename = "firstprotein"

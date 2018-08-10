@@ -21,9 +21,6 @@ from matplotlib import pyplot as plt
 
 from tqdm import tqdm
 
-# from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-# from matplotlib.figure import Figure
-matplotlib.use('TkAgg')
 
 # define starting variables
 # amino acids - every fitness value string references residues string
@@ -58,42 +55,6 @@ trackdotfitness = False  # True or False.
 trackhistfitnessstats = False  # True or False.
 trackhistfitness = False  # True or False.
 trackinvariants = False  # if True, invariants are tracked in the histogram analysis. If false, invariants are ignored.
-
-# create folder and subfolders
-paths = ['runsettings', 'start', 'fastas', 'fitnessgraph', 'fitnessdotmatrix',
-         'fitnessdistribution', 'treefastas']
-runpath = "results/run%s" % datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
-for path in paths:
-    os.makedirs(os.path.join(runpath, path))
-
-innerpaths = ['statistics', 'histograms']
-innerrunpath = '%s/fitnessdistribution' % runpath
-for innerpath in innerpaths:
-    os.makedirs(os.path.join(innerrunpath, innerpath))
-
-# record run settings
-settingsfilepath = '%s/runsettings' % runpath
-settingsfilename = "runsettings"  # define evo filename
-settingsfullname = os.path.join(settingsfilepath, settingsfilename + ".txt")
-settingsfile = open(settingsfullname, "w+")  # open file
-
-settingsfile.write("Protein length: %s" % (amountofaminos+1))
-settingsfile.write("\nAmount of mutations per generation: %s" % amountofmutations)
-settingsfile.write("\nAmount of clones in the population: %s" % amountofclones)
-settingsfile.write("\nAmount of generations simulation is run for: %s" % amountofgenerations)
-settingsfile.write("\nFitness threshold: %s" % fitnessthreshold)
-settingsfile.write("\n\nNormal distribution properties: mu = %s, sigma = %s" % (mu, sigma))
-settingsfile.write("\nGamma distribution properties: kappa = %s, theta = %s" % (gammashape, gammascale))
-settingsfile.write("\n\nWrite rate for FASTA: every %s generations" % writerate)
-settingsfile.write("\n\nTrack rate for graphing and statistics: every %s generations" % trackrate)
-settingsfile.write("\nTracking state: Fitness dot matrix = %s; Fitness histrogram = %s; Fitness normality statistics = %s" % (trackdotfitness, trackhistfitness, trackhistfitnessstats))
-
-# load matrix
-aamatrix = "data/LGaa.csv"  # .csv file defining aa substitution probabilities calculated from R matrix multiplied by PI matrix, with diagonals forced to zero as mutation has to happen then conferted to event rates p(lambda) where lambda = sum Qx and p(lambda)x=Qxy/lambda
-LGmatrixreader = csv.reader(open(aamatrix), delimiter=",")
-LGmatrixlist = list(LGmatrixreader)
-LGmatrix = np.array(LGmatrixlist)  # load matrix into a numpy array
-LGmatrix = np.delete(LGmatrix, 0, 0)  # trim first line of the array as its not useful
 
 
 def generate_protein(a):
@@ -170,10 +131,6 @@ def clones(x, y):  # x= number of clones to generate, y = protein
     for l in range(x):
         cloneslib.update({l: y})
     return cloneslib
-
-
-firstprotein = generate_protein(amountofaminos)  # make first protein
-proteinfitness = get_protein_fitness(firstprotein)  # make first fitness dictionary
 
 
 def get_allowed_sites(a, b): # a = amountofaminos, b = amountofanchors; this module defines the invariant sites within the protein.
@@ -471,21 +428,6 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=firstprot
     return afitprotein
 
 
-variantaminos = get_allowed_sites(amountofaminos, amountofanchors)  # generate invariant sites
-firstprotein = superfit(proteinfitness, variantaminos, firstprotein, startingfitness)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
-gammacategories = gammaray(gammaiterations, gammasamples, gammashape, gammascale, amountofaminos)  # generate gamma categories for every site
-
-firstproteinsavepath = '%s/start' % runpath
-firstproteinfilename = "firstprotein"
-firstproteinfullname = os.path.join(firstproteinsavepath, firstproteinfilename + ".fas")
-firstproteinfile = open(firstproteinfullname, "w+")  # open file
-firstproteinfile.write('>firstprotein\n')
-for prot in firstprotein:
-    firstproteinfile.write(prot)
-#print 'first superfit protein:', firstprotein
-# print 'fitness of the first protein:', calculate_fitness(firstprotein)
-
-
 # NOTE: Not used
 def histfitness(f):
     """Generate and plot fitness values for f proteins."""
@@ -508,9 +450,6 @@ def get_thresholded_protein(b, c):  # b=startingfitness, c=firstprotein;
         proteintoevolve = generate_protein()
         f = calculate_fitness(proteintoevolve)
     return f
-
-
-somestartingclones = clones(amountofclones, firstprotein)  # make some clones to seed evolution
 
 
 def mutate(a, b, c, d, e):  # a = number of mutations in the generation; b = protein generation, c = allowed sites, d = assignedgammas, e = matrix
@@ -1108,9 +1047,6 @@ def generationator(d, e, f, g, h, z):  # d = number of generations to run; e = p
     return genfitdict
 
 
-evolution = generationator(amountofgenerations, somestartingclones, fitnessthreshold, amountofmutations, writerate, LGmatrix)
-
-
 def fitbit(a, b, c):  # a=evolution dictionary; b=amount of generations; c=amountofclones; plots fitness against generation for all clones
     plt.figure()
     fitnessarray = np.zeros(shape=(b, c))  # build an array in computer memory the size of the final arrayed dataset. This is the mose efficient data structure
@@ -1156,4 +1092,70 @@ def fitbit(a, b, c):  # a=evolution dictionary; b=amount of generations; c=amoun
     return plt.savefig(fitgraphfullname)
 
 
-fitbit(evolution, amountofgenerations, amountofclones)
+if __name__ == '__main__':
+
+    # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+    # from matplotlib.figure import Figure
+    matplotlib.use('TkAgg')
+
+    # create folder and subfolders
+    paths = ['runsettings', 'start', 'fastas', 'fitnessgraph', 'fitnessdotmatrix',
+             'fitnessdistribution', 'treefastas']
+
+    runpath = "results/run%s" % datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
+    for path in paths:
+        os.makedirs(os.path.join(runpath, path))
+
+    innerpaths = ['statistics', 'histograms']
+    innerrunpath = '%s/fitnessdistribution' % runpath
+    for innerpath in innerpaths:
+        os.makedirs(os.path.join(innerrunpath, innerpath))
+
+    # record run settings
+    settingsfilepath = '%s/runsettings' % runpath
+    settingsfilename = "runsettings"  # define evo filename
+    settingsfullname = os.path.join(settingsfilepath, settingsfilename + ".txt")
+    settingsfile = open(settingsfullname, "w+")  # open file
+
+    settingsfile.write("Protein length: %s" % (amountofaminos+1))
+    settingsfile.write("\nAmount of mutations per generation: %s" % amountofmutations)
+    settingsfile.write("\nAmount of clones in the population: %s" % amountofclones)
+    settingsfile.write("\nAmount of generations simulation is run for: %s" % amountofgenerations)
+    settingsfile.write("\nFitness threshold: %s" % fitnessthreshold)
+    settingsfile.write("\n\nNormal distribution properties: mu = %s, sigma = %s" % (mu, sigma))
+    settingsfile.write("\nGamma distribution properties: kappa = %s, theta = %s" % (gammashape, gammascale))
+    settingsfile.write("\n\nWrite rate for FASTA: every %s generations" % writerate)
+    settingsfile.write("\n\nTrack rate for graphing and statistics: every %s generations" % trackrate)
+    settingsfile.write("\nTracking state: Fitness dot matrix = %s; Fitness histrogram = %s; Fitness normality statistics = %s" % (trackdotfitness, trackhistfitness, trackhistfitnessstats))
+
+    # load matrix
+    aamatrix = "data/LGaa.csv"  # .csv file defining aa substitution probabilities calculated from R matrix multiplied by PI matrix, with diagonals forced to zero as mutation has to happen then conferted to event rates p(lambda) where lambda = sum Qx and p(lambda)x=Qxy/lambda
+    LGmatrixreader = csv.reader(open(aamatrix), delimiter=",")
+    LGmatrixlist = list(LGmatrixreader)
+    LGmatrix = np.array(LGmatrixlist)  # load matrix into a numpy array
+    LGmatrix = np.delete(LGmatrix, 0, 0)  # trim first line of the array as its not useful
+
+    firstprotein = generate_protein(amountofaminos)  # make first protein
+    proteinfitness = get_protein_fitness(firstprotein)  # make first fitness dictionary
+
+    variantaminos = get_allowed_sites(amountofaminos, amountofanchors)  # generate invariant sites
+    firstprotein = superfit(proteinfitness, variantaminos, firstprotein, startingfitness)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
+    gammacategories = gammaray(gammaiterations, gammasamples, gammashape, gammascale, amountofaminos)  # generate gamma categories for every site
+
+    firstproteinsavepath = '%s/start' % runpath
+    firstproteinfilename = "firstprotein"
+    firstproteinfullname = os.path.join(firstproteinsavepath, firstproteinfilename + ".fas")
+    firstproteinfile = open(firstproteinfullname, "w+")  # open file
+    firstproteinfile.write('>firstprotein\n')
+    for prot in firstprotein:
+        firstproteinfile.write(prot)
+    # print 'first superfit protein:', firstprotein
+    # print 'fitness of the first protein:', calculate_fitness(firstprotein)
+
+    somestartingclones = clones(amountofclones, firstprotein)  # make some clones to seed evolution
+
+    evolution = generationator(amountofgenerations, somestartingclones,
+                               fitnessthreshold, amountofmutations, writerate,
+                               LGmatrix)
+
+    fitbit(evolution, amountofgenerations, amountofclones)

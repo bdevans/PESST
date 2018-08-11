@@ -1,5 +1,5 @@
 import copy
-import os.path
+import os  # .path
 import csv
 import datetime
 from random import randint, sample, choice, shuffle  # TODO: Consolidate with numpy

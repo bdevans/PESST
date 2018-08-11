@@ -81,35 +81,26 @@ def fit_module(mu, sigma):
     return np.random.normal(mu, sigma, len(RESIDUES))
 
 
-def get_protein_fitness(x):  # x=protein;
+def get_protein_fitness(protein):  # x=protein;
     """Generate a dictionary describing list of fitness values at each position
     of the generated protein.
     """
-    fitnesslib = {}
-    for k in range(len(x)):
-        fitvalues = fit_module()
-        fitnesslib.update({k: fitvalues}) # dictionary contains position in the protein as keys and the string of fitness values for each amino acids as variable
-        # extra section to remove fitness value for start methionine, hash out line above and unhash lines below if to be used.
-        # if k = 0:
-            # mposition = RESIDUES.index("M")
-            # fitvalues[mposition] = 0
-            # fitnesslib.update({k: fitvalues}) #dictionary contains position in the protein as keys and the string of fitness values for each amino acids as variable
-        # else
-            # fitnesslib.update({k: fitvalues})
+    # Create dictionary containing position in the protein as keys and the array of fitness values for each amino acid as values
+    fitnesslib = {i: fit_module(mu, sigma) for i in range(len(protein))}
 
     aminofitsavepath = '%s/start' % runpath
     aminofitfilename = "fitnesslibrary"
     aminofitfullname = os.path.join(aminofitsavepath, aminofitfilename + ".csv")
     aminofile = open(aminofitfullname, "w+")  # open file
+    # Write header
     aminofile.write("aminoposition"),
-    for i in RESIDUES:
-        aminofile.write(",%s" % i)
-    for j in range(n_amino_acids+1):
-        keytowrite = j
-        fitnesses = fitnesslib[j]
-        aminofile.write('\n%s' % keytowrite),
-        for m in fitnesses:
-            aminofile.write(',%s' % m)
+    for aa in RESIDUES:
+        aminofile.write(",%s" % aa)
+    # Write fitness values
+    for i in range(n_amino_acids+1):
+        aminofile.write('\n%s' % i),
+        for f in fitnesslib[i]:
+            aminofile.write(',%s' % f)
 
     return fitnesslib
 

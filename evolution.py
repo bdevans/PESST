@@ -81,13 +81,9 @@ def test_normal_distribution():
 # test_normal_distribution()
 
 
-def fit_module():
-    """Generates a string of fitness values for each amino acid in residues."""
-    fitness = []
-    for j in range(len(RESIDUES)):
-        fitnessvalue = np.random.normal(mu, sigma)
-        fitness.append(fitnessvalue)
-    return fitness
+def fit_module(mu, sigma):
+    """Generates an array of fitness values for each amino acid in residues."""
+    return np.random.normal(mu, sigma, len(RESIDUES))
 
 
 def get_protein_fitness(x):  # x=protein;

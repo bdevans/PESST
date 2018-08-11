@@ -431,12 +431,13 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=firstprot
 # NOTE: Not used
 def histfitness(f):
     """Generate and plot fitness values for f proteins."""
-    graphnumbers = []  # numbers to plot
-    for p in range(f):  # generate the fitness values
-        aprotein = generate_protein()
-        toplot = calculate_fitness(aprotein)
-        graphnumbers.append(toplot)
-    plt.hist(graphnumbers, density=True)  # plot fitnesses as histogram
+    # fitnesses = []  # numbers to plot
+    # for p in range(f):  # generate the fitness values
+    #     aprotein = generate_protein()
+    #     toplot = calculate_fitness(aprotein)
+    #     fitnesses.append(toplot)
+    fitnesses = [calculate_fitness(generate_protein()) for p in range(f)]
+    plt.hist(fitnesses, density=True)  # plot fitnesses as histogram
     return plt.show()
 
 

@@ -11,10 +11,11 @@ import numpy as np
 from numpy import median
 from numpy.random import gamma
 from numpy.random import normal, uniform
-from scipy.stats import anderson, normaltest, skew, skewtest, kurtosistest
-from scipy.stats import shapiro as shp
-from scipy.stats import kurtosis as kurt
-from scipy.stats import ks_2samp as kosmo
+import scipy as sp
+# from scipy.stats import anderson, normaltest, skew, skewtest, kurtosistest
+# from scipy.stats import shapiro as shp
+# from scipy.stats import kurtosis as kurt
+# from scipy.stats import ks_2samp as kosmo
 # import scipy.special as sps
 # import matplotlib
 from matplotlib import pyplot as plt
@@ -644,21 +645,21 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
         distclonetrackfile.write('Skewness: \n')
 
         for i in distclonefitnesslist:
-            distclonesshapirolist.append(shp(i))
-            distclonesandersonlist.append(anderson(i))
-            distclonesskewkurtalllist.append(normaltest(i))
+            distclonesshapirolist.append(sp.stats.shapiro(i))
+            distclonesandersonlist.append(sp.stats.anderson(i))
+            distclonesskewkurtalllist.append(sp.stats.normaltest(i))
 
-        skewness = skew(np.asarray(disttotalfitness))
-        # skewstats = skewtest(np.asarray(disttotalfitness))
+        skewness = sp.stats.skew(np.asarray(disttotalfitness))
+        # skewstats = sp.stats.normaltest(np.asarray(disttotalfitness))
         distclonetrackfile.write("\nThe skewness of the data is %s\n\n\n" % skewness)
         distclonetrackfile.write("Kurtosis: \n")
 
-        clonekurtosis = kurt(disttotalfitness)
-        # kurtclonestats = kurtosistest(disttotalfitness)
+        clonekurtosis = sp.stats.kurtosis(disttotalfitness)
+        # kurtclonestats = sp.stats.kurtosistest(disttotalfitness)
         distclonetrackfile.write("\nThe kurtosis of the data is %s\n\n\n" % clonekurtosis)
         distclonetrackfile.write('Shapiro-Wilk test of non-normality: \n')
 
-        totalcloneshapiro = shp(disttotalfitness)
+        totalcloneshapiro = sp.stats.shapiro(disttotalfitness)
 
         # shapiro-wilk tests
         distclonetrackfile.write("\nThe Shapiro-Wilk test of non-normality for the entire dataset gives p = %s" % totalcloneshapiro[-1])
@@ -680,7 +681,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
         # anderson-darling tests
         distclonetrackfile.write('\n\n\nAnderson-Darling test of normality: \n')
         # x = np.random.rand(10000)
-        totalcloneanderson = anderson(disttotalfitness)
+        totalcloneanderson = sp.stats.anderson(disttotalfitness)
         distclonetrackfile.write("\nThe Anderson-Darling test of normality for the entire dataset gives a test statistic of %s " % totalcloneanderson.statistic)
         distclonetrackfile.write("and critical values of %s\nTherefore " % totalcloneanderson.critical_values)
         if totalcloneanderson.statistic < totalcloneanderson.critical_values[0]:
@@ -731,7 +732,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
 
         # skewness-kurtosis all tests
         distclonetrackfile.write('\n\n\nSkewness-kurtosis all test of difference from normality: \n')
-        clonetotalskewkurtall = normaltest(disttotalfitness)
+        clonetotalskewkurtall = sp.stats.normaltest(disttotalfitness)
 
         distclonetrackfile.write("\nAccording to the skewness-kurtosis all test, the whole dataset gives p = %s," % clonetotalskewkurtall.pvalue)
         if clonetotalskewkurtall.pvalue >= 0.05:
@@ -749,7 +750,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
         distclonetrackfile.write("\n\nAccording to the skewness-kurtosis all test, %s%% of sites do not differ significantly from a normal distribution" % cloneskewkurtpercent)
 
         # Kolmogorov-Smirnov test of similarity to original distributuion
-        ksdata = kosmo(np.asarray(disttotalfitness), np.asarray(disttrackeryaxis))
+        ksdata = sp.stats.ks_2samp(np.asarray(disttotalfitness), np.asarray(disttrackeryaxis))
         ksp = ksdata.pvalue
         distclonetrackfile.write("\n\n\n2-sided Kolmogorov-Smirnov test of similarity between the fitness space and evolving protein")
         distclonetrackfile.write("\n\nThe Kolmogorov-Smirnov test between the fitness space an the evolving protein gives a p-value of: %s" % ksp)
@@ -772,23 +773,23 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
             distandersonlist = []
             distskewkurtalllist = []
             for i in disttrackerlist:
-                distshapirolist.append(shp(i))
-                distandersonlist.append(anderson(i))
-                distskewkurtalllist.append(normaltest(i))
+                distshapirolist.append(sp.stats.shapiro(i))
+                distandersonlist.append(sp.stats.anderson(i))
+                distskewkurtalllist.append(sp.stats.normaltest(i))
 
-            skewness = skew(disttrackeryaxis)
-            skewstats = skewtest(disttrackeryaxis)
+            skewness = sp.stats.skew(disttrackeryaxis)
+            skewstats = sp.stats.normaltest(disttrackeryaxis)
             disttrackfile.write("\nThe skewness of the data is %s\n\n\n" % skewness)
 
             disttrackfile.write("Kurtosis: \n")
 
-            kurtosis = kurt(disttrackeryaxis)
-            kurtstats = kurtosistest(disttrackeryaxis)
+            kurtosis = sp.stats.kurtosis(disttrackeryaxis)
+            kurtstats = sp.stats.kurtosistest(disttrackeryaxis)
             disttrackfile.write("\nThe kurtosis of the data is %s\n\n\n" % kurtosis)
 
             disttrackfile.write('Shapiro-Wilk test of non-normality: \n')
 
-            totalshapiro = shp(disttrackeryaxis)
+            totalshapiro = sp.stats.shapiro(disttrackeryaxis)
 
             disttrackfile.write(
                 "\nThe Shapiro-Wilk test of non-normality for the entire dataset gives p = %s" % totalshapiro[-1])
@@ -808,7 +809,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
 
             disttrackfile.write('\n\n\nAnderson-Darling test of normality: \n')
             # x = np.random.rand(10000)
-            totalanderson = anderson(disttrackeryaxis)
+            totalanderson = sp.stats.anderson(disttrackeryaxis)
             disttrackfile.write("\nThe Anderson-Darling test of normality for the entire dataset gives a test statistic of %s " % totalanderson.statistic)
             disttrackfile.write("and critical values of %s\nTherefore " % totalanderson.critical_values)
             if totalanderson.statistic < totalanderson.critical_values[0]:
@@ -859,7 +860,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
             disttrackfile.write("\nand %s%% of positions are rejected" % percentreject)
 
             disttrackfile.write('\n\n\nSkewness-kurtosis all test of difference from normality: \n')
-            totalskewkurtall = normaltest(disttrackeryaxis)
+            totalskewkurtall = sp.stats.normaltest(disttrackeryaxis)
 
             disttrackfile.write("\nAccording to the skewness-kurtosis all test, the whole dataset gives p = %s," % totalskewkurtall.pvalue)
             if totalskewkurtall.pvalue >= 0.05:

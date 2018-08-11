@@ -109,10 +109,7 @@ def clones(x, y):  # x= number of clones to generate, y = protein
     """Generate a dictionary containing X clones of generated protein
     - this contains the evolving dataset.
     """
-    cloneslib = {}
-    for l in range(x):
-        cloneslib.update({l: y})
-    return cloneslib
+    return {l: y for l in range(x)}
 
 
 def get_allowed_sites(a, b): # a = n_amino_acids, b = n_anchors; this module defines the invariant sites within the protein.

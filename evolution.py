@@ -57,17 +57,12 @@ track_hist_fitness = False  # True or False.
 track_invariants = False  # if True, invariants are tracked in the histogram analysis. If false, invariants are ignored.
 
 
-def generate_protein(a):
+def generate_protein(n_amino_acids, start_amino_acid="M"):
     """Generate an original starting protein 20aa long with a start methionine.
     """
-    amino = a
-    firstresidue = "M"
-    original_protein = []
-    original_protein.append(firstresidue)
-    for i in range(amino):
-        x = randint(0, len(RESIDUES)-1)
-        original_protein.append(RESIDUES[x])
-    return original_protein
+    protein = random.sample(RESIDUES, n_amino_acids)
+    protein.insert(0, start_amino_acid)  # Start with methionine
+    return protein
 
 
 # NOTE: unused
@@ -432,7 +427,7 @@ def histfitness(f):
     #     aprotein = generate_protein()
     #     toplot = calculate_fitness(aprotein)
     #     fitnesses.append(toplot)
-    fitnesses = [calculate_fitness(generate_protein()) for p in range(f)]
+    fitnesses = [calculate_fitness(generate_protein(n_amino_acids)) for p in range(f)]
     plt.hist(fitnesses, density=True)  # plot fitnesses as histogram
     return plt.show()
 
@@ -444,7 +439,7 @@ def get_thresholded_protein(b, c):  # b=fitness_start, c=firstprotein;
     """
     f = calculate_fitness(c)
     while f < b:  # keep making proteins until the protein's fitness satisfies the fitness threshold.
-        proteintoevolve = generate_protein()
+        proteintoevolve = generate_protein(n_amino_acids)
         f = calculate_fitness(proteintoevolve)
     return f
 

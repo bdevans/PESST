@@ -9,8 +9,7 @@ from textwrap import wrap
 
 import numpy as np
 from numpy import median
-from numpy.random import gamma
-from numpy.random import normal, uniform
+from numpy.random import normal, uniform, gamma
 import scipy as sp
 # from scipy.stats import anderson, normaltest, skew, skewtest, kurtosistest
 # from scipy.stats import shapiro as shp

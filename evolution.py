@@ -8,8 +8,8 @@ from textwrap import wrap
 # import json
 
 import numpy as np
-from numpy import median
-from numpy.random import normal, uniform, gamma
+# from numpy import median
+# from numpy.random import normal, uniform, gamma
 import scipy as sp
 # from scipy.stats import anderson, normaltest, skew, skewtest, kurtosistest
 # from scipy.stats import shapiro as shp
@@ -73,7 +73,7 @@ def generate_protein(a):
 # NOTE: unused
 def test_normal_distribution():
     """Plot a distribution to test normalality."""
-    s = normal(mu, sigma, 2000)  # generate distribution
+    s = np.random.normal(mu, sigma, 2000)  # generate distribution
     count, bins, ignored = plt.hist(s, 30, density=True)  # plot distribuiton
     plt.plot(bins, 1/(sigma * np.sqrt(2 * np.pi)) * np.exp(- (bins - mu)**2 / (2 * sigma**2)), linewidth=2, color='r')
     return plt.show()
@@ -85,7 +85,7 @@ def fit_module():
     """Generates a string of fitness values for each amino acid in residues."""
     fitness = []
     for j in range(len(RESIDUES)):
-        fitnessvalue = normal(mu, sigma)
+        fitnessvalue = np.random.normal(mu, sigma)
         fitness.append(fitnessvalue)
     return fitness
 
@@ -171,7 +171,7 @@ def gammaray(a, b, c, d, e):  # a = iterations to run gamma sampling, b = number
 
     for i in (list(range(a))):
         # sample gamma i times
-        samples = gamma(c, d, b)
+        samples = np.random.gammac, d, b)
 
         # define quartiles in that data with equal probability
         bottomquart = np.percentile(samples, [0, 25], interpolation='midpoint')
@@ -202,7 +202,7 @@ def gammaray(a, b, c, d, e):  # a = iterations to run gamma sampling, b = number
         bottommidlist.sort()
         topmidlist.sort()
         toplist.sort()
-        ratecategoriesquartile = [median(bottomlist), median(bottommidlist), median(topmidlist), median(toplist)]
+        ratecategoriesquartile = [np.median(bottomlist), np.median(bottommidlist), np.median(topmidlist), np.median(toplist)]
         medians.append(ratecategoriesquartile)
 
         # print ratecategoriesquartile
@@ -293,7 +293,7 @@ def mutate_matrix(a, b):  # a = matrix, b = current amino acid
             sumlist.append(aminosum)
         aminosumdict[l] = sumlist
 
-    randomgrab = uniform(0, 1)  # pick a random number in the cumulative probability distribution
+    randomgrab = np.random.uniform(0, 1)  # pick a random number in the cumulative probability distribution
     mutationselector = aminosumdict[b]  # pull out the probabilities corresponding to the current amino acid
 
     newresidue = 0  # space to store the new residue
@@ -475,7 +475,7 @@ def mutate(a, b, c, d, e):  # a = number of mutations in the generation; b = pro
         residuetomutate = [0]
 
         while residuetomutate[0] not in c:  # always initiates as residuetomutate set to 0 and residue zero 0 should always be disallowed (start methionine locked). Also ensures only mutates at variant sites
-            residueareatomutate = uniform(0, highestgammasum)
+            residueareatomutate = np.random.uniform(0, highestgammasum)
             for j in summedgammas:
                 if residueareatomutate < j:
                     mutatedresidues.append(summedgammas.index(j))

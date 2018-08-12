@@ -1136,7 +1136,7 @@ if __name__ == '__main__':
     somestartingclones = clones(n_clones, firstprotein)  # make some clones to seed evolution
 
     evolution = generationator(n_generations, somestartingclones,
-                               fitness_threshold, n_mutations_per_generation, write_rate,
-                               LGmatrix)
+                               fitness_threshold, n_mutations_per_generation,
+                               write_rate, LGmatrix)
 
     fitbit(evolution, n_generations, n_clones)

@@ -150,7 +150,7 @@ def gammaray(a, b, c, d, e):  # a = iterations to run gamma sampling, b = number
 
     for i in (list(range(a))):
         # sample gamma i times
-        samples = np.random.gammac, d, b)
+        samples = np.random.gamma(c, d, b)
 
         # define quartiles in that data with equal probability
         bottomquart = np.percentile(samples, [0, 25], interpolation='midpoint')

@@ -1027,18 +1027,18 @@ def generationator(d, e, f, g, h, z):  # d = number of generations to run; e = p
     return genfitdict
 
 
-def fitbit(a, b, c):  # a=evolution dictionary; b=amount of generations; c=n_clones; plots fitness against generation for all clones
+def fitbit(evolution, n_generations, n_clones):
+    """Plot fitness against generation for all clones."""
     plt.figure()
-    fitnessarray = np.zeros(shape=(b, c))  # build an array in computer memory the size of the final arrayed dataset. This is the mose efficient data structure
-    # print fitnessarray
-    for i in range(len(a)-1):  # generates a matrix of the fitness values
-        dictaccess = a[i]  # access generation i
+    fitnessarray = np.zeros(shape=(n_generations, n_clones))  # create array the size of the final dataset
+    for i in range(len(evolution)-1):  # generates a matrix of the fitness values
+        dictaccess = evolution[i]  # access generation i
         accessfitness = dictaccess[-1]  # access fitness of clones in generation i
         fitnesslist = []  # store fitnesses in a list
         for j in range(len(accessfitness)):
             fitnesslist.append(accessfitness[j])
         fitnessarray[i] = fitnesslist  # append fitnesses to array. Array form: x = clones, y = generations
-    for k in range(c-1):  # record how each clone's fitness changes over each generation
+    for k in range(n_clones-1):  # record how each clone's fitness changes over each generation
         clonefitness = []  # list describing how a clone changes over each generation (y axis to plot)
         gen = -1  # generation counter
         genlist = []  # list containing each generation (x axis to plot)
@@ -1055,7 +1055,8 @@ def fitbit(a, b, c):  # a=evolution dictionary; b=amount of generations; c=n_clo
         sumfitness = sum(fitnessofclone2)
         avgfitness = float(sumfitness)/float(n_clones)
         averagefitness.append(avgfitness)
-    plt.plot([0, b], [fitness_threshold, fitness_threshold], 'k-', lw=2)
+
+    plt.plot([0, n_generations], [fitness_threshold, fitness_threshold], 'k-', lw=2)
     plt.plot(averagefitness, "k--", lw=2)
     #plt.ylim([fitness_threshold-25, calculate_fitness(firstprotein)+10])  # not suitable for "low or med" graphs
     #plt.ylim([fitness_threshold-5, ((n_amino_acids+1)*mu)+80]) # for low graphs
@@ -1066,7 +1067,7 @@ def fitbit(a, b, c):  # a=evolution dictionary; b=amount of generations; c=n_clo
     plt.text(n_generations-1000, calculate_fitness(firstprotein)+50, "$\mu$ = %s\n$\sigma$ = %s\n$\delta$ = %s" % (mu, sigma, mutation_rate))
 
     fitgraphfilepath = '%s/fitnessgraph' % runpath
-    fitgraphfilename = "fitness_change_over %s generations" % b # define dynamic filename
+    fitgraphfilename = "fitness_change_over %s generations" % n_generations # define dynamic filename
     fitgraphfullname = os.path.join(fitgraphfilepath, fitgraphfilename + ".png")
 
     return plt.savefig(fitgraphfullname)

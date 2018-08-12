@@ -2,6 +2,7 @@ import copy
 import os  # .path
 import csv
 import datetime
+import random
 from random import randint, sample, choice, shuffle  # TODO: Consolidate with numpy
 from textwrap import wrap
 # import shutil

@@ -20,7 +20,7 @@ import scipy as sp
 # import matplotlib
 from matplotlib import pyplot as plt
 
-from tqdm import tqdm
+from tqdm import trange
 
 
 # define starting variables
@@ -973,8 +973,8 @@ def generationator(d, e, f, g, h, z):  # d = number of generations to run; e = p
     generationfitdict.update({0: generationfitness})  # append fitness of starting generation
     fitnessthresh = f
 
-    for i in tqdm(list(range(d))):  # run evolution for d generations
         if i == 0 or (i % h) == 0:  # record fasta every x generations
+    for i in trange(d):  # run evolution for d generations
             write_fasta_alignment(generation, generationcounter)
         if i % bifurgeneration == 0 and i != 0 and len(clonelistlist[0]) > 3:  # Bifuricationmaker. Bifuricates in even generation numbers so every branch on tree has 3 leaves that have been evolving by the last generation
             lists = []  # space to store bifurcations before adding them to clonelistlist

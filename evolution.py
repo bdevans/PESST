@@ -3,7 +3,7 @@ import os  # .path
 import csv
 import datetime
 import random
-from random import randint, sample, choice, shuffle  # TODO: Consolidate with numpy
+# from random import randint, sample, choice, shuffle  # TODO: Consolidate with numpy
 from textwrap import wrap
 # import shutil
 # import json
@@ -237,7 +237,7 @@ def gammaray(a, b, c, d, e):  # a = iterations to run gamma sampling, b = number
 
     gammaaminos = []
     for i in range(e):
-        gammacategorychoice = choice(finalmedians)
+        gammacategorychoice = random.choice(finalmedians)
         gammaaminos.append(gammacategorychoice)
 
     #print "discrete gamma categories: %s" %(finalmedians)
@@ -336,7 +336,7 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=firstprot
                 unfittestaminos.append(unfitaminos)
         afitprotein = []
         for j in range(len(unfittestaminos)):  # generate a superunffit protein by randomly picking one of the 3 most fit amino acids at each position
-            randombin = randint(0, 2)
+            randombin = random.randint(0, 2)
             possibleaminos = unfittestaminos[j]
             afitprotein.append(possibleaminos[randombin])
 
@@ -365,7 +365,7 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=firstprot
         afitprotein = []
 
         for j in range(len(fittestaminos)):  # generate a superfit protein by randomly picking one of the 3 most fit amino acids at each position
-            randombin = randint(0, 2)
+            randombin = random.randint(0, 2)
             possibleaminos = fittestaminos[j]
             afitprotein.append(possibleaminos[randombin])
     # generate medium fitness protein. This module is a little buggy. It takes the starting protein sequence, mutates 5 residues until the protein is fitter, then chooses 5 new residues and continues.
@@ -377,28 +377,28 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=firstprot
         secondprotein = startprotein
 
         while startproteinfitness < fitness_threshold+30:
-            choiceofvariants = sample(variantstochoosefrom, 5)
-            secondprotein[choiceofvariants[0]] = choice(RESIDUES)
-            secondprotein[choiceofvariants[1]] = choice(RESIDUES)
-            secondprotein[choiceofvariants[2]] = choice(RESIDUES)
-            secondprotein[choiceofvariants[3]] = choice(RESIDUES)
-            secondprotein[choiceofvariants[4]] = choice(RESIDUES)
+            choiceofvariants = random.sample(variantstochoosefrom, 5)
+            secondprotein[choiceofvariants[0]] = random.choice(RESIDUES)
+            secondprotein[choiceofvariants[1]] = random.choice(RESIDUES)
+            secondprotein[choiceofvariants[2]] = random.choice(RESIDUES)
+            secondprotein[choiceofvariants[3]] = random.choice(RESIDUES)
+            secondprotein[choiceofvariants[4]] = random.choice(RESIDUES)
             secondproteinfitness = calculate_fitness(secondprotein)
             counting = 0
 
             while secondproteinfitness < startproteinfitness:
                 secondprotein = startprotein
                 secondproteinfitness = calculate_fitness(secondprotein)
-                secondprotein[choiceofvariants[0]] = choice(RESIDUES)
-                secondprotein[choiceofvariants[1]] = choice(RESIDUES)
-                secondprotein[choiceofvariants[2]] = choice(RESIDUES)
-                secondprotein[choiceofvariants[3]] = choice(RESIDUES)
-                secondprotein[choiceofvariants[4]] = choice(RESIDUES)
+                secondprotein[choiceofvariants[0]] = random.choice(RESIDUES)
+                secondprotein[choiceofvariants[1]] = random.choice(RESIDUES)
+                secondprotein[choiceofvariants[2]] = random.choice(RESIDUES)
+                secondprotein[choiceofvariants[3]] = random.choice(RESIDUES)
+                secondprotein[choiceofvariants[4]] = random.choice(RESIDUES)
                 secondproteinfitness = calculate_fitness(secondprotein)
                 counting += 1
 
                 if counting > 99:
-                    choiceofvariants = sample(variantstochoosefrom, 5)
+                    choiceofvariants = random.sample(variantstochoosefrom, 5)
                     counting -= 100
                     break
 
@@ -450,7 +450,7 @@ def mutate(a, b, c, d, e):  # a = number of mutations in the generation; b = pro
 
     for q in range(a):  # impliment gamma
 
-        clonetomutatekey = randint(0, len(b)-1)  # pick random key to make a random generation
+        clonetomutatekey = random.randint(0, len(b)-1)  # pick random key to make a random generation
         clonetomutate = currentgeneration[clonetomutatekey]  # select the clone corresponding to the random key
         mutatedresidues = []
         residuetomutate = [0]
@@ -466,15 +466,15 @@ def mutate(a, b, c, d, e):  # a = number of mutations in the generation; b = pro
                     continue
 
         mutationtarget = copy.deepcopy(clonetomutate)  # make a deep copy of the libaries value as to not change it in the library until we want to
-        # residuetomutate = choice(c) # pick a random residue in the selected mutant to mutate that isnt the start M or an anchor (old)
+        # residuetomutate = random.choice(c) # pick a random residue in the selected mutant to mutate that isnt the start M or an anchor (old)
         targetresidue = mutationtarget[residuetomutate[0]]
         newresidue = mutate_matrix(e, targetresidue)  # implement LG
 
         # old way of selecting random residues to mutate to below
-        # x = randint(0, len(RESIDUES)-1)
+        # x = random.randint(0, len(RESIDUES)-1)
         # newresidue = RESIDUES[x]  # pick a random residue to replace the mutable residue
         # while newresidue == clonetomutate[residuetomutate[0]]:  # ensure the new residue is different to the current residue
-        #    x = randint(0, len(RESIDUES)-1)
+        #    x = random.randint(0, len(RESIDUES)-1)
         #    newresidue = RESIDUES[x]
 
         # below are print functions to check the above part of the fucntion is working correctly
@@ -910,7 +910,7 @@ def finalfastawriter(x, y, z):  # x = current generation, y = bifurication state
     amountofclonestotake = int((bifursize-1)/2)  # if 5, gives 2, if 4 gives 2, if 3 gives 1.
     generationnumbers = []
     for i in y:
-        cloneselection = sample(set(i), amountofclonestotake)
+        cloneselection = random.sample(set(i), amountofclonestotake)
         for j in cloneselection:
             generationnumbers.append(j)
     for k in generationnumbers:  # write fasta header followed by residue in generation string
@@ -919,7 +919,7 @@ def finalfastawriter(x, y, z):  # x = current generation, y = bifurication state
         for l in listtowrite:
             treefastafile.write(l)
         treefastafile.write('\n')
-    rootselection = choice(z)
+    rootselection = random.choice(z)
     roottowrite = x[rootselection]
     treefastafile.write(">root\n")
     for m in roottowrite:
@@ -1003,13 +1003,13 @@ def generationator(d, e, f, g, h, z):  # d = number of generations to run; e = p
                         if k not in m:  # check bifurications
                             clonelistlistcount += 1  # Root searching - counts every bifurcation that does not contain the unfit clone.
                         if k in m:
-                            clonekey = choice(m)
+                            clonekey = random.choice(m)
                             while clonekey == k or generationfitness[clonekey] < fitness_threshold:  # ensure you don't clone the target unfit generation or another clone that is also of fitness below the threshold
-                                clonekey = choice(m)  # choose another random member in the bifurcation.
+                                clonekey = random.choice(m)  # choose another random member in the bifurcation.
                     if clonelistlistcount == len(clonelistlist):  # if every bifurcation does not contain the unfit clone it belongs to the root
-                        clonekey = choice(rootlist)  # choose random root to replace unfit sequence
+                        clonekey = random.choice(rootlist)  # choose random root to replace unfit sequence
                         while clonekey == k or generationfitness[clonekey] < fitness_threshold:
-                            clonekey = choice(rootlist)  # ensure you don't clone the target unfit generation or another clone that is also of fitness below the threshold
+                            clonekey = random.choice(rootlist)  # ensure you don't clone the target unfit generation or another clone that is also of fitness below the threshold
                     if generationfitness[clonekey] < fitness_threshold:  # make warning messages if code breaks
                         print("clone %s is unfit with a value of %s, it will be replaced by:" % (k, generationfitness[k]))
                         print("clone %s with a fitness of %s" % (clonekey, generationfitness[clonekey]))

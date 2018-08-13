@@ -125,6 +125,7 @@ def get_allowed_sites(n_amino_acids, n_anchors):
     for a in anchored_sequences:
         allowed_values.remove(a)
     allowed_values.append(n_amino_acids+1)
+    return allowed_values
 
 
 def gammaray(a, b, c, d, e):  # a = iterations to run gamma sampling, b = number of gamma samples per iteration, c = gamma shape (kappa), d = gamma scale (theta), e = amount of aminos

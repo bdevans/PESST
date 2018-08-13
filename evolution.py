@@ -92,7 +92,7 @@ def get_protein_fitness(protein):  # x=protein;
 
     aminofitsavepath = '%s/start' % runpath
     aminofitfilename = "fitnesslibrary"
-    aminofitfullname = os.path.join(aminofitsavepath, aminofitfilename + ".csv")
+    aminofitfullname = os.path.join(aminofitsavepath, aminofitfilename+".csv")
     aminofile = open(aminofitfullname, "w+")  # open file
     # Write header
     aminofile.write("aminoposition"),
@@ -565,7 +565,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
         plt.xticks([])  # remove x axis ticks
         fitfilename = "generation_%s" % f  # define dynamic filename
         fitsavepath = '%s/fitnessdotmatrix' % runpath
-        fitfullname = os.path.join(fitsavepath, fitfilename + ".png")
+        fitfullname = os.path.join(fitsavepath, fitfilename+".png")
         plt.savefig(fitfullname)
         plt.close()  # close plot (so you dont generate 100 individual figures)
 
@@ -614,7 +614,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
 
         distclonetrackfilepath = '%s/statistics' % innerrunpath
         distclonetrackfilename = "normal_distribution_statistics_generation %s" % f  # define evo filename
-        distclonetrackfullname = os.path.join(distclonetrackfilepath, distclonetrackfilename + ".txt")
+        distclonetrackfullname = os.path.join(distclonetrackfilepath, distclonetrackfilename+".txt")
         distclonetrackfile = open(distclonetrackfullname, "w+")  # open file
 
         distclonetrackfile.write('Tests for normality on the amino acid fitness of each clone: \n\n\n')
@@ -744,7 +744,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
         if f == 0:
             disttrackfilepath = '%s/statistics' % innerrunpath
             disttrackfilename = "normal_distribution_statistics_fitness_space"  # define evo filename
-            disttrackfullname = os.path.join(disttrackfilepath, disttrackfilename + ".txt")
+            disttrackfullname = os.path.join(disttrackfilepath, disttrackfilename+".txt")
             disttrackfile = open(disttrackfullname, "w+")  # open file
 
             disttrackfile.write('Tests for normality on the global amino acid fitness space at each position: \n\n\n')
@@ -878,7 +878,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
 
         disthisttrackfilepath = '%s/histograms' % innerrunpath
         disthistfilename = "generation_%s" % f  # define dynamic filename
-        disthistfullname = os.path.join(disthisttrackfilepath, disthistfilename + ".png")
+        disthistfullname = os.path.join(disthisttrackfilepath, disthistfilename+".png")
         plt.savefig(disthistfullname)
         plt.close()
     return fitnessdict
@@ -1097,9 +1097,10 @@ if __name__ == '__main__':
     # record run settings
     settingsfilepath = '%s/runsettings' % runpath
     settingsfilename = "runsettings"  # define evo filename
-    settingsfullname = os.path.join(settingsfilepath, settingsfilename + ".txt")
+    settingsfullname = os.path.join(settingsfilepath, settingsfilename+".txt")
     settingsfile = open(settingsfullname, "w+")  # open file
 
+    # TODO: Change to logger
     settingsfile.write("Protein length: %s" % (n_amino_acids+1))
     settingsfile.write("\nAmount of mutations per generation: %s" % n_mutations_per_generation)
     settingsfile.write("\nAmount of clones in the population: %s" % n_clones)
@@ -1127,7 +1128,7 @@ if __name__ == '__main__':
 
     firstproteinsavepath = '%s/start' % runpath
     firstproteinfilename = "firstprotein"
-    firstproteinfullname = os.path.join(firstproteinsavepath, firstproteinfilename + ".fas")
+    firstproteinfullname = os.path.join(firstproteinsavepath, firstproteinfilename+".fas")
     firstproteinfile = open(firstproteinfullname, "w+")  # open file
     firstproteinfile.write('>firstprotein\n')
     for prot in firstprotein:

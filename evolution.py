@@ -61,7 +61,8 @@ track_invariants = False  # if True, invariants are tracked in the histogram ana
 def generate_protein(n_amino_acids, start_amino_acid="M"):
     """Generate an original starting protein 20aa long with a start methionine.
     """
-    protein = random.sample(RESIDUES, n_amino_acids)
+    protein = random.choices(RESIDUES, k=n_amino_acids)
+    # protein = [random.choice(RESIDUES) for _ in range(n_amino_acids)]  # ver < 3.6
     protein.insert(0, start_amino_acid)  # Start with methionine
     return protein
 

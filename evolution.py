@@ -114,17 +114,17 @@ def clones(n_clones, protein):
     return {l: protein for l in range(n_clones)}
 
 
-def get_allowed_sites(a, b): # a = n_amino_acids, b = n_anchors; this module defines the invariant sites within the protein.
+def get_allowed_sites(n_amino_acids, n_anchors):
     """Select invariant sites in the initially generated protein and return
     allowed values.
     """
-    anchoredsequences = sample(list(range(1, a)), b)  # randomly define invariant sites
-    allowedvalues = list(range(1, a+1))  # keys for sites that can be modified by mutation
-    for i in anchoredsequences:
-        invariant = i
-        if invariant in allowedvalues:
-            allowedvalues.remove(invariant)  # remove the invariant sites from allowed values
-    return allowedvalues
+    allowed_values = list(range(1, n_amino_acids))  # keys for mutable sites
+    # Randomly define invariant sites (without replacement)
+    anchored_sequences = random.sample(allowed_values, n_anchors)
+    # Remove the invariant sites from allowed values
+    for a in anchored_sequences:
+        allowed_values.remove(a)
+    allowed_values.append(n_amino_acids+1)
 
 
 def gammaray(a, b, c, d, e):  # a = iterations to run gamma sampling, b = number of gamma samples per iteration, c = gamma shape (kappa), d = gamma scale (theta), e = amount of aminos

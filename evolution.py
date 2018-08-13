@@ -107,11 +107,11 @@ def get_protein_fitness(protein):  # x=protein;
     return fitnesslib
 
 
-def clones(x, y):  # x= number of clones to generate, y = protein
-    """Generate a dictionary containing X clones of generated protein
+def clones(n_clones, protein):
+    """Generate a dictionary containing n_clones of generated protein
     - this contains the evolving dataset.
     """
-    return {l: y for l in range(x)}
+    return {l: protein for l in range(n_clones)}
 
 
 def get_allowed_sites(a, b): # a = n_amino_acids, b = n_anchors; this module defines the invariant sites within the protein.

@@ -124,7 +124,8 @@ def get_allowed_sites(n_amino_acids, n_anchors):
     # Remove the invariant sites from allowed values
     for a in anchored_sequences:
         allowed_values.remove(a)
-    allowed_values.append(n_amino_acids+1)
+
+    allowed_values.append(n_amino_acids)
     return allowed_values
 
 

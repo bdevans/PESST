@@ -17,7 +17,7 @@ import scipy as sp
 # from scipy.stats import kurtosis as kurt
 # from scipy.stats import ks_2samp as kosmo
 # import scipy.special as sps
-# import matplotlib
+import matplotlib as mpl
 from matplotlib import pyplot as plt
 
 from tqdm import trange
@@ -1014,50 +1014,37 @@ def generationator(d, e, f, g, h, z):  # d = number of generations to run; e = p
     return genfitdict
 
 
-def fitbit(evolution, n_generations, n_clones):
+def fitbit(evolution, n_generations, n_clones, first_protein):
     """Plot fitness against generation for all clones."""
-    plt.figure()
-    fitnessarray = np.zeros(shape=(n_generations, n_clones))  # create array the size of the final dataset
-    for i in range(len(evolution)-1):  # generates a matrix of the fitness values
-        dictaccess = evolution[i]  # access generation i
-        accessfitness = dictaccess[-1]  # access fitness of clones in generation i
-        fitnesslist = []  # store fitnesses in a list
-        for j in range(len(accessfitness)):
-            fitnesslist.append(accessfitness[j])
-        fitnessarray[i] = fitnesslist  # append fitnesses to array. Array form: x = clones, y = generations
-    for k in range(n_clones-1):  # record how each clone's fitness changes over each generation
-        clonefitness = []  # list describing how a clone changes over each generation (y axis to plot)
-        gen = -1  # generation counter
-        genlist = []  # list containing each generation (x axis to plot)
-        for l in range(len(fitnessarray)):  # for each generation
-            gen += 1  # advance generation counter
-            genlist.append(gen)  # append to x axis
-            fitnessofclone = fitnessarray[l]  # access lth generation list
-            fitnessofgeneration = fitnessofclone[k]  # access lth generation list's kth clone fitness
-            clonefitness.append(fitnessofgeneration)  # append it y axis
-        plt.plot(genlist, clonefitness)
-    averagefitness = []
-    for m in range(len(fitnessarray)):  # record average fitness of all clones over each generation
-        fitnessofclone2 = fitnessarray[m]
-        sumfitness = sum(fitnessofclone2)
-        avgfitness = float(sumfitness)/float(n_clones)
-        averagefitness.append(avgfitness)
+    # NOTE: Final element previously excluded - for i in range(len(evolution)-1):
+    # Create array of fitness values with shape (n_generations, n_clones)
+    fitnesses = np.array([[evolution[g][-1][c] for c in range(n_clones)]
+                          for g in range(n_generations)])
 
+    initial_fitness = calculate_fitness(first_protein)
+    generation_numbers = np.arange(1, n_generations+1)  # Skip initial generation
+
+    plt.figure()
+    plt.plot(generation_numbers, fitnesses)
     plt.plot([0, n_generations], [fitness_threshold, fitness_threshold], 'k-', lw=2)
-    plt.plot(averagefitness, "k--", lw=2)
-    #plt.ylim([fitness_threshold-25, calculate_fitness(firstprotein)+10])  # not suitable for "low or med" graphs
-    #plt.ylim([fitness_threshold-5, ((n_amino_acids+1)*mu)+80]) # for low graphs
-    plt.ylim([fitness_threshold-25, calculate_fitness(firstprotein)+100])  # suitable for med graphs
+    # NOTE: Final element previously excluded - for c in range(n_clones-1):
+    plt.plot(generation_numbers, np.mean(fitnesses, axis=1), "k--", lw=2)  # Average across clones
+    # plt.ylim([fitness_threshold-25, initial_fitness+10])  # not suitable for "low or med" graphs
+    # plt.ylim([fitness_threshold-5, ((n_amino_acids+1)*mu)+80]) # for low graphs
+    plt.ylim([fitness_threshold-25, initial_fitness+100])  # suitable for med graphs
     plt.xlabel("Generations", fontweight='bold')
     plt.ylabel("Fitness", fontweight='bold')
     plt.title("\n".join(wrap('Fitness change for %s randomly generated "superfit" clones of %s amino acids, mutated over %s generations' % (n_clones, (n_amino_acids+1), n_generations), 60)), fontweight='bold')
-    plt.text(n_generations-1000, calculate_fitness(firstprotein)+50, "$\mu$ = %s\n$\sigma$ = %s\n$\delta$ = %s" % (mu, sigma, mutation_rate))
+    plt.text(n_generations-1000, initial_fitness+50,
+             "$\mu$ = %s\n$\sigma$ = %s\n$\delta$ = %s" % (mu, sigma, mutation_rate))
 
+    # Define dynamic filename
     fitgraphfilepath = '%s/fitnessgraph' % runpath
-    fitgraphfilename = "fitness_change_over %s generations" % n_generations # define dynamic filename
-    fitgraphfullname = os.path.join(fitgraphfilepath, fitgraphfilename + ".png")
+    fitgraphfilename = "fitness_change_over %s generations" % n_generations
+    fitgraphfullname = os.path.join(fitgraphfilepath, fitgraphfilename+".png")
 
-    return plt.savefig(fitgraphfullname)
+    plt.savefig(fitgraphfullname)
+    return
 
 
 if __name__ == '__main__':
@@ -1065,6 +1052,7 @@ if __name__ == '__main__':
     # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
     # from matplotlib.figure import Figure
     # matplotlib.use('TkAgg')
+    mpl.rc('savefig', dpi=300)
 
     # create folder and subfolders
     paths = ['runsettings', 'start', 'fastas', 'fitnessgraph',
@@ -1127,4 +1115,4 @@ if __name__ == '__main__':
                                fitness_threshold, n_mutations_per_generation,
                                write_rate, LGmatrix)
 
-    fitbit(evolution, n_generations, n_clones)
+    fitbit(evolution, n_generations, n_clones, first_protein)

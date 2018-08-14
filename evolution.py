@@ -870,18 +870,17 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
     return fitnessdict
 
 
-def write_fasta_alignment(x, y):  # x = current generation of sequence, y = generation number
+def write_fasta_alignment(population, generation):  # x = current generation of sequence, y = generation number
     """Write fasta alignment from sequences provided."""
-
     fastafilepath = '%s/fastas' % runpath
-    fastafilename = "generation_%s" % y  # define dynamic filename
+    fastafilename = "generation_%s" % generation  # define dynamic filename
     fullname = os.path.join(fastafilepath, fastafilename+".fasta")
     fastafile = open(fullname, "w+")  # open file
-    for i in range(len(x)):  # write fasta header followed by residue in generation string
-        listtowrite = x[i]
-        fastafile.write("\n>clone_%s\n" % (i+1))
-        for j in listtowrite:
-            fastafile.write(j)
+    # Write fasta header followed by residue in generation string
+    for p, protein in enumerate(population):
+        fastafile.write("\n>clone_%s\n" % (p+1))
+        for residue in protein:
+            fastafile.write(residue)
 
 
 def finalfastawriter(x, y, z):  # x = current generation, y = bifurication state, z = n_roots

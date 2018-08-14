@@ -412,14 +412,10 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=initial_p
 
 
 # NOTE: Not used
-def histfitness(f):
+def histfitness(n_proteins):
     """Generate and plot fitness values for f proteins."""
-    # fitnesses = []  # numbers to plot
-    # for p in range(f):  # generate the fitness values
-    #     aprotein = generate_protein()
-    #     toplot = calculate_fitness(aprotein)
-    #     fitnesses.append(toplot)
-    fitnesses = [calculate_fitness(generate_protein(n_amino_acids)) for p in range(f)]
+    fitnesses = [calculate_fitness(generate_protein(n_amino_acids))
+                 for p in range(n_proteins)]
     plt.hist(fitnesses, density=True)  # plot fitnesses as histogram
     return plt.show()
 
@@ -450,9 +446,9 @@ def mutate(current_generation, n_mutations_per_generation, variant_sites,
         # Pick random key, clone to make a random generation
         mutant_key, mutant_clone = random.choice(list(next_generation.items()))
         mutation_target = copy.deepcopy(mutant_clone)  # make a deep copy of the libaries value as to not change it in the library until we want to
+
         # mutated_residues = []
         # residue_index = [0]
-        #
         # while residue_index[0] not in variant_sites:  # always initiates as residue_index set to 0 and residue zero 0 should always be disallowed (start methionine locked). Also ensures only mutates at variant sites
         #     mutant_residue_area = np.random.uniform(0, cumulative_gamma[-1])  # [0, highest_gamma_sum)
         #     # Find the first bin with gamma > mutant_residue_area

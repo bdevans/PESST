@@ -883,31 +883,31 @@ def write_fasta_alignment(population, generation):  # x = current generation of 
             fastafile.write(residue)
 
 
-def finalfastawriter(x, y, z):  # x = current generation, y = bifurication state, z = n_roots
+def write_final_fasta(population, bifurcations, n_roots):  # x = current generation, y = bifurication state, z = n_roots
     treefastafilepath = '%s/treefastas' % runpath
     treefastafilename = "selected_fastas"
     fullname = os.path.join(treefastafilepath, treefastafilename+".fasta")
     treefastafile = open(fullname, "w+")  # open file
     bifsize = 0
-    for bifs in y:
+    for bifs in bifurcations:
         bifsize += len(bifs)
-    bifursize = bifsize/len(y)
-    amountofclonestotake = int((bifursize-1)/2)  # if 5, gives 2, if 4 gives 2, if 3 gives 1.
-    generationnumbers = []
-    for i in y:
-        cloneselection = random.sample(set(i), amountofclonestotake)
-        for j in cloneselection:
-            generationnumbers.append(j)
-    for k in generationnumbers:  # write fasta header followed by residue in generation string
-        listtowrite = x[k]
-        treefastafile.write(">clone_%s\n" % (k+1))
-        for l in listtowrite:
-            treefastafile.write(l)
+    bifursize = bifsize/len(bifurcations)
+    n_clones_to_take = int((bifursize-1)/2)  # if 5, gives 2, if 4 gives 2, if 3 gives 1.
+    generation_numbers = []
+    for i in bifurcations:
+        clone_selection = random.sample(set(i), n_clones_to_take)  # NOTE: Only sample from unique clones?
+        for c in clone_selection:
+            generation_numbers.append(c)
+    # Write fasta header followed by residue in generation string
+    for p in generation_numbers:
+        treefastafile.write(">clone_%s\n" % (p+1))
+        for residue in population[p]:
+            treefastafile.write(residue)
         treefastafile.write('\n')
-    rootselection = random.choice(z)
-    roottowrite = x[rootselection]
+    # Choose a random root to write
+    root = population[random.choice(n_roots)]
     treefastafile.write(">root\n")
-    for m in roottowrite:
+    for m in root:
         treefastafile.write(m)
 
 

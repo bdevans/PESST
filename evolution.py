@@ -7,6 +7,7 @@ import random
 from textwrap import wrap
 # import shutil
 # import json
+from collections import namedtuple
 
 import numpy as np
 # from numpy import median
@@ -944,20 +945,24 @@ def generationator(d, e, f, g, h, z):  # d = number of generations to run; e = p
 
     clonelistlist = []  # place to store bifurcations (list of lists of clone keys)
     clonelistlist.append(clonelist)  # store all clones that are not root to start
-    generationdict = {}  # where all of the generations will be stored
-    generationfitdict = {}  # where the fitness of each generation will be stored
-    genfitdict = {}  # where the final output dictionary of format {generationkey:{[dictionary of mutatants],[dictionary of fitness]}}
     generation = copy.deepcopy(e)  # current generation
     generationcounter = 0  # count generation for filenames
     generationfitness = record_generation_fitness(generation, track_dot_fitness, track_rate, generationcounter, proteinfitness, track_hist_fitness_stats, track_hist_fitness, track_invariants, variantaminos)  # current generation fitness
-    generationdict.update({0: generation})  # append fitness of starting generation
-    generationfitdict.update({0: generationfitness})  # append fitness of starting generation
     fitnessthresh = f
 
         if i == 0 or (i % h) == 0:  # record fasta every x generations
     for i in trange(d):  # run evolution for d generations
             write_fasta_alignment(generation, generationcounter)
         if i % bifurgeneration == 0 and i != 0 and len(clonelistlist[0]) > 3:  # Bifuricationmaker. Bifuricates in even generation numbers so every branch on tree has 3 leaves that have been evolving by the last generation
+    # generationdict = {}  # where all of the generations will be stored
+    # generationfitdict = {}  # where the fitness of each generation will be stored
+    # genfitdict = {}  # where the final output dictionary of format {generationkey:{[dictionary of mutatants],[dictionary of fitness]}}
+    # generationdict.update({0: population})  # append fitness of starting generation
+    # generationfitdict.update({0: fitnesses})  # append fitness of starting generation
+    # Store each generation along with its fitness
+    Generation = namedtuple('Generation', ['population', 'fitness'])
+    # Create a list of generations and add initial population and fitness
+    evolution = [Generation(population=population, fitness=fitnesses)]
             lists = []  # space to store bifurcations before adding them to clonelistlist
             for j in clonelistlist:  # bifuricate each set of leaves
                 shuffle(j)
@@ -998,27 +1003,31 @@ def generationator(d, e, f, g, h, z):  # d = number of generations to run; e = p
                         print(generationfitness)
                         print(clonelistlist)
                     generation[unfitkey] = generation[clonekey]   # swap out unfit clone for fit clone
+        # generationdict.update({gen+1: population})  # add next generation to dictionary
+        # generationfitdict.update({gen+1: fitnesses})  # add next generation fitness to dictionary
+        evolution.append(Generation(population=population, fitness=fitnesses))
+    # Combine fitness and population dictionaries into one.
+    # for l in range(len(generationdict)):
+    #     dictlist = [generationdict[l], generationfitdict[l]]
+    #     genfitdict.update({l: dictlist})
 
-        generationdict.update({i + 1: generation})  # add next generation to dictionary
-        generationfitdict.update({i + 1: generationfitness})  # add next generation fitness to dictionary
     write_fasta_alignment(generation, generationcounter)
     finalfastawriter(generation, clonelistlist, rootlist)
-    for l in range(len(generationdict)):  # combine fitness and generation dictionaries into one.
-        dictlist = [generationdict[l], generationfitdict[l]]
-        genfitdict.update({l: dictlist})
-    # print genfitdict[d]
-    return genfitdict
+    # return genfitdict
+    return evolution
 
 
 def fitbit(evolution, n_generations, n_clones, initial_protein):
     """Plot fitness against generation for all clones."""
     # NOTE: Final element previously excluded - for i in range(len(evolution)-1):
     # Create array of fitness values with shape (n_generations, n_clones)
-    fitnesses = np.array([[evolution[g][-1][c] for c in range(n_clones)]
-                          for g in range(n_generations)])
+    # fitnesses = np.array([[evolution[g][-1][c] for c in range(n_clones)]
+    #                       for g in range(n_generations)])
+    fitnesses = np.array([[evolution[g].fitness[c] for c in range(n_clones)]
+                          for g in range(n_generations+1)])
 
     initial_fitness = calculate_fitness(initial_protein)
-    generation_numbers = np.arange(1, n_generations+1)  # Skip initial generation
+    generation_numbers = np.arange(n_generations+1)  # Skip initial generation
 
     plt.figure()
     plt.plot(generation_numbers, fitnesses)

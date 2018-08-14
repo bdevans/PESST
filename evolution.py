@@ -1048,6 +1048,7 @@ def fitbit(evolution, n_generations, n_clones, initial_protein):
 
 if __name__ == '__main__':
 
+    np.random.seed(42)
     # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
     # from matplotlib.figure import Figure
     # matplotlib.use('TkAgg')

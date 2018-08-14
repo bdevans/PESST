@@ -1,0 +1,12 @@
+.git
+.gitignore
+.ipynb_checkpoints
+Dockerfile
+.DS_Store
+README.md
+LICENSE.txt
+NOTES.md
+env.*
+.travis.yml
+
+results

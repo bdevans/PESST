@@ -1105,9 +1105,9 @@ if __name__ == '__main__':
     # print 'first superfit protein:', initial_protein
     # print 'fitness of the first protein:', calculate_fitness(initial_protein)
 
-    somestartingclones = clones(n_clones, initial_protein)  # make some clones to seed evolution
+    initial_population = clones(n_clones, initial_protein)  # make some clones to seed evolution
 
-    evolution = generationator(n_generations, somestartingclones,
+    evolution = generationator(n_generations, initial_population,
                                fitness_threshold, n_mutations_per_generation,
                                write_rate, LGmatrix)
 

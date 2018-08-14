@@ -1032,7 +1032,10 @@ def fitbit(evolution, n_generations, n_clones, initial_protein):
     plt.ylabel("Fitness", fontweight='bold')
     plt.title("\n".join(wrap('Fitness change for %s randomly generated "superfit" clones of %s amino acids, mutated over %s generations' % (n_clones, (n_amino_acids+1), n_generations), 60)), fontweight='bold')
     plt.text(n_generations-1000, initial_fitness+50,
-             "$\mu$ = %s\n$\sigma$ = %s\n$\delta$ = %s" % (mu, sigma, mutation_rate))
+             r"$\mu$ = {}".format(mu) + "\n" + \
+             r"$\sigma$ = {}".format(sigma) + "\n" + \
+             r"$\delta$ = {}".format(mutation_rate))
+             # r"$\mu$ = %s\n$\sigma$ = %s\n$\delta$ = %s" % (mu, sigma, mutation_rate))
 
     # Define dynamic filename
     fitgraphfilepath = '%s/fitnessgraph' % runpath

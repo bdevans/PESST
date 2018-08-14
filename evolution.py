@@ -422,13 +422,14 @@ def histfitness(n_proteins):
     return plt.show()
 
 
-def get_thresholded_protein(b, c):  # b=fitness_start, c=initial_protein;
+# NOTE: Unused but swapped arguments
+def get_thresholded_protein(initial_protein, initial_fitness):
     """Make a protein with a fitness value above a defined threshold.
 
     Note: This takes a long time if thresh is too high.
     """
-    f = calculate_fitness(c)
-    while f < b:  # keep making proteins until the protein's fitness satisfies the fitness threshold.
+    f = calculate_fitness(initial_protein)
+    while f < initial_fitness:  # keep making proteins until the protein's fitness satisfies the fitness threshold.
         proteintoevolve = generate_protein(n_amino_acids)
         f = calculate_fitness(proteintoevolve)
     return f

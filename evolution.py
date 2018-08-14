@@ -1037,6 +1037,7 @@ def fitbit(evolution, n_generations, n_clones, initial_protein):
     # plt.ylim([fitness_threshold-25, initial_fitness+10])  # not suitable for "low or med" graphs
     # plt.ylim([fitness_threshold-5, ((n_amino_acids+1)*mu)+80]) # for low graphs
     plt.ylim([fitness_threshold-25, initial_fitness+100])  # suitable for med graphs
+    plt.xlim([0, n_generations])
     plt.xlabel("Generations", fontweight='bold')
     plt.ylabel("Fitness", fontweight='bold')
     plt.title("\n".join(wrap('Fitness change for %s randomly generated "superfit" clones of %s amino acids, mutated over %s generations' % (n_clones, (n_amino_acids+1), n_generations), 60)), fontweight='bold')

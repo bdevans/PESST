@@ -877,7 +877,7 @@ def write_fasta_alignment(population, generation):  # x = current generation of 
     fullname = os.path.join(fastafilepath, fastafilename+".fasta")
     fastafile = open(fullname, "w+")  # open file
     # Write fasta header followed by residue in generation string
-    for p, protein in enumerate(population):
+    for p, protein in list(population.items()):
         fastafile.write("\n>clone_%s\n" % (p+1))
         for residue in protein:
             fastafile.write(residue)

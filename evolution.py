@@ -436,66 +436,50 @@ def get_thresholded_protein(b, c):  # b=fitness_start, c=firstprotein;
     return f
 
 
-def mutate(a, b, c, d, e):  # a = number of mutations in the generation; b = protein generation, c = allowed sites, d = assignedgammas, e = matrix
+def mutate(current_generation, n_mutations_per_generation, variant_sites,
+           gamma_categories, LG_matrix):
     """Mutate a given sequence based on the LG+I+G model of amino acid
     substitution.
     """
-    currentgeneration = copy.deepcopy(b)  # make a deep copy of the library so changing the library in the function doesnt change the library outside the function
-    summedgammas = []
-    gammasum = 0
+    next_generation = copy.deepcopy(current_generation)  # make a deep copy of the library so changing the library in the function doesn't change the library outside the function
 
-    for i in d:  # sum up the gammas to make a probability distribution to randomly select from.
-        gammasum = gammasum + i
-        summedgammas.append(gammasum)
+    # Sum gammas to make a probability distribution to randomly select from.
+    cumulative_gamma = np.cumsum(gamma_categories)  # n_amino_acids long
 
-    highestgammasum = summedgammas[-1]
+    for q in range(n_mutations_per_generation):  # impliment gamma
+        # Pick random key, clone to make a random generation
+        mutant_key, mutant_clone = random.choice(list(next_generation.items()))
+        mutation_target = copy.deepcopy(mutant_clone)  # make a deep copy of the libaries value as to not change it in the library until we want to
+        # mutated_residues = []
+        # residue_index = [0]
+        #
+        # while residue_index[0] not in variant_sites:  # always initiates as residue_index set to 0 and residue zero 0 should always be disallowed (start methionine locked). Also ensures only mutates at variant sites
+        #     mutant_residue_area = np.random.uniform(0, cumulative_gamma[-1])  # [0, highest_gamma_sum)
+        #     # Find the first bin with gamma > mutant_residue_area
+        #     for gi, gamma in enumerate(cumulative_gamma):
+        #         if mutant_residue_area < gamma:
+        #             mutated_residues.append(gi)
+        #             residue_index[0] = gi
+        #             break
+        #         else:
+        #             continue
+        # # residue_index = random.choice(c) # pick a random residue in the selected mutant to mutate that isnt the start M or an anchor (old)
+        # target_residue = mutation_target[residue_index[0]]
+        # newresidue = mutate_matrix(LG_matrix, target_residue)  # implement LG
+        # mutation_target[residue_index[0]] = newresidue  # mutate the copy with the randomly chosen residue
 
-    for q in range(a):  # impliment gamma
+        # TODO: Could gamma_categories be the length of anchor_sites?
+        residue_index = 0
+        # cumulative_gamma[anchor_sites] = -np.inf  # Would this work instead of while loop?
+        # while residue_index in anchor_sites:
+        while residue_index not in variant_sites:
+            mutant_residue_area = np.random.uniform(0, cumulative_gamma[-1])  # [0, highest_gamma_sum)
+            residue_index = np.searchsorted(cumulative_gamma, mutant_residue_area)  # Return index where mutant_residue_area <= cumulative_gamma[i]
+        mutation_target[residue_index] = mutate_matrix(LG_matrix, mutation_target[residue_index])  # mutate the copy with the randomly chosen residue
 
-        clonetomutatekey = random.randint(0, len(b)-1)  # pick random key to make a random generation
-        clonetomutate = currentgeneration[clonetomutatekey]  # select the clone corresponding to the random key
-        mutatedresidues = []
-        residuetomutate = [0]
+        next_generation[mutant_key] = mutation_target  # update with new sequence
 
-        while residuetomutate[0] not in c:  # always initiates as residuetomutate set to 0 and residue zero 0 should always be disallowed (start methionine locked). Also ensures only mutates at variant sites
-            residueareatomutate = np.random.uniform(0, highestgammasum)
-            for j in summedgammas:
-                if residueareatomutate < j:
-                    mutatedresidues.append(summedgammas.index(j))
-                    residuetomutate[0] = summedgammas.index(j)
-                    break
-                else:
-                    continue
-
-        mutationtarget = copy.deepcopy(clonetomutate)  # make a deep copy of the libaries value as to not change it in the library until we want to
-        # residuetomutate = random.choice(c) # pick a random residue in the selected mutant to mutate that isnt the start M or an anchor (old)
-        targetresidue = mutationtarget[residuetomutate[0]]
-        newresidue = mutate_matrix(e, targetresidue)  # implement LG
-
-        # old way of selecting random residues to mutate to below
-        # x = random.randint(0, len(RESIDUES)-1)
-        # newresidue = RESIDUES[x]  # pick a random residue to replace the mutable residue
-        # while newresidue == clonetomutate[residuetomutate[0]]:  # ensure the new residue is different to the current residue
-        #    x = random.randint(0, len(RESIDUES)-1)
-        #    newresidue = RESIDUES[x]
-
-        # below are print functions to check the above part of the fucntion is working correctly
-        # print "generation", i+1
-        # print "new residue to be added:", newresidue
-        # print "position of residue to be mutated:", residuetomutate
-        # print "position of clone to be mutated", clonetomutatekey
-        # print "sequence of clone to be mutated:", clonetomutate
-        # print "old residue that will be changed", clonetomutate[residuetomutate]
-
-        mutationtarget[residuetomutate[0]] = newresidue  # mutate the copy with the randomly chosen residue
-        currentgeneration[clonetomutatekey] = mutationtarget  # update with new sequence
-
-        # below are print functions to check the above part of the fucntion is working correctly
-        # print "sequence of clone after mutation", mutationtarget
-        # print "sequence of clonetomutate function", clonetomutate
-        # print "generation of clones with new mutation", currentgeneration
-        # print ""
-    return currentgeneration
+    return next_generation
 
 
 def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generation; d=track_dot_fitness, e=generationtotrack, f=generationnumber, g=proteinfitness, h=track_hist_fitness_stats, m=track_hist_fitness, n=track invariants, o= invariant sites

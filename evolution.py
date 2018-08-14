@@ -300,7 +300,7 @@ def calculate_fitness(protein, fitness_table):
     return sum(protein_fitness)
 
 
-def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=initial_protein, q = fitness_start; Generates a protein with high, low or medium fitness, with anchored sequences from the initial generation
+def superfit(n, o, p, q):  # n=fitness_table, o=anchored sequences, p=initial_protein, q = fitness_start; Generates a protein with high, low or medium fitness, with anchored sequences from the initial generation
     """Make either a superfit protein, a superunfit protein or a 'medium
     fitness' protein with fitness just higher than the fitness threshold.
 
@@ -371,7 +371,7 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=initial_p
     # If it cannot make a fitter protein with the 5 residues its mutating it reverts back to the previous state and picks 5 new residues.
     if q == 'medium':
         startprotein = p
-        startproteinfitness = calculate_fitness(startprotein, proteinfitness)
+        startproteinfitness = calculate_fitness(startprotein, fitness_table)
         variantstochoosefrom = o
         secondprotein = startprotein
 
@@ -382,18 +382,18 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=initial_p
             secondprotein[choiceofvariants[2]] = random.choice(RESIDUES)
             secondprotein[choiceofvariants[3]] = random.choice(RESIDUES)
             secondprotein[choiceofvariants[4]] = random.choice(RESIDUES)
-            secondproteinfitness = calculate_fitness(secondprotein, proteinfitness)
+            secondproteinfitness = calculate_fitness(secondprotein, fitness_table)
             counting = 0
 
             while secondproteinfitness < startproteinfitness:
                 secondprotein = startprotein
-                secondproteinfitness = calculate_fitness(secondprotein, proteinfitness)
+                secondproteinfitness = calculate_fitness(secondprotein, fitness_table)
                 secondprotein[choiceofvariants[0]] = random.choice(RESIDUES)
                 secondprotein[choiceofvariants[1]] = random.choice(RESIDUES)
                 secondprotein[choiceofvariants[2]] = random.choice(RESIDUES)
                 secondprotein[choiceofvariants[3]] = random.choice(RESIDUES)
                 secondprotein[choiceofvariants[4]] = random.choice(RESIDUES)
-                secondproteinfitness = calculate_fitness(secondprotein, proteinfitness)
+                secondproteinfitness = calculate_fitness(secondprotein, fitness_table)
                 counting += 1
 
                 if counting > 99:
@@ -402,7 +402,7 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=initial_p
                     break
 
             startprotein = secondprotein
-            startproteinfitness = calculate_fitness(startprotein, proteinfitness)
+            startproteinfitness = calculate_fitness(startprotein, fitness_table)
         afitprotein = startprotein
 
     return afitprotein
@@ -411,7 +411,7 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=initial_p
 # NOTE: Not used
 def histfitness(n_proteins):
     """Generate and plot fitness values for f proteins."""
-    fitnesses = [calculate_fitness(generate_protein(n_amino_acids), proteinfitness)
+    fitnesses = [calculate_fitness(generate_protein(n_amino_acids), fitness_table)
                  for p in range(n_proteins)]
     plt.hist(fitnesses, density=True)  # plot fitnesses as histogram
     return plt.show()
@@ -423,10 +423,10 @@ def get_thresholded_protein(initial_protein, initial_fitness):
 
     Note: This takes a long time if thresh is too high.
     """
-    f = calculate_fitness(initial_protein, proteinfitness)
+    f = calculate_fitness(initial_protein, fitness_table)
     while f < initial_fitness:  # keep making proteins until the protein's fitness satisfies the fitness threshold.
         proteintoevolve = generate_protein(n_amino_acids)
-        f = calculate_fitness(proteintoevolve, proteinfitness)
+        f = calculate_fitness(proteintoevolve, fitness_table)
     return f
 
 
@@ -476,7 +476,7 @@ def mutate(current_generation, n_mutations_per_generation, variant_sites,
     return next_generation
 
 
-def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generation; d=track_dot_fitness, e=generationtotrack, f=generationnumber, g=proteinfitness, h=track_hist_fitness_stats, m=track_hist_fitness, n=track invariants, o= invariant sites
+def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generation; d=track_dot_fitness, e=generationtotrack, f=generationnumber, g=fitness_table, h=track_hist_fitness_stats, m=track_hist_fitness, n=track invariants, o= invariant sites
     """Record the fitness of every protein in the generation and store them in
     dictionary. Optionally generate data and figures about fitness.
     """
@@ -484,7 +484,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
     fitnessdict = {}
     for r in range(len(c)):  # record calculated fitness for each protein in dictionary
         keycounter += 1
-        fitnessofprotein = calculate_fitness(c[keycounter], proteinfitness)
+        fitnessofprotein = calculate_fitness(c[keycounter], fitness_table)
         fitnessdict.update({keycounter: fitnessofprotein})
 
     if (d is True) and (f % e == 0 or f == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
@@ -527,7 +527,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
                 if amino is not 'X':
                     pointsright += 1
                     fitindex = RESIDUES.index(amino)  # find index of first amino acid in RESIDUES list
-                    fitstring = proteinfitness[k]  # find fitness values for ith amino acid position
+                    fitstring = fitness_table[k]  # find fitness values for ith amino acid position
                     fitvalue = fitstring[fitindex]  # find fitness value corresponding to amino acid at position
                     additionright += fitvalue
                     Y2fitness.append(fitvalue)  # append these to list
@@ -552,7 +552,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
     disttrackerlist = []  # build fitness space numbers
     disttrackeryaxis = []
     for i in range(n_amino_acids+1):
-        disttrackerlist.append(proteinfitness[i])
+        disttrackerlist.append(fitness_table[i])
     for i in disttrackerlist:
         for j in i:
             disttrackeryaxis.append(j)
@@ -581,7 +581,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
                 if amino is not 'X':
                     pointsdist += 1
                     distindex = RESIDUES.index(amino)  # find index of first amino acid in RESIDUES list
-                    diststring = proteinfitness[k]  # find fitness values for ith amino acid position
+                    diststring = fitness_table[k]  # find fitness values for ith amino acid position
                     distvalue = diststring[distindex]  # find fitness value corresponding to amino acid at position
                     additiondist += distvalue
                     clonefitnesslist.append(distvalue)
@@ -955,7 +955,7 @@ def generationator(n_generations, initial_population, fitness_threshold,
     population = copy.deepcopy(initial_population)  # current generation
     # Record initial population
     fitnesses = record_generation_fitness(population, track_dot_fitness,
-                                          track_rate, 0, proteinfitness,
+                                          track_rate, 0, fitness_table,
                                           track_hist_fitness_stats,
                                           track_hist_fitness, track_invariants,
                                           variantaminos)  # current generation fitness
@@ -984,7 +984,7 @@ def generationator(n_generations, initial_population, fitness_threshold,
                             variantaminos, gammacategories, LGmatrix)
         # Re-calculate fitness
         fitnesses = record_generation_fitness(population, track_dot_fitness,
-                                              track_rate, gen, proteinfitness,
+                                              track_rate, gen, fitness_table,
                                               track_hist_fitness_stats,
                                               track_hist_fitness, track_invariants,
                                               variantaminos)
@@ -1027,7 +1027,7 @@ def fitbit(evolution, n_generations, n_clones, initial_protein):
     fitnesses = np.array([[evolution[g].fitness[c] for c in range(n_clones)]
                           for g in range(n_generations+1)])
 
-    initial_fitness = calculate_fitness(initial_protein, proteinfitness)
+    initial_fitness = calculate_fitness(initial_protein, fitness_table)
     generation_numbers = np.arange(n_generations+1)  # Skip initial generation
 
     plt.figure()
@@ -1104,10 +1104,10 @@ if __name__ == '__main__':
     LGmatrix = np.delete(LGmatrix, 0, 0)  # trim first line of the array as its not useful
 
     initial_protein = generate_protein(n_amino_acids)  # make first protein
-    proteinfitness = get_protein_fitness(initial_protein)  # make first fitness dictionary
+    fitness_table = get_protein_fitness(initial_protein)  # make first fitness dictionary
 
     variantaminos = get_allowed_sites(n_amino_acids, n_anchors)  # generate invariant sites
-    initial_protein = superfit(proteinfitness, variantaminos, initial_protein, fitness_start)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
+    initial_protein = superfit(fitness_table, variantaminos, initial_protein, fitness_start)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
     gammacategories = gammaray(gamma_iterations, gamma_samples, gamma_shape, gamma_scale, n_amino_acids)  # generate gamma categories for every site
 
     firstproteinsavepath = '%s/start' % runpath
@@ -1118,7 +1118,7 @@ if __name__ == '__main__':
     for prot in initial_protein:
         firstproteinfile.write(prot)
     # print 'first superfit protein:', initial_protein
-    # print 'fitness of the first protein:', calculate_fitness(initial_protein, proteinfitness)
+    # print 'fitness of the first protein:', calculate_fitness(initial_protein, fitness_table)
 
     initial_population = clones(n_clones, initial_protein)  # make some clones to seed evolution
 

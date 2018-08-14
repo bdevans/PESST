@@ -27,8 +27,8 @@ WORKDIR /usr/revolver
 RUN mkdir -p /root/.config/matplotlib
 RUN echo "backend : Agg" > /root/.config/matplotlib/matplotlibrc
 
-COPY *.py /usr/revolver/
 COPY data /usr/revolver/data/
+COPY *.py /usr/revolver/
 VOLUME /usr/revolver/results
 
 # We set ENTRYPOINT, so while we still use exec mode, we don’t

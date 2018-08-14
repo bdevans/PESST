@@ -8,6 +8,7 @@ from textwrap import wrap
 # import shutil
 # import json
 from collections import namedtuple
+import warnings
 
 import numpy as np
 # from numpy import median
@@ -908,112 +909,116 @@ def write_final_fasta(population, bifurcations, n_roots):  # x = current generat
         treefastafile.write(m)
 
 
-def generationator(d, e, f, g, h, z):  # d = number of generations to run; e = protein generation to start; f = fitness_threshold; g = amount of mutations per generation, h = write_rate, z = matrix
+def replace_protein(protein, candidates, fitnesses, fitness_threshold):
+    # Filter out original protein and those below the fitness threshold
+    pool = [c for c in candidates
+            if c != protein and fitnesses[c] >= fitness_threshold]
+    if len(pool) > 0:
+        new_protein = random.choice(pool)
+    else:
+        # raise Exception("No suitable candidates on branch!")
+        warnings.warn("No suitable candidates on branch!")
+        new_protein = np.nan
+    return new_protein
+
+
+def generationator(n_generations, initial_population, fitness_threshold,
+                   n_mutations_per_generation, write_rate, LGmatrix):
     """Generation generator - mutate a protein for a defined number of
     generations according to an LG matrix and gamma distribution.
     """
 
-    clonelist = []  # generate list of clone keys for bifurication
-    for n in range(n_clones):
-        clonelist.append(n)
-
-    rootlist = []  # define set number of random roots from list of clones
-    for j in range(n_roots):
-        integertosplit = randint(0, len(clonelist) - 1)
-        while integertosplit in rootlist:
-            integertosplit = randint(0, len(clonelist) - 1)
-        clonelist.remove(integertosplit)
-        rootlist.append(integertosplit)
+    # Generate list of clone keys for bifurication
+    clonelist = list(range(n_clones))
+    # Randomly sample without replacement n_roots items from clonelist
+    rootlist = random.sample(clonelist, n_roots)
+    for r in rootlist:
+        clonelist.remove(r)
+    # rootlist = [clonelist.pop(random.randrange(len(clonelist))) for r in range(n_roots)]
 
     rootssavepath = "%s/start" % runpath
     rootsfilename = "Roots"
-    rootsfullname = os.path.join(rootssavepath, rootsfilename + ".txt")
+    rootsfullname = os.path.join(rootssavepath, rootsfilename+".txt")
     rootsfile = open(rootsfullname, "w+")  # open file
     rootsfile.write('Roots:')
     for k in rootlist:
         rootsfile.write('\nClone %s' % str(k+1))
 
-    bifurstart = n_clones - n_roots  # do sums to calculate amount of bifurications per generation.
+    # Calculate number of bifurications per generation.
+    bifuraction_start = n_clones - n_roots
     bifurlist = [1]
     for m in bifurlist:
         bifurlist.append(1)
-        bifurstart = bifurstart / 2
-        if bifurstart < 6:  # stop when there are 3, 4, 5 or 6 leaves per branch.
+        bifuraction_start /= 2
+        if bifuraction_start < 6:  # stop when there are 3, 4, 5 or 6 leaves per branch.
             break
-    amountofbifurs = len(bifurlist)
-    bifurgeneration = int(n_generations/amountofbifurs)  # amount of generations per bifurication.
+    bifurgeneration = int(n_generations/len(bifurlist))  # number of generations per bifurication.
 
     clonelistlist = []  # place to store bifurcations (list of lists of clone keys)
     clonelistlist.append(clonelist)  # store all clones that are not root to start
-    generation = copy.deepcopy(e)  # current generation
-    generationcounter = 0  # count generation for filenames
-    generationfitness = record_generation_fitness(generation, track_dot_fitness, track_rate, generationcounter, proteinfitness, track_hist_fitness_stats, track_hist_fitness, track_invariants, variantaminos)  # current generation fitness
-    fitnessthresh = f
+    population = copy.deepcopy(initial_population)  # current generation
+    # Record initial population
+    fitnesses = record_generation_fitness(population, track_dot_fitness,
+                                          track_rate, 0, proteinfitness,
+                                          track_hist_fitness_stats,
+                                          track_hist_fitness, track_invariants,
+                                          variantaminos)  # current generation fitness
+    write_fasta_alignment(population, 0)
 
-        if i == 0 or (i % h) == 0:  # record fasta every x generations
-    for i in trange(d):  # run evolution for d generations
-            write_fasta_alignment(generation, generationcounter)
-        if i % bifurgeneration == 0 and i != 0 and len(clonelistlist[0]) > 3:  # Bifuricationmaker. Bifuricates in even generation numbers so every branch on tree has 3 leaves that have been evolving by the last generation
-    # generationdict = {}  # where all of the generations will be stored
-    # generationfitdict = {}  # where the fitness of each generation will be stored
-    # genfitdict = {}  # where the final output dictionary of format {generationkey:{[dictionary of mutatants],[dictionary of fitness]}}
-    # generationdict.update({0: population})  # append fitness of starting generation
-    # generationfitdict.update({0: fitnesses})  # append fitness of starting generation
     # Store each generation along with its fitness
     Generation = namedtuple('Generation', ['population', 'fitness'])
     # Create a list of generations and add initial population and fitness
     evolution = [Generation(population=population, fitness=fitnesses)]
+
+    for gen in trange(n_generations):  # run evolution for n_generations
+        # Bifuricationmaker. Bifuricates in even generation numbers so every branch on tree has 3 leaves that have been evolving by the last generation
+        if gen % bifurgeneration == 0 and gen > 0 and len(clonelistlist[0]) > 3:
             lists = []  # space to store bifurcations before adding them to clonelistlist
             for j in clonelistlist:  # bifuricate each set of leaves
-                shuffle(j)
-                half = int(len(j)/2)
-                half1 = j[half:]
-                half2 = j[:half]
-                lists.append(half1)
-                lists.append(half2)
+                random.shuffle(j)
+                midpoint = int(len(j)/2)
+                lists.append(j[midpoint:])
+                lists.append(j[:midpoint])
             del clonelistlist[:]
             for k in lists:  # append bifurcations to a cleared clonelistlist
                 clonelistlist.append(k)
-        generation = mutate(g, generation, variantaminos, gammacategories, z)  # mutate generation
-        generationcounter += 1
-        generationfitness = record_generation_fitness(generation, track_dot_fitness, track_rate, generationcounter, proteinfitness, track_hist_fitness_stats, track_hist_fitness, track_invariants, variantaminos)  # re-calculate fitness
-        duplicationcounter = 0  # need to fix the counter
-        if any(j < fitnessthresh for j in list(generationfitness.values())):  # check if any of the current generations fitness values are below the threshold
-            for k in range(len(generationfitness)):  # if there are, start loop on generationfitness
-                if generationfitness[k] < fitness_threshold:  # if fitness is less than threshold clone a random sequence in its place.
 
-                    duplicationcounter = duplicationcounter+1
-                    unfitkey = k
-                    clonelistlistcount = 0
-                    for m in clonelistlist:
-                        if k not in m:  # check bifurications
-                            clonelistlistcount += 1  # Root searching - counts every bifurcation that does not contain the unfit clone.
-                        if k in m:
-                            clonekey = random.choice(m)
-                            while clonekey == k or generationfitness[clonekey] < fitness_threshold:  # ensure you don't clone the target unfit generation or another clone that is also of fitness below the threshold
-                                clonekey = random.choice(m)  # choose another random member in the bifurcation.
-                    if clonelistlistcount == len(clonelistlist):  # if every bifurcation does not contain the unfit clone it belongs to the root
-                        clonekey = random.choice(rootlist)  # choose random root to replace unfit sequence
-                        while clonekey == k or generationfitness[clonekey] < fitness_threshold:
-                            clonekey = random.choice(rootlist)  # ensure you don't clone the target unfit generation or another clone that is also of fitness below the threshold
-                    if generationfitness[clonekey] < fitness_threshold:  # make warning messages if code breaks
-                        print("clone %s is unfit with a value of %s, it will be replaced by:" % (k, generationfitness[k]))
-                        print("clone %s with a fitness of %s" % (clonekey, generationfitness[clonekey]))
-                        print('WARNING: clonekey fitness is too low or mutation rate is too high')  # Bug in this section that causes infinite loop if mutation rate is too high. Happens when a bifurication has a small number of clones to be replaced by, and the high mutation rate causes all clones to dip below the threshold in one generation.
-                        print(generationfitness)
-                        print(clonelistlist)
-                    generation[unfitkey] = generation[clonekey]   # swap out unfit clone for fit clone
-        # generationdict.update({gen+1: population})  # add next generation to dictionary
-        # generationfitdict.update({gen+1: fitnesses})  # add next generation fitness to dictionary
+        # Mutate population
+        population = mutate(population, n_mutations_per_generation,
+                            variantaminos, gammacategories, LGmatrix)
+        # Re-calculate fitness
+        fitnesses = record_generation_fitness(population, track_dot_fitness,
+                                              track_rate, gen, proteinfitness,
+                                              track_hist_fitness_stats,
+                                              track_hist_fitness, track_invariants,
+                                              variantaminos)
+
+        for pi in range(len(fitnesses)):  # if there are, start loop on fitnesses
+            if fitnesses[pi] < fitness_threshold:  # if fitness is less than threshold clone a random sequence in its place.
+                if pi in rootlist:
+                    clonekey = replace_protein(pi, rootlist, fitnesses,
+                                               fitness_threshold)
+                else:  # Protein is in one of the branches
+                    for branch in clonelistlist:
+                        if pi in branch:
+                            clonekey = replace_protein(pi, branch, fitnesses,
+                                                       fitness_threshold)
+                if np.isnan(clonekey):
+                    # Could not find fit enough candidate
+                    warnings.warn("clone %s is unfit with a value of %s, it will be replaced by:" % (pi, fitnesses[pi]))
+                    warnings.warn("clone %s with a fitness of %s" % (clonekey, fitnesses[clonekey]))
+                    warnings.warn('Clonekey fitness is too low or mutation rate is too high')  # Bug in this section that causes infinite loop if mutation rate is too high. Happens when a bifurication has a small number of clones to be replaced by, and the high mutation rate causes all clones to dip below the threshold in one generation.
+                    print(fitnesses)
+                    print(clonelistlist)
+                else:
+                    population[pi] = population[clonekey]  # swap out unfit clone for fit clone
+
         evolution.append(Generation(population=population, fitness=fitnesses))
-    # Combine fitness and population dictionaries into one.
-    # for l in range(len(generationdict)):
-    #     dictlist = [generationdict[l], generationfitdict[l]]
-    #     genfitdict.update({l: dictlist})
+        # NOTE: Should this be at the end of each timestep?
+        if ((gen+1) % write_rate) == 0:  # write fasta every write_rate generations
+            write_fasta_alignment(population, gen+1)
+    write_final_fasta(population, clonelistlist, rootlist)
 
-    write_fasta_alignment(generation, generationcounter)
-    finalfastawriter(generation, clonelistlist, rootlist)
-    # return genfitdict
     return evolution
 
 

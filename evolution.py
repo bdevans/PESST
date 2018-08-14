@@ -2,13 +2,13 @@ import copy
 import os  # .path
 import csv
 import datetime
-import random
-# from random import randint, sample, choice, shuffle  # TODO: Consolidate with numpy
 from textwrap import wrap
-# import shutil
-# import json
 from collections import namedtuple
 import warnings
+# import shutil
+# import json
+import random
+# from random import randint, sample, choice, shuffle  # TODO: Consolidate with numpy
 
 import numpy as np
 # from numpy import median
@@ -21,7 +21,6 @@ import scipy as sp
 # import scipy.special as sps
 import matplotlib as mpl
 from matplotlib import pyplot as plt
-
 from tqdm import trange
 
 
@@ -61,7 +60,8 @@ track_invariants = False  # if True, invariants are tracked in the histogram ana
 
 
 def generate_protein(n_amino_acids, start_amino_acid="M"):
-    """Generate an original starting protein 20aa long with a start methionine.
+    """Generate an original starting protein n_amino_acids long with a start
+    amino acid set to methionine.
     """
     protein = random.choices(RESIDUES, k=n_amino_acids)
     # protein = [random.choice(RESIDUES) for _ in range(n_amino_acids)]  # ver < 3.6
@@ -74,10 +74,11 @@ def test_normal_distribution():
     """Plot a distribution to test normalality."""
     s = np.random.normal(mu, sigma, 2000)  # generate distribution
     count, bins, ignored = plt.hist(s, 30, density=True)  # plot distribuiton
-    plt.plot(bins, 1/(sigma * np.sqrt(2 * np.pi)) * np.exp(- (bins - mu)**2 / (2 * sigma**2)), linewidth=2, color='r')
-    return plt.show()
-
-# test_normal_distribution()
+    plt.plot(bins, 1/(sigma * np.sqrt(2 * np.pi)) *
+                   np.exp(- (bins - mu)**2 / (2 * sigma**2)),
+             linewidth=2, color='r')
+    plt.show()
+    return
 
 
 def fit_module(mu, sigma):

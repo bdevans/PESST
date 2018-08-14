@@ -303,7 +303,7 @@ def calculate_fitness(z):  # z=protein input. calculates fitness of a protein gi
     return fitness
 
 
-def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=firstprotein, q = fitness_start; Generates a protein with high, low or medium fitness, with anchored sequences from the initial generation
+def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=initial_protein, q = fitness_start; Generates a protein with high, low or medium fitness, with anchored sequences from the initial generation
     """Make either a superfit protein, a superunfit protein or a 'medium
     fitness' protein with fitness just higher than the fitness threshold.
 
@@ -424,7 +424,7 @@ def histfitness(f):
     return plt.show()
 
 
-def get_thresholded_protein(b, c):  # b=fitness_start, c=firstprotein;
+def get_thresholded_protein(b, c):  # b=fitness_start, c=initial_protein;
     """Make a protein with a fitness value above a defined threshold.
 
     Note: This takes a long time if thresh is too high.
@@ -1014,14 +1014,14 @@ def generationator(d, e, f, g, h, z):  # d = number of generations to run; e = p
     return genfitdict
 
 
-def fitbit(evolution, n_generations, n_clones, first_protein):
+def fitbit(evolution, n_generations, n_clones, initial_protein):
     """Plot fitness against generation for all clones."""
     # NOTE: Final element previously excluded - for i in range(len(evolution)-1):
     # Create array of fitness values with shape (n_generations, n_clones)
     fitnesses = np.array([[evolution[g][-1][c] for c in range(n_clones)]
                           for g in range(n_generations)])
 
-    initial_fitness = calculate_fitness(first_protein)
+    initial_fitness = calculate_fitness(initial_protein)
     generation_numbers = np.arange(1, n_generations+1)  # Skip initial generation
 
     plt.figure()
@@ -1092,11 +1092,11 @@ if __name__ == '__main__':
     LGmatrix = np.array(LGmatrixlist)  # load matrix into a numpy array
     LGmatrix = np.delete(LGmatrix, 0, 0)  # trim first line of the array as its not useful
 
-    firstprotein = generate_protein(n_amino_acids)  # make first protein
-    proteinfitness = get_protein_fitness(firstprotein)  # make first fitness dictionary
+    initial_protein = generate_protein(n_amino_acids)  # make first protein
+    proteinfitness = get_protein_fitness(initial_protein)  # make first fitness dictionary
 
     variantaminos = get_allowed_sites(n_amino_acids, n_anchors)  # generate invariant sites
-    firstprotein = superfit(proteinfitness, variantaminos, firstprotein, fitness_start)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
+    initial_protein = superfit(proteinfitness, variantaminos, initial_protein, fitness_start)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
     gammacategories = gammaray(gamma_iterations, gamma_samples, gamma_shape, gamma_scale, n_amino_acids)  # generate gamma categories for every site
 
     firstproteinsavepath = '%s/start' % runpath
@@ -1104,15 +1104,15 @@ if __name__ == '__main__':
     firstproteinfullname = os.path.join(firstproteinsavepath, firstproteinfilename+".fas")
     firstproteinfile = open(firstproteinfullname, "w+")  # open file
     firstproteinfile.write('>firstprotein\n')
-    for prot in firstprotein:
+    for prot in initial_protein:
         firstproteinfile.write(prot)
-    # print 'first superfit protein:', firstprotein
-    # print 'fitness of the first protein:', calculate_fitness(firstprotein)
+    # print 'first superfit protein:', initial_protein
+    # print 'fitness of the first protein:', calculate_fitness(initial_protein)
 
-    somestartingclones = clones(n_clones, firstprotein)  # make some clones to seed evolution
+    somestartingclones = clones(n_clones, initial_protein)  # make some clones to seed evolution
 
     evolution = generationator(n_generations, somestartingclones,
                                fitness_threshold, n_mutations_per_generation,
                                write_rate, LGmatrix)
 
-    fitbit(evolution, n_generations, n_clones, first_protein)
+    fitbit(evolution, n_generations, n_clones, initial_protein)

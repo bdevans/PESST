@@ -250,45 +250,16 @@ def gammaray(a, b, c, d, e):  # a = iterations to run gamma sampling, b = number
     return gammaaminos
 
 
-def mutate_matrix(a, b):  # a = matrix, b = current amino acid
+def mutate_matrix(amino_acid, LG_matrix):  # b = matrix, a = current amino acid
     """Mutate a residue to another residue based on the LG matrix."""
-    aminolist = []  # space for the order of the aminos corresponding to the values in the dictionaries this code makes from the numpy matrix
-    for i in a:
-        aminolist.append(i[0])
-
-    aminodict = {}  # space to make a dictionary of current possible amino acids and that amino acid's event probability matrix
-    for j in a:  # makes the probability dictionary
-        aminodictkey = 0
-        valuelist = []
-        matrixline = j
-        for k in range(len(matrixline)):
-            if k == 0:
-                aminodictkey = matrixline[k]
-            else:
-                valuelist.append(matrixline[k])
-        key = aminodictkey[0]
-        aminodict[key] = valuelist
-
-    aminosumdict = {}  # space to make a dictionary of cumulative probability for changing one amino acid to another
-    for l in aminodict:  # makes the cumulative probability dictionary
-        aminosum = 0
-        sumlist = []
-        lgforamino = aminodict[l]
-        for m in lgforamino:
-            aminosum = aminosum + float(m)
-            sumlist.append(aminosum)
-        aminosumdict[l] = sumlist
-
-    randomgrab = np.random.uniform(0, 1)  # pick a random number in the cumulative probability distribution
-    mutationselector = aminosumdict[b]  # pull out the probabilities corresponding to the current amino acid
-
-    newresidue = 0  # space to store the new residue
-    for n in mutationselector:  # find the new residue corresponding to the random number by finding the first residue with a cumulative probability bigger than the number selected.
-        if randomgrab < n:
-            newresidue = aminolist[mutationselector.index(n)]
-            break
-
-    return newresidue
+    # Get the order of the aminos corresponding to the values in the array
+    aminolist = LG_matrix[:, 0].ravel().tolist()
+    # Build cumulative sum of row of probabilities corresponding to amino_acid
+    old_aa_index = aminolist.index(amino_acid)
+    aa_cumsum = np.cumsum(np.asarray(LG_matrix[old_aa_index, 1:], dtype=float))
+    # Return new_aa_index where random variable <= aa_cumsum[new_aa_index]
+    new_aa_index = np.searchsorted(aa_cumsum, np.random.uniform(0, 1))
+    return aminolist[new_aa_index]
 
 
 def calculate_fitness(protein, fitness_table):
@@ -459,7 +430,7 @@ def mutate(current_generation, n_mutations_per_generation, variant_sites,
         #             continue
         # # residue_index = random.choice(c) # pick a random residue in the selected mutant to mutate that isnt the start M or an anchor (old)
         # target_residue = mutation_target[residue_index[0]]
-        # newresidue = mutate_matrix(LG_matrix, target_residue)  # implement LG
+        # newresidue = mutate_matrix(target_residue, LG_matrix)  # implement LG
         # mutation_target[residue_index[0]] = newresidue  # mutate the copy with the randomly chosen residue
 
         # TODO: Could gamma_categories be the length of anchor_sites?
@@ -469,7 +440,7 @@ def mutate(current_generation, n_mutations_per_generation, variant_sites,
         while residue_index not in variant_sites:
             mutant_residue_area = np.random.uniform(0, cumulative_gamma[-1])  # [0, highest_gamma_sum)
             residue_index = np.searchsorted(cumulative_gamma, mutant_residue_area)  # Return index where mutant_residue_area <= cumulative_gamma[i]
-        mutation_target[residue_index] = mutate_matrix(LG_matrix, mutation_target[residue_index])  # mutate the copy with the randomly chosen residue
+        mutation_target[residue_index] = mutate_matrix(mutation_target[residue_index], LG_matrix)  # mutate the copy with the randomly chosen residue
 
         next_generation[mutant_key] = mutation_target  # update with new sequence
 

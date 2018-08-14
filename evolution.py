@@ -291,19 +291,13 @@ def mutate_matrix(a, b):  # a = matrix, b = current amino acid
     return newresidue
 
 
-def calculate_fitness(z):  # z=protein input. calculates fitness of a protein given the fitness values and the sequence.
-    protein = z
-    aminofitnesses = []  # where fitness values will be added
-    for m in range(len(protein)):
-        amino = protein[m]  # find ith amino acid
-        fitindex = RESIDUES.index(amino)  # find index of first amino acid in RESIDUES list
-        fitstring = proteinfitness[m]  # find fitness values for ith amino acid position
-        fitvalue = fitstring[fitindex]  # find fitness value corresponding to amino acid at position
-        aminofitnesses.append(fitvalue)  # append these to string
-    fitness = 0
-    for i in range(len(aminofitnesses)):
-        fitness = fitness+aminofitnesses[i]  # compute fitness
-    return fitness
+def calculate_fitness(protein, fitness_table):
+    """Calculate fitness of a protein given the sequence and fitness values."""
+    protein_fitness = []  # where fitness values will be added
+    for ai, amino_acid in enumerate(protein):
+        # Append fitness values corresponding to amino_acid at position ai
+        protein_fitness.append(fitness_table[ai][RESIDUES.index(amino_acid)])
+    return sum(protein_fitness)
 
 
 def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=initial_protein, q = fitness_start; Generates a protein with high, low or medium fitness, with anchored sequences from the initial generation
@@ -377,7 +371,7 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=initial_p
     # If it cannot make a fitter protein with the 5 residues its mutating it reverts back to the previous state and picks 5 new residues.
     if q == 'medium':
         startprotein = p
-        startproteinfitness = calculate_fitness(startprotein)
+        startproteinfitness = calculate_fitness(startprotein, proteinfitness)
         variantstochoosefrom = o
         secondprotein = startprotein
 
@@ -388,18 +382,18 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=initial_p
             secondprotein[choiceofvariants[2]] = random.choice(RESIDUES)
             secondprotein[choiceofvariants[3]] = random.choice(RESIDUES)
             secondprotein[choiceofvariants[4]] = random.choice(RESIDUES)
-            secondproteinfitness = calculate_fitness(secondprotein)
+            secondproteinfitness = calculate_fitness(secondprotein, proteinfitness)
             counting = 0
 
             while secondproteinfitness < startproteinfitness:
                 secondprotein = startprotein
-                secondproteinfitness = calculate_fitness(secondprotein)
+                secondproteinfitness = calculate_fitness(secondprotein, proteinfitness)
                 secondprotein[choiceofvariants[0]] = random.choice(RESIDUES)
                 secondprotein[choiceofvariants[1]] = random.choice(RESIDUES)
                 secondprotein[choiceofvariants[2]] = random.choice(RESIDUES)
                 secondprotein[choiceofvariants[3]] = random.choice(RESIDUES)
                 secondprotein[choiceofvariants[4]] = random.choice(RESIDUES)
-                secondproteinfitness = calculate_fitness(secondprotein)
+                secondproteinfitness = calculate_fitness(secondprotein, proteinfitness)
                 counting += 1
 
                 if counting > 99:
@@ -408,7 +402,7 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=initial_p
                     break
 
             startprotein = secondprotein
-            startproteinfitness = calculate_fitness(startprotein)
+            startproteinfitness = calculate_fitness(startprotein, proteinfitness)
         afitprotein = startprotein
 
     return afitprotein
@@ -417,7 +411,7 @@ def superfit(n, o, p, q):  # n=proteinfitness, o=anchored sequences, p=initial_p
 # NOTE: Not used
 def histfitness(n_proteins):
     """Generate and plot fitness values for f proteins."""
-    fitnesses = [calculate_fitness(generate_protein(n_amino_acids))
+    fitnesses = [calculate_fitness(generate_protein(n_amino_acids), proteinfitness)
                  for p in range(n_proteins)]
     plt.hist(fitnesses, density=True)  # plot fitnesses as histogram
     return plt.show()
@@ -429,10 +423,10 @@ def get_thresholded_protein(initial_protein, initial_fitness):
 
     Note: This takes a long time if thresh is too high.
     """
-    f = calculate_fitness(initial_protein)
+    f = calculate_fitness(initial_protein, proteinfitness)
     while f < initial_fitness:  # keep making proteins until the protein's fitness satisfies the fitness threshold.
         proteintoevolve = generate_protein(n_amino_acids)
-        f = calculate_fitness(proteintoevolve)
+        f = calculate_fitness(proteintoevolve, proteinfitness)
     return f
 
 
@@ -490,7 +484,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
     fitnessdict = {}
     for r in range(len(c)):  # record calculated fitness for each protein in dictionary
         keycounter += 1
-        fitnessofprotein = calculate_fitness(c[keycounter])
+        fitnessofprotein = calculate_fitness(c[keycounter], proteinfitness)
         fitnessdict.update({keycounter: fitnessofprotein})
 
     if (d is True) and (f % e == 0 or f == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
@@ -1033,7 +1027,7 @@ def fitbit(evolution, n_generations, n_clones, initial_protein):
     fitnesses = np.array([[evolution[g].fitness[c] for c in range(n_clones)]
                           for g in range(n_generations+1)])
 
-    initial_fitness = calculate_fitness(initial_protein)
+    initial_fitness = calculate_fitness(initial_protein, proteinfitness)
     generation_numbers = np.arange(n_generations+1)  # Skip initial generation
 
     plt.figure()
@@ -1124,7 +1118,7 @@ if __name__ == '__main__':
     for prot in initial_protein:
         firstproteinfile.write(prot)
     # print 'first superfit protein:', initial_protein
-    # print 'fitness of the first protein:', calculate_fitness(initial_protein)
+    # print 'fitness of the first protein:', calculate_fitness(initial_protein, proteinfitness)
 
     initial_population = clones(n_clones, initial_protein)  # make some clones to seed evolution
 

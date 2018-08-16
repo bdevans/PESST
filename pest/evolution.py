@@ -554,19 +554,16 @@ def record_generation_fitness(generation, population, invariant_sites,
     """Record the fitness of every protein in the generation and store them in
     dictionary. Optionally generate data and figures about fitness.
     """
-    keycounter = -1  # loop over each key - unelegent but it works
-    fitnessdict = {}
-    for r in range(len(population)):  # record calculated fitness for each protein in dictionary
-        keycounter += 1
-        fitnessofprotein = calculate_fitness(population[keycounter], fitness_table)
-        fitnessdict.update({keycounter: fitnessofprotein})
+    # Record calculated fitness for each protein in dictionary
+    fitnessdict = {pi: calculate_fitness(protein, fitness_table)
+                   for pi, protein in list(population.items())}
+                   # for pi, protein in enumerate(population)}
 
     if record["dot_fitness"] and (generation == 0 or generation % record["rate"] == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
-        plt.figure()  # make individual figure in pyplot
 
-        fittrackeryaxis = []  # store values for the left side of the figure
-        for i in range(n_amino_acids+1):
-            fittrackeryaxis.append(fitness_table[i])  # for each amino in the dataset append its fitness space to list
+        # Store fitness values for each amino in the dataset for the left side of the figure
+        fittrackeryaxis = [fitness_table[aa] for aa in range(n_amino_acids+1)]
+
         additionleft = 0  # calculate average fitness of dataset (messy but I can keep track of it)
         pointsleft = 0
         for i in fittrackeryaxis:
@@ -575,39 +572,34 @@ def record_generation_fitness(generation, population, invariant_sites,
                 additionleft += j
         avgtoplotleft = additionleft / pointsleft
 
+        plt.figure()  # make individual figure in pyplot
         for i in range(len(fittrackeryaxis)):
             yaxistoplot = fittrackeryaxis[i]
             plt.plot(len(yaxistoplot) * [i], yaxistoplot, ".", color='k')  # plot data
 
         transform = n_amino_acids + (n_amino_acids / 10)  # generate values for right side of the figure. Transform function sets offet to make figure look nice.
-        Keycounter = -1
         additionright = 0
         pointsright = 0
-        for j in range(len(population)):  # find and plot all fitness values in the current generation
-            Keycounter += 1
+        # Find and plot all fitness values in the current generation
+        for pi, protein in list(population.items()):
             Y2fitness = []  # space for values to plot
             if record["invariants"]:  # check if invariants need to be ignored
-                Y2aminos = population[Keycounter]  # load fitness of each gen (a keys are numbers so easy to iterate)
+                Y2aminos = protein  # load fitness of each gen (a keys are numbers so easy to iterate)
             else:
                 Y2aminos = []  # ignore variant sites
-                invariantY2checkaminos = population[Keycounter]
-                for i in range(len(invariantY2checkaminos)):
-                    if i in invariant_sites:
-                        Y2aminos.append(invariantY2checkaminos[i])
+                for ai in range(len(protein)):
+                    if ai in invariant_sites:
+                        Y2aminos.append(protein[ai])
                     else:
                         Y2aminos.append('X')
-            for k in range(len(Y2aminos)):  # generate values from generation x to plot
-                amino = Y2aminos[k]  # find ith amino acid
-                if amino is not 'X':
+            for ai, amino_acid in enumerate(Y2aminos):  # generate values from generation x to plot
+                if amino_acid is not 'X':
                     pointsright += 1
-                    fitindex = RESIDUES.index(amino)  # find index of first amino acid in RESIDUES list
-                    fitstring = fitness_table[k]  # find fitness values for ith amino acid position
-                    fitvalue = fitstring[fitindex]  # find fitness value corresponding to amino acid at position
+                    fitvalue = fitness_table[ai][RESIDUES.index(amino_acid)]  # find fitness value corresponding to amino acid at position
                     additionright += fitvalue
                     Y2fitness.append(fitvalue)  # append these to list
-            #print Y2fitness
             plt.plot(len(Y2fitness) * [j + transform], Y2fitness, "o", markersize=1)  # plot right hand side with small markers
-            plt.title("\n".join(wrap('Fitness of every amino acid in the fitness matrix vs fitness of every amino acid in generation %s' % generation, 60)), fontweight='bold')
+        plt.title("\n".join(wrap('Fitness of every amino acid in the fitness matrix vs fitness of every amino acid in generation %s' % generation, 60)), fontweight='bold')
         avgtoplotright = additionright / pointsright  # calculate right side average
         plt.axis([-10, (n_amino_acids * 2) + (n_amino_acids / 10)+10, -11, 11])  # generate attractive figure
         plt.plot([0, len(fittrackeryaxis) + 1], [avgtoplotleft, avgtoplotleft], 'r--', lw=3)
@@ -623,49 +615,43 @@ def record_generation_fitness(generation, population, invariant_sites,
         plt.savefig(fitfullname)
         plt.close()  # close plot (so you dont generate 100 individual figures)
 
-    disttrackerlist = []  # build fitness space numbers
+    disttrackerlist = [fitness_table[i] for i in range(n_amino_acids+1)]  # build fitness space numbers
+    # disttrackeryaxis = [j for j in i for i in disttrackerlist]
     disttrackeryaxis = []
-    for i in range(n_amino_acids+1):
-        disttrackerlist.append(fitness_table[i])
     for i in disttrackerlist:
         for j in i:
             disttrackeryaxis.append(j)
 
     if generation == 0 or generation % record["rate"] == 0:
-        keycounterdist = -1  # build distribution of fitness values existing in evolving protein
+        # Build distribution of fitness values existing in evolving protein
         additiondist = 0
         pointsdist = 0
         distclonefitnesslist = []
         disttotalfitness = []  # space for values to plot
-        for j in range(len(population)):  # find and plot all fitness values in the current generation
-            keycounterdist += 1
+
+        # find and plot all fitness values in the current generation
+        for pi, protein in list(population.items()):
             if record["invariants"]:
-                disttotalaminos = population[keycounterdist]  # load fitness of each clone (as keys are numbers so easy to iterate)
+                disttotalaminos = protein  # load fitness of each clone (as keys are numbers so easy to iterate)
             else:
                 disttotalaminos = []  # ignore variant sites
-                invariantcheckaminos = population[keycounterdist]
-                for i in range(len(invariantcheckaminos)):
-                    if i in invariant_sites:
-                        disttotalaminos.append(invariantcheckaminos[i])
+                for ai, amino_acid in enumerate(protein):
+                    if ai in invariant_sites:
+                        disttotalaminos.append(amino_acid)
                     else:
                         disttotalaminos.append('X')
             clonefitnesslist = []
-            for k in range(len(disttotalaminos)):  # generate values from generation x to plot
-                amino = disttotalaminos[k]  # find ith amino acid
-                if amino is not 'X':
+            for ai, amino_acid in enumerate(disttotalaminos):  # generate values from generation x to plot
+                if amino_acid is not 'X':
                     pointsdist += 1
-                    distindex = RESIDUES.index(amino)  # find index of first amino acid in RESIDUES list
-                    diststring = fitness_table[k]  # find fitness values for ith amino acid position
-                    distvalue = diststring[distindex]  # find fitness value corresponding to amino acid at position
+                    distvalue = fitness_table[ai][RESIDUES.index(amino_acid)]  # find fitness value corresponding to amino acid at position
                     additiondist += distvalue
                     clonefitnesslist.append(distvalue)
                     disttotalfitness.append(distvalue)  # append these to list
             distclonefitnesslist.append(clonefitnesslist)
 
     if record["hist_fitness_stats"] and (generation == 0 or generation % record["rate"] == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
-        # print 'lets'
         # This section writes a file describing 5 statistical tests on the global fitness space.
-
         distclonetrackfilepath = '%s/statistics' % innerrunpath
         distclonetrackfilename = "normal_distribution_statistics_generation %s" % generation  # define evo filename
         distclonetrackfullname = os.path.join(distclonetrackfilepath, distclonetrackfilename+".txt")

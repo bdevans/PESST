@@ -1,5 +1,5 @@
-# docker build -t revolver .
-# docker run -it -v revolver:/usr/revolver/data --rm -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --name revolver revolver
+# docker build -t pest .
+# docker run -it -v pest:/usr/pest/data --rm -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --name pest pest
 # docker run -i -t -p 8888:8888 continuumio/miniconda3 /bin/bash -c "/opt/conda/bin/conda install jupyter -y --quiet && mkdir /opt/notebooks && /opt/conda/bin/jupyter notebook --notebook-dir=/opt/notebooks --ip='*' --port=8888 --no-browser"
 
 FROM continuumio/miniconda3
@@ -20,17 +20,17 @@ RUN [ "conda", "env", "create" ]
 
 # Use bash to source our new environment for setting up private dependencies
 # Note that /bin/bash is called in exec mode directly
-WORKDIR /usr/revolver
-#RUN [ "/bin/bash", "-c", "source activate revolver && python setup.py develop" ]
+WORKDIR /usr/pest
+#RUN [ "/bin/bash", "-c", "source activate pest && python setup.py develop" ]
 
 # matplotlib config
 RUN mkdir -p /root/.config/matplotlib
 RUN echo "backend : Agg" > /root/.config/matplotlib/matplotlibrc
 
-COPY data /usr/revolver/data/
-COPY *.py /usr/revolver/
-VOLUME /usr/revolver/results
+COPY data /usr/pest/data/
+COPY *.py /usr/pest/
+VOLUME /usr/pest/results
 
 # We set ENTRYPOINT, so while we still use exec mode, we don’t
 # explicitly call /bin/bash
-CMD [ "source activate revolver && exec python evolution.py" ]
+CMD [ "source activate pest && exec python evolution.py" ]

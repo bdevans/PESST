@@ -1,5 +1,5 @@
 
-name: revolver
+name: pest
 channels:
   - conda-forge
 dependencies:

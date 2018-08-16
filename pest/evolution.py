@@ -482,17 +482,23 @@ def histfitness(n_proteins):
 
 
 # NOTE: Unused but swapped arguments
-def get_thresholded_protein(initial_protein, initial_fitness):
+def get_thresholded_protein(initial_protein, fitness_threshold):
     """Make a protein with a fitness value above a defined threshold.
 
     Note: This takes a long time if thresh is too high.
     """
-    f = calculate_fitness(initial_protein, fitness_table)
-    while f < initial_fitness:  # keep making proteins until the protein's fitness satisfies the fitness threshold.
-        proteintoevolve = generate_protein(n_amino_acids)
-        f = calculate_fitness(proteintoevolve, fitness_table)
-    return f
-
+    # f = calculate_fitness(initial_protein, fitness_table)
+    # while f < fitness_threshold:  # keep making proteins until the protein's fitness satisfies the fitness threshold.
+    #     proteintoevolve = generate_protein(n_amino_acids)
+    #     f = calculate_fitness(proteintoevolve, fitness_table)
+    # # NOTE: Shouldn't this return the protein?
+    # return f
+    protein = initial_protein
+    # Make proteins until the protein's fitness satisfies the fitness threshold
+    while calculate_fitness(protein, fitness_table) < fitness_threshold:
+        protein = generate_protein(n_amino_acids)
+    # NOTE: Shouldn't this return the protein?
+    return protein
 
 def mutate(current_generation, n_mutations_per_generation, variant_sites,
            gamma_categories, LG_matrix):

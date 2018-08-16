@@ -99,16 +99,16 @@ def get_protein_fitness(protein):  # x=protein;
     aminofitsavepath = '%s/start' % runpath
     aminofitfilename = "fitnesslibrary"
     aminofitfullname = os.path.join(aminofitsavepath, aminofitfilename+".csv")
-    aminofile = open(aminofitfullname, "w+")  # open file
-    # Write header
-    aminofile.write("aminoposition"),
-    for aa in RESIDUES:
-        aminofile.write(",%s" % aa)
-    # Write fitness values
-    for i in range(n_amino_acids+1):
-        aminofile.write('\n%s' % i),
-        for f in fitnesslib[i]:
-            aminofile.write(',%s' % f)
+    with open(aminofitfullname, "w") as aminofile:  # open file
+        # Write header
+        aminofile.write("aminoposition"),
+        for aa in RESIDUES:
+            aminofile.write(",%s" % aa)
+        # Write fitness values
+        for i in range(n_amino_acids+1):
+            aminofile.write('\n%s' % i),
+            for f in fitnesslib[i]:
+                aminofile.write(',%s' % f)
 
     return fitnesslib
 
@@ -667,8 +667,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
         distclonetrackfilepath = '%s/statistics' % innerrunpath
         distclonetrackfilename = "normal_distribution_statistics_generation %s" % f  # define evo filename
         distclonetrackfullname = os.path.join(distclonetrackfilepath, distclonetrackfilename+".txt")
-        distclonetrackfile = open(distclonetrackfullname, "w+")  # open file
-
+        distclonetrackfile = open(distclonetrackfullname, "w")  # open file
         distclonetrackfile.write('Tests for normality on the amino acid fitness of each clone: \n\n\n')
 
         distclonesshapirolist = []
@@ -793,6 +792,8 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
         else:
             distclonetrackfile.write("\nTherefore, as the pvalue is larger than 0.05 we canot reject the hypothesis that the fitness space distribution and the evolving sequence distribution are the same")
 
+        distclonetrackfile.close()
+
         if f == 0:
             disttrackfilepath = '%s/statistics' % innerrunpath
             disttrackfilename = "normal_distribution_statistics_fitness_space"  # define evo filename
@@ -909,6 +910,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
                     skewkurtpass.append(0)
             skewkurtpercent = (sum(skewkurtpass) / len(skewkurtpass)) * 100
             disttrackfile.write("\n\nAccording to the skewness-kurtosis all test, %s%% of sites do not differ significantly from a normal distribution" % skewkurtpercent)
+            disttrackfile.close()
 
     if (m is True) and (f % e == 0 or f == 0):  # if the switch is on, and record fitness histograms on the first generation and every x generation thereafter
         # print 'go'
@@ -941,20 +943,16 @@ def write_fasta_alignment(population, generation):  # x = current generation of 
     fastafilepath = '%s/fastas' % runpath
     fastafilename = "generation_%s" % generation  # define dynamic filename
     fullname = os.path.join(fastafilepath, fastafilename+".fasta")
-    fastafile = open(fullname, "w+")  # open file
-    # Write fasta header followed by residue in generation string
-    # TODO: This should be an ordered dict or list to preserve the order...
-    for p, protein in list(population.items()):
-        fastafile.write("\n>clone_%s\n" % (p+1))
-        for residue in protein:
-            fastafile.write(residue)
+    with open(fullname, "w") as fastafile:  # open file
+        # Write fasta header followed by residue in generation string
+        # TODO: This should be an ordered dict or list to preserve the order...
+        for p, protein in list(population.items()):
+            fastafile.write("\n>clone_%s\n" % (p+1))
+            for residue in protein:
+                fastafile.write(residue)
 
 
-def write_final_fasta(population, bifurcations, n_roots):  # x = current generation, y = bifurication state, z = n_roots
-    treefastafilepath = '%s/treefastas' % runpath
-    treefastafilename = "selected_fastas"
-    fullname = os.path.join(treefastafilepath, treefastafilename+".fasta")
-    treefastafile = open(fullname, "w+")  # open file
+def write_final_fasta(population, bifurcations, n_roots):
     bifsize = 0
     for bifs in bifurcations:
         bifsize += len(bifs)
@@ -965,17 +963,22 @@ def write_final_fasta(population, bifurcations, n_roots):  # x = current generat
         clone_selection = random.sample(set(i), n_clones_to_take)  # NOTE: Only sample from unique clones?
         for c in clone_selection:
             generation_numbers.append(c)
-    # Write fasta header followed by residue in generation string
-    for p in generation_numbers:
-        treefastafile.write(">clone_%s\n" % (p+1))
-        for residue in population[p]:
-            treefastafile.write(residue)
-        treefastafile.write('\n')
-    # Choose a random root to write
-    root = population[random.choice(n_roots)]
-    treefastafile.write(">root\n")
-    for m in root:
-        treefastafile.write(m)
+
+    treefastafilepath = '%s/treefastas' % runpath
+    treefastafilename = "selected_fastas"
+    fullname = os.path.join(treefastafilepath, treefastafilename+".fasta")
+    with open(fullname, "w") as treefastafile:  # open file
+        # Write fasta header followed by residue in generation string
+        for p in generation_numbers:
+            treefastafile.write(">clone_%s\n" % (p+1))
+            for residue in population[p]:
+                treefastafile.write(residue)
+            treefastafile.write('\n')
+        # Choose a random root to write
+        root = population[random.choice(n_roots)]
+        treefastafile.write(">root\n")
+        for m in root:
+            treefastafile.write(m)
 
 
 def replace_protein(protein, candidates, fitnesses, fitness_threshold):
@@ -1008,10 +1011,10 @@ def generationator(n_generations, initial_population, fitness_threshold,
     rootssavepath = "%s/start" % runpath
     rootsfilename = "Roots"
     rootsfullname = os.path.join(rootssavepath, rootsfilename+".txt")
-    rootsfile = open(rootsfullname, "w+")  # open file
-    rootsfile.write('Roots:')
-    for k in rootlist:
-        rootsfile.write('\nClone %s' % str(k+1))
+    with open(rootsfullname, "w") as rootsfile:  # open file
+        rootsfile.write('Roots:')
+        for k in rootlist:
+            rootsfile.write('\nClone %s' % str(k+1))
 
     # Calculate number of bifurications per generation.
     bifuraction_start = n_clones - n_roots
@@ -1173,24 +1176,23 @@ if __name__ == '__main__':
     settingsfilepath = '%s/runsettings' % runpath
     settingsfilename = "runsettings"  # define evo filename
     settingsfullname = os.path.join(settingsfilepath, settingsfilename+".txt")
-    settingsfile = open(settingsfullname, "w+")  # open file
-
     # TODO: Change to logger
-    settingsfile.write("Protein length: %s" % (n_amino_acids+1))
-    settingsfile.write("\nAmount of mutations per generation: %s" % n_mutations_per_generation)
-    settingsfile.write("\nAmount of clones in the population: %s" % n_clones)
-    settingsfile.write("\nAmount of generations simulation is run for: %s" % n_generations)
-    settingsfile.write("\nFitness threshold: %s" % fitness_threshold)
-    settingsfile.write("\n\nNormal distribution properties: mu = %s, sigma = %s" % (mu, sigma))
-    settingsfile.write("\nGamma distribution properties: kappa = %s, theta = %s" % (gamma_shape, gamma_scale))
-    settingsfile.write("\n\nWrite rate for FASTA: every %s generations" % write_rate)
-    settingsfile.write("\n\nTrack rate for graphing and statistics: every %s generations" % track_rate)
-    settingsfile.write("\nTracking state: Fitness dot matrix = %s; Fitness histrogram = %s; Fitness normality statistics = %s" % (track_dot_fitness, track_hist_fitness, track_hist_fitness_stats))
+    with open(settingsfullname, "w") as settingsfile:  # open file
+        settingsfile.write("Protein length: %s" % (n_amino_acids+1))
+        settingsfile.write("\nAmount of mutations per generation: %s" % n_mutations_per_generation)
+        settingsfile.write("\nAmount of clones in the population: %s" % n_clones)
+        settingsfile.write("\nAmount of generations simulation is run for: %s" % n_generations)
+        settingsfile.write("\nFitness threshold: %s" % fitness_threshold)
+        settingsfile.write("\n\nNormal distribution properties: mu = %s, sigma = %s" % (mu, sigma))
+        settingsfile.write("\nGamma distribution properties: kappa = %s, theta = %s" % (gamma_shape, gamma_scale))
+        settingsfile.write("\n\nWrite rate for FASTA: every %s generations" % write_rate)
+        settingsfile.write("\n\nTrack rate for graphing and statistics: every %s generations" % track_rate)
+        settingsfile.write("\nTracking state: Fitness dot matrix = %s; Fitness histrogram = %s; Fitness normality statistics = %s" % (track_dot_fitness, track_hist_fitness, track_hist_fitness_stats))
 
     # load matrix
     aamatrix = "data/LGaa.csv"  # .csv file defining aa substitution probabilities calculated from R matrix multiplied by PI matrix, with diagonals forced to zero as mutation has to happen then conferted to event rates p(lambda) where lambda = sum Qx and p(lambda)x=Qxy/lambda
-    LGmatrixreader = csv.reader(open(aamatrix), delimiter=",")
-    LGmatrixlist = list(LGmatrixreader)
+    with open(aamatrix) as matrix_file:  # Open in read-only mode
+        LGmatrixlist = list(csv.reader(matrix_file, delimiter=","))
     LGmatrix = np.array(LGmatrixlist)  # load matrix into a numpy array
     LGmatrix = np.delete(LGmatrix, 0, 0)  # trim first line of the array as its not useful
 
@@ -1204,10 +1206,10 @@ if __name__ == '__main__':
     firstproteinsavepath = '%s/start' % runpath
     firstproteinfilename = "firstprotein"
     firstproteinfullname = os.path.join(firstproteinsavepath, firstproteinfilename+".fas")
-    firstproteinfile = open(firstproteinfullname, "w+")  # open file
-    firstproteinfile.write('>firstprotein\n')
-    for prot in initial_protein:
-        firstproteinfile.write(prot)
+    with open(firstproteinfullname, "w") as firstproteinfile:  # open file
+        firstproteinfile.write('>firstprotein\n')
+        for prot in initial_protein:
+            firstproteinfile.write(prot)
     # print 'first superfit protein:', initial_protein
     # print 'fitness of the first protein:', calculate_fitness(initial_protein, fitness_table)
 

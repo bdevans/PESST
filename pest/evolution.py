@@ -50,7 +50,7 @@ mutation_rate = 0.001  # should be small!
 n_mutations_per_generation = int(n_clones*(n_amino_acids+1)*mutation_rate)  # number of mutations per generation
 n_anchors = int((n_amino_acids+1)/10)  # amount of invariant sites in a generation (not including root)
 n_roots = 4
-deaths_per_generations = 10  # Set to 0 to turn off protein deaths
+deaths_per_generations = 10  # Set to 0 to turn off protein deaths
 death_ratio = 0.1
 
 # set what to record

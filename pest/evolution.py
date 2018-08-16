@@ -473,12 +473,13 @@ def superfit(fitness_table, anchored_sequences, initial_protein, fitness_level):
 
 
 # NOTE: Not used
-def histfitness(n_proteins):
+def plot_fitness_histogram(n_proteins, n_amino_acids, fitness_table):
     """Generate and plot fitness values for f proteins."""
     fitnesses = [calculate_fitness(generate_protein(n_amino_acids), fitness_table)
                  for p in range(n_proteins)]
     plt.hist(fitnesses, density=True)  # plot fitnesses as histogram
-    return plt.show()
+    plt.show()
+    return
 
 
 # NOTE: Unused but swapped arguments

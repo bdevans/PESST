@@ -14,6 +14,7 @@ import numpy as np
 # from numpy import median
 # from numpy.random import normal, uniform, gamma
 import scipy as sp
+from scipy.stats import binned_statistic
 # from scipy.stats import anderson, normaltest, skew, skewtest, kurtosistest
 # from scipy.stats import shapiro as shp
 # from scipy.stats import kurtosis as kurt
@@ -132,7 +133,8 @@ def get_allowed_sites(n_amino_acids, n_anchors):
     return allowed_values
 
 
-def gammaray(a, b, c, d, e):  # a = iterations to run gamma sampling, b = number of gamma samples per iteration, c = gamma shape (kappa), d = gamma scale (theta), e = amount of aminos
+def gamma_ray(n_amino_acids, kappa, theta, n_iterations=100, n_samples=10000):
+# def gammaray(a, b, c, d, e):  # a = iterations to run gamma sampling, b = number of gamma samples per iteration, c = gamma shape (kappa), d = gamma scale (theta), e = amount of aminos
     """Generate a set of gamma rate categories.
 
     Does so by sampling many times from a gamma distribution.
@@ -145,62 +147,82 @@ def gammaray(a, b, c, d, e):  # a = iterations to run gamma sampling, b = number
     Tests of the tradeoff between computing time and variance led me to set
     this to 100 independent runs (1 million total samples from distribution).
     """
-    medians = []
-    medianlower = []
-    medianlowermid = []
-    medianuppermid = []
-    medianupper = []
-    bottomquarts = []
-    bottommidquarts = []
-    topmidquarts = []
-    topquarts = []
+    # medians = []
+    # medianlower = []
+    # medianlowermid = []
+    # medianuppermid = []
+    # medianupper = []
+    # bottomquarts = []
+    # bottommidquarts = []
+    # topmidquarts = []
+    # topquarts = []
 
-    for i in (list(range(a))):
-        # sample gamma i times
-        samples = np.random.gamma(c, d, b)
+    # quartiles = [[] * 4]
+    medians = np.zeros(shape=(n_iterations, 4))
 
-        # define quartiles in that data with equal probability
-        bottomquart = np.percentile(samples, [0, 25], interpolation='midpoint')
-        bottomquarts.append(bottomquart)
-        bottommidquart = np.percentile(samples, [25, 50], interpolation='midpoint')
-        bottommidquarts.append(bottommidquart)
-        topmidquart = np.percentile(samples, [50, 75], interpolation='midpoint')
-        topmidquarts.append(topmidquart)
-        topquart = np.percentile(samples, [75, 100], interpolation='midpoint')
-        topquarts.append(topquart)
-        # print bottomquart, bottommidquart, topmidquart, topquart
+    for i in range(n_iterations):
+        # Draw n_samples from the gamma distribution
+        samples = np.random.gamma(kappa, theta, n_samples)
+        # Define quartiles in that data with equal probability
+        quartiles = np.percentile(samples, (0, 25, 50, 75, 100),
+                                  interpolation='midpoint')
+        # Find the median of each quartile
+        medians[i, :], _, _ = binned_statistic(samples, samples,
+                                               statistic='median',
+                                               bins=quartiles)
 
-        # generate space for the values within each quartile, sort them, find the median, record the median.
-        bottomlist = []
-        bottommidlist = []
-        topmidlist = []
-        toplist = []
-        for j in samples:
-            if bottomquart[0] <= j < bottomquart[-1]:
-                bottomlist.append(j)
-            elif bottommidquart[0] <= j < bottommidquart[-1]:
-                bottommidlist.append(j)
-            elif topmidquart[0] <= j < topmidquart[-1]:
-                topmidlist.append(j)
-            else:
-                toplist.append(j)
-        bottomlist.sort()
-        bottommidlist.sort()
-        topmidlist.sort()
-        toplist.sort()
-        ratecategoriesquartile = [np.median(bottomlist), np.median(bottommidlist), np.median(topmidlist), np.median(toplist)]
-        medians.append(ratecategoriesquartile)
+    # Calculate average of medians across iterations
+    average_medians = np.mean(medians, axis=0)
 
-        # print ratecategoriesquartile
-
-    # calculate average of medians from each iteration
-    for k in medians:
-        medianlower.append(k[0])
-        medianlowermid.append(k[1])
-        medianuppermid.append(k[2])
-        medianupper.append(k[3])
-
-    finalmedians = [np.mean(medianlower), np.mean(medianlowermid), np.mean(medianuppermid), np.mean(medianupper)]
+    #     # define quartiles in that data with equal probability
+    #     for q in range(4):
+    #         quartiles[q].append(np.percentile(samples, [q*25, (q+1)*25],
+    #                                           interpolation='midpoint'))
+    #
+    #     quartiles = np.percentile(samples, [0, 25, 50, 75, 100], interpolation='midpoint')
+    #     bin_medians, bin_edges, binnumber = sp.stats.binned_statistic(samples, samples, statistic='median', bins=quartiles)
+    #     # samples[np.where(quartiles[q][0] <= samples < quartiles[q][-1])]
+    #
+    #     # bottomquart = np.percentile(samples, [0, 25], interpolation='midpoint')
+    #     # bottomquarts.append(bottomquart)
+    #     # bottommidquart = np.percentile(samples, [25, 50], interpolation='midpoint')
+    #     # bottommidquarts.append(bottommidquart)
+    #     # topmidquart = np.percentile(samples, [50, 75], interpolation='midpoint')
+    #     # topmidquarts.append(topmidquart)
+    #     # topquart = np.percentile(samples, [75, 100], interpolation='midpoint')
+    #     # topquarts.append(topquart)
+    #
+    #     # generate space for the values within each quartile, sort them, find the median, record the median.
+    #     bottomlist = []
+    #     bottommidlist = []
+    #     topmidlist = []
+    #     toplist = []
+    #     for s in samples:
+    #         if bottomquart[0] <= s < bottomquart[-1]:
+    #             bottomlist.append(s)
+    #         elif bottommidquart[0] <= s < bottommidquart[-1]:
+    #             bottommidlist.append(s)
+    #         elif topmidquart[0] <= s < topmidquart[-1]:
+    #             topmidlist.append(s)
+    #         else:
+    #             toplist.append(s)
+    #     bottomlist.sort()
+    #     bottommidlist.sort()
+    #     topmidlist.sort()
+    #     toplist.sort()
+    #     ratecategoriesquartile = [np.median(bottomlist), np.median(bottommidlist), np.median(topmidlist), np.median(toplist)]
+    #     medians.append(ratecategoriesquartile)
+    #
+    #     # print ratecategoriesquartile
+    #
+    # # calculate average of medians from each iteration
+    # for k in medians:
+    #     medianlower.append(k[0])
+    #     medianlowermid.append(k[1])
+    #     medianuppermid.append(k[2])
+    #     medianupper.append(k[3])
+    #
+    # finalmedians = [np.mean(medianlower), np.mean(medianlowermid), np.mean(medianuppermid), np.mean(medianupper)]
 
     # This section will display the gamma distribution if desired.
     # bottomquartlowerbounds = []
@@ -240,14 +262,9 @@ def gammaray(a, b, c, d, e):  # a = iterations to run gamma sampling, b = number
     # plt.text(5, 0.6, "$\kappa$ = %s\n$\\theta$ = $\\frac{1}{\kappa}$" % (gamma_shape))
     # plt.show()
 
-    gammaaminos = []
-    for i in range(e):
-        gammacategorychoice = random.choice(finalmedians)
-        gammaaminos.append(gammacategorychoice)
+    # gammaaminos = [random.choice(average_medians) for aa in range(n_amino_acids)]
 
-    #print "discrete gamma categories: %s" %(finalmedians)
-    #print gammaaminos
-    return gammaaminos
+    return [random.choice(average_medians) for aa in range(n_amino_acids)]
 
 
 def mutate_matrix(amino_acid, LG_matrix):  # b = matrix, a = current amino acid
@@ -342,8 +359,6 @@ def superfit(fitness_table, anchored_sequences, initial_protein, fitness_level):
         afitprotein = start_protein
 
     return afitprotein
-
-
 
     # if fitness_level == 'low':  # generate unfit protein
     #     unfittestaminos = []
@@ -1150,7 +1165,7 @@ if __name__ == '__main__':
 
     variantaminos = get_allowed_sites(n_amino_acids, n_anchors)  # generate invariant sites
     initial_protein = superfit(fitness_table, variantaminos, initial_protein, fitness_start)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
-    gammacategories = gammaray(gamma_iterations, gamma_samples, gamma_shape, gamma_scale, n_amino_acids)  # generate gamma categories for every site
+    gammacategories = gamma_ray(n_amino_acids, gamma_shape, gamma_scale, gamma_iterations, gamma_samples)  # generate gamma categories for every site
 
     firstproteinsavepath = '%s/start' % runpath
     firstproteinfilename = "firstprotein"

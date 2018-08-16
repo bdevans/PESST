@@ -130,7 +130,8 @@ def get_allowed_sites(n_amino_acids, n_anchors):
     # Remove the invariant sites from allowed values
     for a in anchored_sequences:
         allowed_values.remove(a)
-
+    # anchored_sequences = [allowed_values.pop(random.randrange(len(allowed_values))) for r in range(n_anchors)]
+    # NOTE: Should this be appended (as it may mean indexing out of range)?
     allowed_values.append(n_amino_acids)
     return allowed_values
 
@@ -498,8 +499,8 @@ def get_thresholded_protein(initial_protein, fitness_threshold):
     # Make proteins until the protein's fitness satisfies the fitness threshold
     while calculate_fitness(protein, fitness_table) < fitness_threshold:
         protein = generate_protein(n_amino_acids)
-    # NOTE: Shouldn't this return the protein?
     return protein
+
 
 def mutate(current_generation, n_mutations_per_generation, variant_sites,
            gamma_categories, LG_matrix):

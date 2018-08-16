@@ -1199,8 +1199,8 @@ if __name__ == '__main__':
     initial_protein = generate_protein(n_amino_acids)  # make first protein
     fitness_table = get_protein_fitness(initial_protein)  # make first fitness dictionary
 
-    variantaminos = get_allowed_sites(n_amino_acids, n_anchors)  # generate invariant sites
-    initial_protein = superfit(fitness_table, variantaminos, initial_protein, fitness_start)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
+    variant_sites = get_allowed_sites(n_amino_acids, n_anchors)  # generate invariant sites
+    initial_protein = superfit(fitness_table, variant_sites, initial_protein, fitness_start)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
     gammacategories = gamma_ray(n_amino_acids, gamma_shape, gamma_scale, gamma_iterations, gamma_samples)  # generate gamma categories for every site
 
     firstproteinsavepath = '%s/start' % runpath

@@ -548,23 +548,24 @@ def mutate(current_generation, n_mutations_per_generation, variant_sites,
     return next_generation
 
 
-def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generation; d=track_dot_fitness, e=generationtotrack, f=generationnumber, g=fitness_table, h=track_hist_fitness_stats, m=track_hist_fitness, n=track invariants, o= invariant sites
+# NOTE: variant_sites is passed in as invariant_sites!
+def record_generation_fitness(generation, population, invariant_sites, fitness_table, track_dot_fitness, track_rate, track_hist_fitness_stats, track_hist_fitness, track_invariants):  # c=protein generation; d=track_dot_fitness, e=generationtotrack, f=generationnumber, g=fitness_table, h=track_hist_fitness_stats, m=track_hist_fitness, n=track invariants, o= invariant sites
     """Record the fitness of every protein in the generation and store them in
     dictionary. Optionally generate data and figures about fitness.
     """
     keycounter = -1  # loop over each key - unelegent but it works
     fitnessdict = {}
-    for r in range(len(c)):  # record calculated fitness for each protein in dictionary
+    for r in range(len(population)):  # record calculated fitness for each protein in dictionary
         keycounter += 1
-        fitnessofprotein = calculate_fitness(c[keycounter], fitness_table)
+        fitnessofprotein = calculate_fitness(population[keycounter], fitness_table)
         fitnessdict.update({keycounter: fitnessofprotein})
 
-    if (d is True) and (f % e == 0 or f == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
+    if track_dot_fitness and (generation == 0 or generation % track_rate == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
         plt.figure()  # make individual figure in pyplot
 
         fittrackeryaxis = []  # store values for the left side of the figure
         for i in range(n_amino_acids+1):
-            fittrackeryaxis.append(g[i])  # for each amino in the dataset append its fitness space to list
+            fittrackeryaxis.append(fitness_table[i])  # for each amino in the dataset append its fitness space to list
         additionleft = 0  # calculate average fitness of dataset (messy but I can keep track of it)
         pointsleft = 0
         for i in fittrackeryaxis:
@@ -581,16 +582,16 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
         Keycounter = -1
         additionright = 0
         pointsright = 0
-        for j in range(len(c)):  # find and plot all fitness values in the current generation
+        for j in range(len(population)):  # find and plot all fitness values in the current generation
             Keycounter += 1
             Y2fitness = []  # space for values to plot
-            if n is True:  # check if invariants need to be ignored
-                Y2aminos = c[Keycounter]  # load fitness of each gen (a keys are numbers so easy to iterate)
+            if track_invariants:  # check if invariants need to be ignored
+                Y2aminos = population[Keycounter]  # load fitness of each gen (a keys are numbers so easy to iterate)
             else:
                 Y2aminos = []  # ignore variant sites
-                invariantY2checkaminos = c[Keycounter]
+                invariantY2checkaminos = population[Keycounter]
                 for i in range(len(invariantY2checkaminos)):
-                    if i in o:
+                    if i in invariant_sites:
                         Y2aminos.append(invariantY2checkaminos[i])
                     else:
                         Y2aminos.append('X')
@@ -605,17 +606,17 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
                     Y2fitness.append(fitvalue)  # append these to list
             #print Y2fitness
             plt.plot(len(Y2fitness) * [j + transform], Y2fitness, "o", markersize=1)  # plot right hand side with small markers
-            plt.title("\n".join(wrap('Fitness of every amino acid in the fitness matrix vs fitness of every amino acid in generation %s' % f, 60)), fontweight='bold')
+            plt.title("\n".join(wrap('Fitness of every amino acid in the fitness matrix vs fitness of every amino acid in generation %s' % generation, 60)), fontweight='bold')
         avgtoplotright = additionright / pointsright  # calculate right side average
         plt.axis([-10, (n_amino_acids * 2) + (n_amino_acids / 10)+10, -11, 11])  # generate attractive figure
         plt.plot([0, len(fittrackeryaxis) + 1], [avgtoplotleft, avgtoplotleft], 'r--', lw=3)
-        plt.plot([0 + transform, len(c) + 1 + transform], [avgtoplotright, avgtoplotright], 'r--', lw=3)
+        plt.plot([0 + transform, len(population) + 1 + transform], [avgtoplotright, avgtoplotright], 'r--', lw=3)
         muleftdistdp = "%.3f" % avgtoplotleft
         murightdistdp = "%.3f" % avgtoplotright
         plt.text(0, 8.7, "$\mu$1 = %s\n$\mu$2 = %s\nthreshold = %s" % (muleftdistdp, murightdistdp, fitness_threshold), size = 6.5)
 
         plt.xticks([])  # remove x axis ticks
-        fitfilename = "generation_%s" % f  # define dynamic filename
+        fitfilename = "generation_%s" % generation  # define dynamic filename
         fitsavepath = '%s/fitnessdotmatrix' % runpath
         fitfullname = os.path.join(fitsavepath, fitfilename+".png")
         plt.savefig(fitfullname)
@@ -629,21 +630,21 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
         for j in i:
             disttrackeryaxis.append(j)
 
-    if f % e == 0 or f == 0:
+    if generation == 0 or generation % track_rate == 0:
         keycounterdist = -1  # build distribution of fitness values existing in evolving protein
         additiondist = 0
         pointsdist = 0
         distclonefitnesslist = []
         disttotalfitness = []  # space for values to plot
-        for j in range(len(c)):  # find and plot all fitness values in the current generation
+        for j in range(len(population)):  # find and plot all fitness values in the current generation
             keycounterdist += 1
-            if n is True:
-                disttotalaminos = c[keycounterdist]  # load fitness of each clone (as keys are numbers so easy to iterate)
+            if track_invariants:
+                disttotalaminos = population[keycounterdist]  # load fitness of each clone (as keys are numbers so easy to iterate)
             else:
                 disttotalaminos = []  # ignore variant sites
-                invariantcheckaminos = c[keycounterdist]
+                invariantcheckaminos = population[keycounterdist]
                 for i in range(len(invariantcheckaminos)):
-                    if i in o:
+                    if i in invariant_sites:
                         disttotalaminos.append(invariantcheckaminos[i])
                     else:
                         disttotalaminos.append('X')
@@ -660,12 +661,12 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
                     disttotalfitness.append(distvalue)  # append these to list
             distclonefitnesslist.append(clonefitnesslist)
 
-    if (h is True) and (f % e == 0 or f == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
+    if track_hist_fitness_stats and (generation == 0 or generation % track_rate == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
         # print 'lets'
         # This section writes a file describing 5 statistical tests on the global fitness space.
 
         distclonetrackfilepath = '%s/statistics' % innerrunpath
-        distclonetrackfilename = "normal_distribution_statistics_generation %s" % f  # define evo filename
+        distclonetrackfilename = "normal_distribution_statistics_generation %s" % generation  # define evo filename
         distclonetrackfullname = os.path.join(distclonetrackfilepath, distclonetrackfilename+".txt")
         distclonetrackfile = open(distclonetrackfullname, "w")  # open file
         distclonetrackfile.write('Tests for normality on the amino acid fitness of each clone: \n\n\n')
@@ -794,7 +795,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
 
         distclonetrackfile.close()
 
-        if f == 0:
+        if generation == 0:
             disttrackfilepath = '%s/statistics' % innerrunpath
             disttrackfilename = "normal_distribution_statistics_fitness_space"  # define evo filename
             disttrackfullname = os.path.join(disttrackfilepath, disttrackfilename+".txt")
@@ -912,7 +913,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
             disttrackfile.write("\n\nAccording to the skewness-kurtosis all test, %s%% of sites do not differ significantly from a normal distribution" % skewkurtpercent)
             disttrackfile.close()
 
-    if (m is True) and (f % e == 0 or f == 0):  # if the switch is on, and record fitness histograms on the first generation and every x generation thereafter
+    if track_hist_fitness and (generation == 0 or generation % track_rate == 0):  # if the switch is on, and record fitness histograms on the first generation and every x generation thereafter
         # print 'go'
         plt.figure()
         plt.axis([-10, 8, 0, 0.5])  # generate attractive figure
@@ -931,7 +932,7 @@ def record_generation_fitness(c, d, e, f, g, h, m, n, o):  # c=protein generatio
         plt.text(4.1, 0.42, "$\mu$1 = %s\n$\mu$2 = %s\nthreshold = %s" % (mu1distdp, mu2distdp, fitness_threshold))
 
         disthisttrackfilepath = '%s/histograms' % innerrunpath
-        disthistfilename = "generation_%s" % f  # define dynamic filename
+        disthistfilename = "generation_%s" % generation  # define dynamic filename
         disthistfullname = os.path.join(disthisttrackfilepath, disthistfilename+".png")
         plt.savefig(disthistfullname)
         plt.close()
@@ -1030,11 +1031,11 @@ def generationator(n_generations, initial_population, fitness_threshold,
     clonelistlist.append(clonelist)  # store all clones that are not root to start
     population = copy.deepcopy(initial_population)  # current generation
     # Record initial population
-    fitnesses = record_generation_fitness(population, track_dot_fitness,
-                                          track_rate, 0, fitness_table,
+    fitnesses = record_generation_fitness(0, population, variant_sites,
+                                          fitness_table,
+                                          track_dot_fitness, track_rate,
                                           track_hist_fitness_stats,
-                                          track_hist_fitness, track_invariants,
-                                          variantaminos)  # current generation fitness
+                                          track_hist_fitness, track_invariants)
     write_fasta_alignment(population, 0)
 
     # Store each generation along with its fitness
@@ -1057,13 +1058,13 @@ def generationator(n_generations, initial_population, fitness_threshold,
 
         # Mutate population
         population = mutate(population, n_mutations_per_generation,
-                            variantaminos, gammacategories, LGmatrix)
+                            variant_sites, gammacategories, LGmatrix)
         # Re-calculate fitness
-        fitnesses = record_generation_fitness(population, track_dot_fitness,
-                                              track_rate, gen, fitness_table,
+        fitnesses = record_generation_fitness(gen, population, variant_sites,
+                                              fitness_table,
+                                              track_dot_fitness, track_rate,
                                               track_hist_fitness_stats,
-                                              track_hist_fitness, track_invariants,
-                                              variantaminos)
+                                              track_hist_fitness, track_invariants)
 
         for pi in range(len(fitnesses)):  # if there are, start loop on fitnesses
             if fitnesses[pi] < fitness_threshold:  # if fitness is less than threshold clone a random sequence in its place.

@@ -50,6 +50,8 @@ mutation_rate = 0.001  # should be small!
 n_mutations_per_generation = int(n_clones*(n_amino_acids+1)*mutation_rate)  # number of mutations per generation
 n_anchors = int((n_amino_acids+1)/10)  # amount of invariant sites in a generation (not including root)
 n_roots = 4
+deaths_per_generations = 10  # Set to 0 to turn off protein deaths
+death_ratio = 0.1
 
 # set what to record
 write_rate = 50  # write a new fasta file every x generations
@@ -333,7 +335,7 @@ def superfit(fitness_table, anchored_sequences, initial_protein, fitness_level):
         # NOTE: This chooses from anchored_sequences whereas the other conditions exclude them
         new_protein = start_protein  # copy.deepcopy(start_protein)
 
-        while start_fitness < fitness_threshold+30:
+        while start_fitness < fitness_threshold+10 or start_fitness > fitness_threshold+20:
             # Mutate the new protein (sample without replacement)
             chosen_variants = random.sample(anchored_sequences, n_variants)
             for aa in chosen_variants:
@@ -341,18 +343,23 @@ def superfit(fitness_table, anchored_sequences, initial_protein, fitness_level):
             new_fitness = calculate_fitness(new_protein, fitness_table)
             counter = 0
 
-            while new_fitness < start_fitness:
-                # Continue to mutate until it is better than the start_protein
-                new_protein = start_protein  # copy.deepcopy(start_protein)
-                for aa in chosen_variants:
-                    new_protein[aa] = random.choice(RESIDUES)
-                new_fitness = calculate_fitness(new_protein, fitness_table)
-                counter += 1
+            if start_fitness < fitness_threshold+5:  # setting lower bounds of medium fitness
+                while new_fitness < start_fitness and counter <= 100:
+                    # Continue to mutate until it is better than the start_protein
+                    new_protein = start_protein  # copy.deepcopy(start_protein)
+                    for aa in chosen_variants:
+                        new_protein[aa] = random.choice(RESIDUES)
+                    new_fitness = calculate_fitness(new_protein, fitness_table)
+                    counter += 1
 
-                if counter > 99:  # Draw new variants, reset and try again
-                    chosen_variants = random.sample(anchored_sequences, n_variants)
-                    counter = 0
-                    break
+            elif start_fitness > fitness_threshold+10:  # set upper bounds of medium fitness
+                while new_fitness > start_fitness and counter <= 100:
+                    # Continue to mutate until it is better than the start_protein
+                    new_protein = start_protein  # copy.deepcopy(start_protein)
+                    for aa in chosen_variants:
+                        new_protein[aa] = random.choice(RESIDUES)
+                    new_fitness = calculate_fitness(new_protein, fitness_table)
+                    counter += 1
 
             start_protein = new_protein
             start_fitness = calculate_fitness(start_protein, fitness_table)
@@ -932,6 +939,7 @@ def write_fasta_alignment(population, generation):  # x = current generation of 
         fastafile.write("\n>clone_%s\n" % (p+1))
         for residue in protein:
             fastafile.write(residue)
+        fastafile.write("\n")
 
 
 def write_final_fasta(population, bifurcations, n_roots):  # x = current generation, y = bifurication state, z = n_roots
@@ -1066,6 +1074,24 @@ def generationator(n_generations, initial_population, fitness_threshold,
                 else:
                     population[pi] = population[clonekey]  # swap out unfit clone for fit clone
 
+        # Allow sequences to die and be replacecd at a predefined rate
+        if deaths_per_generations > 0 and gen % deaths_per_generations == 0:
+            # NOTE: Originally this was sampled with replacement
+            mortals = random.sample(range(n_clones), int(n_clones * death_ratio))
+            for pi in mortals:
+                if pi in rootlist:
+                    clonekey = replace_protein(pi, rootlist, fitnesses,
+                                               fitness_threshold)
+                else:  # Protein is in one of the branches
+                    for branch in clonelistlist:
+                        if pi in branch:
+                            clonekey = replace_protein(pi, branch, fitnesses,
+                                                       fitness_threshold)
+                if np.isnan(clonekey):
+                    warnings.warn("Unable to kill protein {} - no suitable replacements!".format(pi))
+                else:
+                    population[pi] = population[clonekey]  # Replace dead protein
+
         evolution.append(Generation(population=population, fitness=fitnesses))
         # NOTE: Should this be at the end of each timestep?
         if ((gen+1) % write_rate) == 0:  # write fasta every write_rate generations
@@ -1097,8 +1123,9 @@ def fitbit(evolution, n_generations, n_clones, initial_protein):
     plt.ylim([fitness_threshold-25, initial_fitness+100])  # suitable for med graphs
     plt.xlim([0, n_generations])
     plt.xlabel("Generations", fontweight='bold')
-    plt.ylabel("Fitness", fontweight='bold')
+    plt.ylabel("$T_m$", fontweight='bold')
     plt.title("\n".join(wrap('Fitness change for %s randomly generated "superfit" clones of %s amino acids, mutated over %s generations' % (n_clones, (n_amino_acids+1), n_generations), 60)), fontweight='bold')
+    plt.text(n_generations+15, fitness_threshold-3, r"$\Omega$")
     plt.text(n_generations-1000, initial_fitness+50,
              r"$\mu$ = {}".format(mu) + "\n" + \
              r"$\sigma$ = {}".format(sigma) + "\n" + \

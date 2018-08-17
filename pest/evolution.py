@@ -593,7 +593,7 @@ def record_generation_fitness(generation, population, invariant_sites,
                     else:
                         Y2aminos.append('X')
             for ai, amino_acid in enumerate(Y2aminos):  # generate values from generation x to plot
-                if amino_acid is not 'X':
+                if amino_acid != 'X':
                     pointsright += 1
                     fitvalue = fitness_table[ai][RESIDUES.index(amino_acid)]  # find fitness value corresponding to amino acid at position
                     additionright += fitvalue
@@ -642,7 +642,7 @@ def record_generation_fitness(generation, population, invariant_sites,
                         disttotalaminos.append('X')
             clonefitnesslist = []
             for ai, amino_acid in enumerate(disttotalaminos):  # generate values from generation x to plot
-                if amino_acid is not 'X':
+                if amino_acid != 'X':
                     pointsdist += 1
                     distvalue = fitness_table[ai][RESIDUES.index(amino_acid)]  # find fitness value corresponding to amino acid at position
                     additiondist += distvalue

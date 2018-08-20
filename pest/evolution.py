@@ -530,7 +530,7 @@ def mutate(current_generation, n_mutations_per_generation, variant_sites,
 
 
 # NOTE: variant_sites is passed in as invariant_sites!
-def record_generation_fitness(generation, population, invariant_sites,
+def record_generation_fitness(generation, population, variant_sites,
                               fitness_table, record):
     """Record the fitness of every protein in the generation and store them in
     dictionary. Optionally generate data and figures about fitness.
@@ -569,7 +569,7 @@ def record_generation_fitness(generation, population, invariant_sites,
             else:
                 Y2aminos = []  # ignore variant sites
                 for ai in range(len(protein)):
-                    if ai in invariant_sites:
+                    if ai in variant_sites:
                         Y2aminos.append(protein[ai])
                     else:
                         Y2aminos.append('X')
@@ -617,7 +617,7 @@ def record_generation_fitness(generation, population, invariant_sites,
             else:
                 disttotalaminos = []  # ignore variant sites
                 for ai, amino_acid in enumerate(protein):
-                    if ai in invariant_sites:
+                    if ai in variant_sites:
                         disttotalaminos.append(amino_acid)
                     else:
                         disttotalaminos.append('X')

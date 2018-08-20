@@ -1135,8 +1135,9 @@ def fitbit(evolution, n_generations, n_clones, initial_protein):
 if __name__ == '__main__':
 
     # TODO: Output seed in `start` and switch from random to np.random for proper seeding and make it a default argument.
-    np.random.seed(seed)
-    random.seed(seed)
+    if seed is not None:
+        np.random.seed(seed)
+        random.seed(seed)
     # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
     # from matplotlib.figure import Figure
     # matplotlib.use('TkAgg')

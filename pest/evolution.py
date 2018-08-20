@@ -291,7 +291,7 @@ def calculate_fitness(protein, fitness_table):
     return sum(protein_fitness)
 
 
-def superfit(fitness_table, anchored_sequences, initial_protein, fitness_level):
+def superfit(fitness_table, variant_aminos, initial_protein, fitness_level):
     """Generate a protein of a specified fitness.
 
     Make either a superfit protein, a superunfit protein or a 'medium
@@ -313,7 +313,7 @@ def superfit(fitness_table, anchored_sequences, initial_protein, fitness_level):
 
         aminos = ["M"] * 3
         for aa in range(1, len(fitness_table)):  # range(n_amino_acids):
-            if aa not in anchored_sequences:
+            if aa not in variant_aminos:
                 aminos.append([initial_protein[aa]] * 3)
             else:
                 i_sorted = np.argsort(fitness_table[aa])
@@ -333,12 +333,12 @@ def superfit(fitness_table, anchored_sequences, initial_protein, fitness_level):
         n_variants = 5
         start_protein = initial_protein  # Copies the external initial_protein
         start_fitness = calculate_fitness(start_protein, fitness_table)
-        # NOTE: This chooses from anchored_sequences whereas the other conditions exclude them
+        # NOTE: This chooses from anchored_sequences whereas the other conditions exclude them FIXED
         new_protein = start_protein  # copy.deepcopy(start_protein)
 
         while start_fitness < fitness_threshold+10 or start_fitness > fitness_threshold+20:
             # Mutate the new protein (sample without replacement)
-            chosen_variants = random.sample(anchored_sequences, n_variants)
+            chosen_variants = random.sample(variant_aminos, n_variants)
             for aa in chosen_variants:
                 new_protein[aa] = random.choice(RESIDUES)
             new_fitness = calculate_fitness(new_protein, fitness_table)
@@ -373,7 +373,7 @@ def superfit(fitness_table, anchored_sequences, initial_protein, fitness_level):
     #     for i in range(len(fitness_table)):
     #         if i == 0:
     #             unfittestaminos.append(["M"] * 3)
-    #         elif i not in anchored_sequences and not 0:
+    #         elif i not in variant_aminos and not 0:
     #             toappend = initial_protein[i]
     #             unfittestaminos.append([toappend] * 3)  # add invariant sites if an anchor position is defined
     #         else:  # find the indexes of the 3 least fit amino acids in RESIDUES and record then as lists for each position
@@ -409,7 +409,7 @@ def superfit(fitness_table, anchored_sequences, initial_protein, fitness_level):
     #     for i in range(len(fitness_table)):
     #         if i == 0:
     #             fittestaminos.append(["M", "M", "M"])
-    #         elif i not in anchored_sequences and not 0:
+    #         elif i not in variant_aminos and not 0:
     #             toappend = initial_protein[i]
     #             fittestaminos.append([toappend, toappend, toappend])  # add invariant sites if an anchor position is defined
     #         else:  # find the indexes of the 3 fittest amino acids in RESIDUES and record then as lists for each position
@@ -437,7 +437,7 @@ def superfit(fitness_table, anchored_sequences, initial_protein, fitness_level):
     # if fitness_level == 'medium':
     #     startprotein = initial_protein
     #     startproteinfitness = calculate_fitness(startprotein, fitness_table)
-    #     variantstochoosefrom = anchored_sequences
+    #     variantstochoosefrom = variant_aminos
     #     secondprotein = startprotein
     #
     #     while startproteinfitness < fitness_threshold+30:

@@ -499,7 +499,9 @@ def mutate(current_generation, n_mutations_per_generation, variant_sites,
     """Mutate a given sequence based on the LG+I+G model of amino acid
     substitution.
     """
-    next_generation = copy.deepcopy(current_generation)  # make a deep copy of the library so changing the library in the function doesn't change the library outside the function
+    # NOTE: This could be removed for speed after checking it is not used later
+    # next_generation = copy.deepcopy(current_generation)  # make a deep copy of the library so changing the library in the function doesn't change the library outside the function
+    next_generation = current_generation
 
     # Sum gammas to make a probability distribution to randomly select from.
     cumulative_gamma = np.cumsum(gamma_categories)  # n_amino_acids long

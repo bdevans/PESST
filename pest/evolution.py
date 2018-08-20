@@ -51,7 +51,7 @@ mutation_rate = 0.001  # should be small!
 # TODO: Allow user to pass a number but defau;t to None and calculate as follows
 n_mutations_per_generation = int(n_clones*(n_amino_acids+1)*mutation_rate)  # number of mutations per generation
 n_anchors = int((n_amino_acids+1)/10)  # amount of invariant sites in a generation (not including root)
-# TODO: Add random seed here
+seed = 42
 
 # TODO: Place bifurcation parameters into kwargs dict with a flag for bifurcations
 n_roots = 4
@@ -1132,7 +1132,8 @@ def fitbit(evolution, n_generations, n_clones, initial_protein):
 if __name__ == '__main__':
 
     # TODO: Output seed in `start` and switch from random to np.random for proper seeding and make it a default argument.
-    np.random.seed(42)
+    np.random.seed(seed)
+    random.seed(seed)
     # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
     # from matplotlib.figure import Figure
     # matplotlib.use('TkAgg')

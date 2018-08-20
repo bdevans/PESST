@@ -46,11 +46,11 @@ death_ratio = 0.1
 # TODO: These could possibly gi into their own dictionary too
 n_clones = 52  # amount of clones that will be generated in the first generation #5 10 20 40 80
 # TODO: Change to the more logical n+1!
-n_amino_acids = 79  # number of amino acids in the protein after the start methionine
+n_amino_acids = 80  # number of amino acids in the protein after the start methionine
 mutation_rate = 0.001  # should be small!
 # TODO: Allow user to pass a number but defau;t to None and calculate as follows
-n_mutations_per_generation = int(n_clones*(n_amino_acids+1)*mutation_rate)  # number of mutations per generation
-n_anchors = int((n_amino_acids+1)/10)  # amount of invariant sites in a generation (not including root)
+n_mutations_per_generation = int(n_clones*(n_amino_acids)*mutation_rate)  # number of mutations per generation
+n_anchors = int((n_amino_acids)/10)  # amount of invariant sites in a generation (not including root)
 seed = 42
 
 # TODO: Place bifurcation parameters into kwargs dict with a flag for bifurcations
@@ -76,7 +76,7 @@ def generate_protein(n_amino_acids, start_amino_acid="M"):
     """Generate an original starting protein n_amino_acids long with a start
     amino acid set to methionine.
     """
-    protein = random.choices(RESIDUES, k=n_amino_acids)
+    protein = random.choices(RESIDUES, k=n_amino_acids-1)
     # protein = [random.choice(RESIDUES) for _ in range(n_amino_acids)]  # ver < 3.6
     protein.insert(0, start_amino_acid)  # Start with methionine
     return protein
@@ -115,7 +115,7 @@ def get_protein_fitness(protein):  # x=protein;
         for aa in RESIDUES:
             aminofile.write(",%s" % aa)
         # Write fitness values
-        for i in range(n_amino_acids+1):
+        for i in range(n_amino_acids):
             aminofile.write('\n%s' % i),
             for f in fitnesslib[i]:
                 aminofile.write(',%s' % f)
@@ -138,8 +138,9 @@ def get_allowed_sites(n_amino_acids, n_anchors):
     allowed_values = list(range(1, n_amino_acids))  # keys for mutable sites
     # Randomly define invariant sites (without replacement)
     anchored_sequences = random.sample(allowed_values, n_anchors)
+    anchored_sequences.insert(0, 0)  # First aa is always anchored (Methionine)
     # Remove the invariant sites from allowed values
-    for a in anchored_sequences:
+    for a in anchored_sequences[1:]:
         allowed_values.remove(a)
     # anchored_sequences = [allowed_values.pop(random.randrange(len(allowed_values))) for r in range(n_anchors)]
     # NOTE: Should this be appended (as it may mean indexing out of range)?
@@ -558,7 +559,7 @@ def record_generation_fitness(generation, population, variant_sites,
     if record["dot_fitness"] and (generation == 0 or generation % record["rate"] == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
         # TODO: There will be a bug in plotting the mean fitness at the wrong x point (as before)
         # Store fitness values for each amino in the dataset for the left side of the figure
-        fittrackeryaxis = [fitness_table[aa] for aa in range(n_amino_acids+1)]
+        fittrackeryaxis = [fitness_table[aa] for aa in range(n_amino_acids)]
 
         additionleft = 0  # calculate average fitness of dataset (messy but I can keep track of it)
         pointsleft = 0
@@ -611,7 +612,7 @@ def record_generation_fitness(generation, population, variant_sites,
         plt.savefig(fitfullname)
         plt.close()  # close plot (so you dont generate 100 individual figures)
 
-    disttrackerlist = [fitness_table[i] for i in range(n_amino_acids+1)]  # build fitness space numbers
+    disttrackerlist = [fitness_table[i] for i in range(n_amino_acids)]  # build fitness space numbers
     # disttrackeryaxis = [j for j in i for i in disttrackerlist]
     disttrackeryaxis = []
     for i in disttrackerlist:
@@ -1115,7 +1116,7 @@ def fitbit(evolution, n_generations, n_clones, initial_protein):
     plt.xlim([0, n_generations])
     plt.xlabel("Generations", fontweight='bold')
     plt.ylabel("$T_m$", fontweight='bold')
-    plt.title("\n".join(wrap('Fitness change for %s randomly generated "superfit" clones of %s amino acids, mutated over %s generations' % (n_clones, (n_amino_acids+1), n_generations), 60)), fontweight='bold')
+    plt.title("\n".join(wrap('Fitness change for %s randomly generated "superfit" clones of %s amino acids, mutated over %s generations' % (n_clones, (n_amino_acids), n_generations), 60)), fontweight='bold')
     plt.text(n_generations+15, fitness_threshold-3, r"$\Omega$")
     plt.text(n_generations-1000, initial_fitness+50,
              "\n".join([r"$\mu$ = {}".format(mu),
@@ -1165,7 +1166,7 @@ if __name__ == '__main__':
     settingsfullname = os.path.join(settingsfilepath, settingsfilename+".txt")
     # TODO: Change to logger
     with open(settingsfullname, "w") as settingsfile:  # open file
-        settingsfile.write("Protein length: %s" % (n_amino_acids+1))
+        settingsfile.write("Protein length: %s" % (n_amino_acids))
         settingsfile.write("\nAmount of mutations per generation: %s" % n_mutations_per_generation)
         settingsfile.write("\nAmount of clones in the population: %s" % n_clones)
         settingsfile.write("\nAmount of generations simulation is run for: %s" % n_generations)

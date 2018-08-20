@@ -295,10 +295,12 @@ def mutate_matrix(amino_acid, LG_matrix):  # b = matrix, a = current amino acid
 
 def calculate_fitness(protein, fitness_table):
     """Calculate fitness of a protein given the sequence and fitness values."""
-    protein_fitness = []  # where fitness values will be added
-    for ai, amino_acid in enumerate(protein):
-        # Append fitness values corresponding to amino_acid at position ai
-        protein_fitness.append(fitness_table[ai][RESIDUES.index(amino_acid)])
+    # protein_fitness = []  # where fitness values will be added
+    # for ai, amino_acid in enumerate(protein):
+    #     # Append fitness values corresponding to amino_acid at position ai
+    #     protein_fitness.append(fitness_table[ai][RESIDUES.index(amino_acid)])
+    protein_fitness = [fitness_table[ai][RESIDUES.index(amino_acid)]
+                       for ai, amino_acid in enumerate(protein)]
     return sum(protein_fitness)
 
 

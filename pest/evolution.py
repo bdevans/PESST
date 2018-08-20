@@ -30,28 +30,38 @@ from tqdm import trange
 RESIDUES = ("R", "H", "K", "D", "E", "S", "T", "N", "Q", "C",
             "G", "P", "A", "V", "I", "L", "M", "F", "Y", "W")
 
+# TODO: Give these default values
 # parameters for normal distribution used to select fitness values
 mu = -1.2
 sigma = 2.5
 
+# parameters of protein evolution
+n_generations = 2000  # amount of generations the protein evolves for
+fitness_start = 'medium'  # high, medium or low; must be lower case. If selecting low, fitness threshold needs to be significantly smaller (i.e. 4x) than #positions*mu
+# TODO: Create parameters for the numeric literals which define teh medium boundaries
+fitness_threshold = 0  # arbitrary number for fitness threshold
+
+deaths_per_generations = 10  # Set to 0 to turn off protein deaths
+death_ratio = 0.1
+# TODO: These could possibly gi into their own dictionary too
+n_clones = 52  # amount of clones that will be generated in the first generation #5 10 20 40 80
+# TODO: Change to the more logical n+1!
+n_amino_acids = 79  # number of amino acids in the protein after the start methionine
+mutation_rate = 0.001  # should be small!
+# TODO: Allow user to pass a number but defau;t to None and calculate as follows
+n_mutations_per_generation = int(n_clones*(n_amino_acids+1)*mutation_rate)  # number of mutations per generation
+n_anchors = int((n_amino_acids+1)/10)  # amount of invariant sites in a generation (not including root)
+# TODO: Add random seed here
+
+# TODO: Place bifurcation parameters into kwargs dict with a flag for bifurcations
+n_roots = 4
+
+# TODO: Put into dictionary
 # parameters for forming discrete gamma distribution used for evolution of protein
 gamma_iterations = 100
 gamma_samples = 10000
 gamma_shape = 1.9  # Most phylogenetic systems that use gamma only let you set kappa (often called shape alpha) and calculate theta as 1/kappa giving mean of 1
 gamma_scale = 1/gamma_shape
-
-# parameters of protein evolution
-n_clones = 52  # amount of clones that will be generated in the first generation #5 10 20 40 80
-n_generations = 2000  # amount of generations the protein evolves for
-fitness_start = 'medium'  # high, medium or low; must be lower case. If selecting low, fitness threshold needs to be significantly smaller (i.e. 4x) than #positions*mu
-fitness_threshold = 0  # arbitrary number for fitness threshold
-n_amino_acids = 79  # number of amino acids in the protein after the start methionine
-mutation_rate = 0.001  # should be small!
-n_mutations_per_generation = int(n_clones*(n_amino_acids+1)*mutation_rate)  # number of mutations per generation
-n_anchors = int((n_amino_acids+1)/10)  # amount of invariant sites in a generation (not including root)
-n_roots = 4
-deaths_per_generations = 10  # Set to 0 to turn off protein deaths
-death_ratio = 0.1
 
 # Set what to record
 record = {"rate": 50,           # write a new fasta file every x generations
@@ -124,6 +134,7 @@ def get_allowed_sites(n_amino_acids, n_anchors):
     """Select invariant sites in the initially generated protein and return
     allowed values.
     """
+    # TODO: Methionine is always the first anchor, so change to range(n_amino_acids) and add one to n_anchors definition
     allowed_values = list(range(1, n_amino_acids))  # keys for mutable sites
     # Randomly define invariant sites (without replacement)
     anchored_sequences = random.sample(allowed_values, n_anchors)
@@ -541,7 +552,7 @@ def record_generation_fitness(generation, population, variant_sites,
                    # for pi, protein in enumerate(population)}
 
     if record["dot_fitness"] and (generation == 0 or generation % record["rate"] == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
-
+        # TODO: There will be a bug in plotting the mean fitness at the wrong x point (as before)
         # Store fitness values for each amino in the dataset for the left side of the figure
         fittrackeryaxis = [fitness_table[aa] for aa in range(n_amino_acids+1)]
 
@@ -929,7 +940,7 @@ def write_final_fasta(population, bifurcations, n_roots):
     n_clones_to_take = int((bifursize-1)/2)  # if 5, gives 2, if 4 gives 2, if 3 gives 1.
     generation_numbers = []
     for i in bifurcations:
-        clone_selection = random.sample(set(i), n_clones_to_take)  # NOTE: Only sample from unique clones?
+        clone_selection = random.sample(set(i), n_clones_to_take)  # NOTE: Only sample from unique clones? YES
         for c in clone_selection:
             generation_numbers.append(c)
 
@@ -1021,9 +1032,11 @@ def generationator(n_generations, initial_population, fitness_threshold,
             for k in lists:  # append bifurcations to a cleared clonelistlist
                 clonelistlist.append(k)
 
+        # TODO: If no suitable clones are available, re-mutate the generation and start again
         # Mutate population
         population = mutate(population, n_mutations_per_generation,
                             variant_sites, gammacategories, LGmatrix)
+        # TODO: Split out writing to file until the end so that all branches are valid
         # Re-calculate fitness
         fitnesses = record_generation_fitness(gen, population, variant_sites,
                                               fitness_table, record)
@@ -1050,7 +1063,7 @@ def generationator(n_generations, initial_population, fitness_threshold,
 
         # Allow sequences to die and be replacecd at a predefined rate
         if deaths_per_generations > 0 and gen % deaths_per_generations == 0:
-            # NOTE: Originally this was sampled with replacement
+            # NOTE: Originally this was sampled with replacement: FIXED
             mortals = random.sample(range(n_clones), int(n_clones * death_ratio))
             for pi in mortals:
                 if pi in rootlist:
@@ -1067,7 +1080,7 @@ def generationator(n_generations, initial_population, fitness_threshold,
                     population[pi] = population[clonekey]  # Replace dead protein
 
         evolution.append(Generation(population=population, fitness=fitnesses))
-        # NOTE: Should this be at the end of each timestep?
+        # NOTE: Should this be at the end of each timestep? FIXED
         if ((gen+1) % fasta_rate) == 0:  # write fasta every record["fasta_rate"] generations
             write_fasta_alignment(population, gen+1)
     write_final_fasta(population, clonelistlist, rootlist)
@@ -1077,7 +1090,7 @@ def generationator(n_generations, initial_population, fitness_threshold,
 
 def fitbit(evolution, n_generations, n_clones, initial_protein):
     """Plot fitness against generation for all clones."""
-    # NOTE: Final element previously excluded - for i in range(len(evolution)-1):
+    # NOTE: Final element previously excluded - for i in range(len(evolution)-1):  FIXED
     # Create array of fitness values with shape (n_generations, n_clones)
     # fitnesses = np.array([[evolution[g][-1][c] for c in range(n_clones)]
     #                       for g in range(n_generations)])
@@ -1116,6 +1129,7 @@ def fitbit(evolution, n_generations, n_clones, initial_protein):
 
 if __name__ == '__main__':
 
+    # TODO: Output seed in `start` and switch from random to np.random for proper seeding and make it a default argument.
     np.random.seed(42)
     # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
     # from matplotlib.figure import Figure

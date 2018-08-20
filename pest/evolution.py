@@ -1141,6 +1141,7 @@ if __name__ == '__main__':
              'fitnessdotmatrix', 'fitnessdistribution', 'treefastas']
 
     runpath = "results/run%s" % datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
+    os.makedirs(runpath)
     if os.path.isdir(runpath):
         print("Results directory successfully created: {}".format(os.path.join(os.getcwd(), runpath)))
     else:

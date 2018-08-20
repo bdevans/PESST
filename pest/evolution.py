@@ -132,7 +132,7 @@ def get_allowed_sites(n_amino_acids, n_anchors):
         allowed_values.remove(a)
     # anchored_sequences = [allowed_values.pop(random.randrange(len(allowed_values))) for r in range(n_anchors)]
     # NOTE: Should this be appended (as it may mean indexing out of range)?
-    allowed_values.append(n_amino_acids)
+    # allowed_values.append(n_amino_acids)
     return allowed_values
 
 

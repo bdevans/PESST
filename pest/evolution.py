@@ -42,8 +42,8 @@ fitness_start = 'medium'  # high, medium or low; must be lower case. If selectin
 # TODO: Create parameters for the numeric literals which define teh medium boundaries
 fitness_threshold = 0  # arbitrary number for fitness threshold
 
-deaths_per_generations = 10  # Set to 0 to turn off protein deaths
-death_ratio = 0.1
+deaths_per_generations = 5  # Set to 0 to turn off protein deaths
+death_ratio = 0.05
 # TODO: These could possibly gi into their own dictionary too
 n_clones = 52  # amount of clones that will be generated in the first generation #5 10 20 40 80
 # TODO: Change to the more logical n+1!
@@ -67,9 +67,9 @@ gamma_scale = 1/gamma_shape
 # Set what to record
 record = {"rate": 50,           # write a new fasta file every x generations
           "fasta_rate": 50,     # write a new fasta file every x generations
-          "dot_fitness": False,
-          "hist_fitness_stats": False,
-          "hist_fitness": False,
+          "dot_fitness": True,
+          "hist_fitness_stats": True,
+          "hist_fitness": True,
           "invariants": False}
 
 
@@ -576,7 +576,7 @@ def mutate(current_generation, n_mutations_per_generation, variant_sites,
 
 # NOTE: variant_sites is passed in as invariant_sites!
 def record_generation_fitness(generation, population, variant_sites,
-                              fitness_table, record):
+                              fitness_table, fitness_threshold, record):
     """Record the fitness of every protein in the generation and store them in
     dictionary. Optionally generate data and figures about fitness.
     """
@@ -584,6 +584,9 @@ def record_generation_fitness(generation, population, variant_sites,
     fitnessdict = {pi: calculate_fitness(protein, fitness_table)
                    for pi, protein in list(population.items())}
                    # for pi, protein in enumerate(population)}
+    # TODO: Replace with list once population is a list (or OrderedDict)
+    # fitnesslist = [calculate_fitness(protein, fitness_table)
+    #                for pi, protein in list(population.items())]
 
     if record["dot_fitness"] and (generation == 0 or generation % record["rate"] == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
         # TODO: There will be a bug in plotting the mean fitness at the wrong x point (as before)
@@ -592,24 +595,38 @@ def record_generation_fitness(generation, population, variant_sites,
         # fittrackeryaxis = [fitness_table[aa] for aa in range(n_amino_acids)]
         # fittrackeryaxis = [np.array([fitness_table[ai][aa] for aa in RESIDUES]) for ai in range(n_amino_acids)]
         # 2D numpy array
-        fittrackeryaxis = fitness_table
+        # fittrackeryaxis = fitness_table
         # DataFrame
         # fittrackeryaxis = fitness_table.values
 
-        additionleft = 0  # calculate average fitness of dataset (messy but I can keep track of it)
-        pointsleft = 0
-        for i in fittrackeryaxis:
-            for j in i:
-                pointsleft += 1
-                additionleft += j
-        avgtoplotleft = additionleft / pointsleft
+        # additionleft = 0  # calculate average fitness of dataset (messy but I can keep track of it)
+        # pointsleft = 0
+        # for i in fittrackeryaxis:
+        #     for j in i:
+        #         pointsleft += 1
+        #         additionleft += j
+        # avgtoplotleft = additionleft / pointsleft
+        avgtoplotleft = np.mean(fitness_table)  # Average across flattened array
 
         plt.figure()  # make individual figure in pyplot
-        for i in range(len(fittrackeryaxis)):
-            yaxistoplot = fittrackeryaxis[i]
-            plt.plot(len(yaxistoplot) * [i], yaxistoplot, ".", color='k')  # plot data
+        plt.subplot(121)
+        # for i in range(len(fittrackeryaxis)):  # range(n_amino_acids)
+        #     yaxistoplot = fittrackeryaxis[i]
+        #     plt.plot(len(yaxistoplot) * [i], yaxistoplot, ".", color='k')  # plot data
+        # for i in range(len(RESIDUES)):
+        #     plt.plot(np.arange(n_amino_acids), fittrackeryaxis[:, i], ".", color='k')
 
-        transform = n_amino_acids + (n_amino_acids / 10)  # generate values for right side of the figure. Transform function sets offet to make figure look nice.
+        # Plot each column of fitness_table as a separate dataseries against 0..N-1
+        plt.plot(fitness_table, ".", color='k')
+        plt.plot([0, n_amino_acids], [avgtoplotleft, avgtoplotleft], 'r--', lw=3)
+        plt.ylim(((-4 * sigma) - 1), ((4 * sigma) + 1))  # generate attractive figure
+        muleftdistdp = "%.3f" % avgtoplotleft
+        plt.text(0, 4*sigma, "$\mu$1 = %s\nthreshold = %s" % (muleftdistdp, fitness_threshold), size=6.5)
+        plt.xticks([])
+        plt.title("\n".join(wrap(r"Fitness distribution of $\Delta T_m$ matrix", 40)), size=8)
+
+        plt.subplot(122)
+        # transform = n_amino_acids + (n_amino_acids / 10)  # generate values for right side of the figure. Transform function sets offet to make figure look nice.
         additionright = 0
         pointsright = 0
         # Find and plot all fitness values in the current generation
@@ -619,30 +636,30 @@ def record_generation_fitness(generation, population, variant_sites,
                 Y2aminos = protein  # load fitness of each gen (a keys are numbers so easy to iterate)
             else:
                 Y2aminos = []  # ignore variant sites
-                for ai in range(len(protein)):
+                for ai in range(n_amino_acids):
                     if ai in variant_sites:
                         Y2aminos.append(protein[ai])
                     else:
                         Y2aminos.append('X')
             for ai, amino_acid in enumerate(Y2aminos):  # generate values from generation x to plot
                 if amino_acid != 'X':
-                    pointsright += 1
+                    # pointsright += 1
                     fitvalue = fitness_table[ai][RESIDUES.index(amino_acid)]  # find fitness value corresponding to amino acid at position
                     # fitvalue = fitness_table[ai][amino_acid]
                     # DataFrame
                     # fitvalue = fitness_table.loc[ai, amino_acid]
-                    additionright += fitvalue
+                    # additionright += fitvalue
                     Y2fitness.append(fitvalue)  # append these to list
-            plt.plot(len(Y2fitness) * [j + transform], Y2fitness, "o", markersize=1)  # plot right hand side with small markers
-        plt.title("\n".join(wrap('Fitness of every amino acid in the fitness matrix vs fitness of every amino acid in generation %s' % generation, 60)), fontweight='bold')
-        avgtoplotright = additionright / pointsright  # calculate right side average
-        plt.axis([-10, (n_amino_acids * 2) + (n_amino_acids / 10)+10, -11, 11])  # generate attractive figure
-        plt.plot([0, len(fittrackeryaxis) + 1], [avgtoplotleft, avgtoplotleft], 'r--', lw=3)
-        plt.plot([0 + transform, len(population) + 1 + transform], [avgtoplotright, avgtoplotright], 'r--', lw=3)
-        muleftdistdp = "%.3f" % avgtoplotleft
+            plt.plot(len(Y2fitness) * [pi], Y2fitness, "o", markersize=2)  # plot right hand side with small markers
+        plt.suptitle(('Generation %s' % generation), fontweight='bold')
+        # avgtoplotright = additionright / pointsright  # calculate right side average
+        avgtoplotright = np.mean(Y2fitness)
+        plt.ylim(((-4 * sigma) - 1), ((4 * sigma) + 1))  # generate attractive figure
+        plt.plot([0, len(population)], [avgtoplotright, avgtoplotright], 'r--', lw=3)
         murightdistdp = "%.3f" % avgtoplotright
-        plt.text(0, 8.7, "$\mu$1 = %s\n$\mu$2 = %s\nthreshold = %s" % (muleftdistdp, murightdistdp, fitness_threshold), size = 6.5)
-
+        plt.text(0, 4*sigma, "\n".join([r"$\mu$2 = %s" % murightdistdp, "threshold = %s" % fitness_threshold]), size=6.5)
+        plt.title("\n".join(wrap('Fitness of every amino acid in the fitness matrix vs fitness of every amino acid in generation %s' % generation, 60)), fontweight='bold')
+        plt.subplots_adjust(top=0.85)
         plt.xticks([])  # remove x axis ticks
         fitfilename = "generation_%s" % generation  # define dynamic filename
         fitsavepath = '%s/fitnessdotmatrix' % runpath
@@ -1061,7 +1078,7 @@ def generationator(n_generations, initial_population, fitness_threshold,
     population = copy.deepcopy(initial_population)  # current generation
     # Record initial population
     fitnesses = record_generation_fitness(0, population, variant_sites,
-                                          fitness_table, record)
+                                          fitness_table, fitness_threshold, record)
     write_fasta_alignment(population, 0)
 
     # Store each generation along with its fitness
@@ -1089,7 +1106,7 @@ def generationator(n_generations, initial_population, fitness_threshold,
         # TODO: Split out writing to file until the end so that all branches are valid
         # Re-calculate fitness
         fitnesses = record_generation_fitness(gen, population, variant_sites,
-                                              fitness_table, record)
+                                              fitness_table, fitness_threshold, record)
 
         for pi in range(len(fitnesses)):  # if there are, start loop on fitnesses
             if fitnesses[pi] < fitness_threshold:  # if fitness is less than threshold clone a random sequence in its place.

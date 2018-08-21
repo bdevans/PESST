@@ -123,7 +123,7 @@ def get_protein_fitness(protein):  # x=protein;
     return fitnesslib
 
 
-def clones(n_clones, protein):
+def clone_protein(protein, n_clones):
     """Generate a dictionary containing n_clones of generated protein
     - this contains the evolving dataset.
     """
@@ -1202,7 +1202,7 @@ if __name__ == '__main__':
     # print 'first superfit protein:', initial_protein
     # print 'fitness of the first protein:', calculate_fitness(initial_protein, fitness_table)
 
-    initial_population = clones(n_clones, initial_protein)  # make some clones to seed evolution
+    initial_population = clone_protein(initial_protein, n_clones)  # make some clones to seed evolution
 
     evolution = generationator(n_generations, initial_population,
                                fitness_threshold, n_mutations_per_generation,

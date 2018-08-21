@@ -5,21 +5,13 @@ import datetime
 from textwrap import wrap
 from collections import namedtuple
 import warnings
-# import shutil
-# import json
 import random
 # from random import randint, sample, choice, shuffle  # TODO: Consolidate with numpy
-
 import numpy as np
-# from numpy import median
 # from numpy.random import normal, uniform, gamma
 import scipy as sp
 from scipy.stats import binned_statistic
-# from scipy.stats import anderson, normaltest, skew, skewtest, kurtosistest
-# from scipy.stats import shapiro as shp
-# from scipy.stats import kurtosis as kurt
-# from scipy.stats import ks_2samp as kosmo
-# import scipy.special as sps
+# from scipy.stats import anderson, normaltest, skew, skewtest, kurtosistest, shapiro, kurtosis, ks_2samp
 # import pandas as pd
 import matplotlib as mpl
 from matplotlib import pyplot as plt

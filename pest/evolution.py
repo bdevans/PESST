@@ -650,7 +650,7 @@ def record_generation_fitness(generation, population, variant_sites,
         plt.plot([0, len(population)], [avgtoplotright, avgtoplotright], 'r--', lw=3)
         murightdistdp = "%.3f" % avgtoplotright
         plt.text(0, 4*sigma, "\n".join([r"$\mu$2 = %s" % murightdistdp, "threshold = %s" % fitness_threshold]), size=6.5)
-        plt.title("\n".join(wrap('Fitness of every amino acid in the fitness matrix vs fitness of every amino acid in generation %s' % generation, 60)), fontweight='bold')
+        plt.title("\n".join(wrap("Fitness distribution of every sequence in the evolving dataset", 40)), size=8)
         plt.subplots_adjust(top=0.85)
         plt.xticks([])  # remove x axis ticks
         fitfilename = "generation_%s" % generation  # define dynamic filename

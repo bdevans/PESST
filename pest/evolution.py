@@ -1176,14 +1176,14 @@ if __name__ == '__main__':
         settingsfile.write("\nGamma distribution properties: kappa = %s, theta = %s" % (gamma_shape, gamma_scale))
         settingsfile.write("\n\nWrite rate for FASTA: every %s generations" % record["fasta_rate"])
         settingsfile.write("\n\nTrack rate for graphing and statistics: every %s generations" % record["rate"])
-        settingsfile.write("\nTracking state: Fitness dot matrix = %s; Fitness histrogram = %s; Fitness normality statistics = %s" % (record["dot_fitness"], record["hist_fitness"], record["hist_fitness_stats"]))
+        settingsfile.write("\nTracking state: Fitness dot matrix = %s; Fitness histogram = %s; Fitness normality statistics = %s" % (record["dot_fitness"], record["hist_fitness"], record["hist_fitness_stats"]))
 
     # load matrix
     aamatrix = "data/LGaa.csv"  # .csv file defining aa substitution probabilities calculated from R matrix multiplied by PI matrix, with diagonals forced to zero as mutation has to happen then conferted to event rates p(lambda) where lambda = sum Qx and p(lambda)x=Qxy/lambda
     with open(aamatrix) as matrix_file:  # Open in read-only mode
         LGmatrixlist = list(csv.reader(matrix_file, delimiter=","))
     LGmatrix = np.array(LGmatrixlist)  # load matrix into a numpy array
-    LGmatrix = np.delete(LGmatrix, 0, 0)  # trim first line of the array as its not useful
+    LGmatrix = np.delete(LGmatrix, 0, 0)  # trim first line of the array as it's not useful
 
     initial_protein = generate_protein(n_amino_acids)  # make first protein
     fitness_table = get_protein_fitness(initial_protein)  # make first fitness dictionary

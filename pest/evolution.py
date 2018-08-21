@@ -67,9 +67,9 @@ gamma_scale = 1/gamma_shape
 # Set what to record
 record = {"rate": 50,           # write a new fasta file every x generations
           "fasta_rate": 50,     # write a new fasta file every x generations
-          "dot_fitness": True,
-          "hist_fitness_stats": True,
-          "hist_fitness": True,
+          "dot_fitness": False,
+          "hist_fitness_stats": False,
+          "hist_fitness": False,
           "invariants": False}
 
 

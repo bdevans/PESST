@@ -20,6 +20,7 @@ from scipy.stats import binned_statistic
 # from scipy.stats import kurtosis as kurt
 # from scipy.stats import ks_2samp as kosmo
 # import scipy.special as sps
+# import pandas as pd
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 from tqdm import trange
@@ -94,33 +95,49 @@ def test_normal_distribution():
     return
 
 
-def fit_module(mu, sigma):
-    """Generates an array of fitness values for each amino acid in residues."""
-    return np.random.normal(mu, sigma, len(RESIDUES))
+# def fit_module(mu, sigma):
+#     """Generates an array of fitness values for each amino acid in residues."""
+#     return np.random.normal(mu, sigma, len(RESIDUES))
 
 
-def get_protein_fitness(protein):  # x=protein;
+# def get_protein_fitness(protein):  # x=protein;
+def get_protein_fitness(n_amino_acids, n_variants=len(RESIDUES)):
     """Generate a dictionary describing list of fitness values at each position
     of the generated protein.
     """
     # Create dictionary containing position in the protein as keys and the array of fitness values for each amino acid as values
-    fitnesslib = {i: fit_module(mu, sigma) for i in range(len(protein))}
+    # fitnesslib = {i: fit_module(mu, sigma) for i in range(len(protein))}
+    fitness_table = np.random.normal(mu, sigma, size=(n_amino_acids, n_variants))
+    # fitness_table = [{aa: np.random.normal(mu, sigma, size=(len(RESIDUES)))
+    #                   for aa in RESIDUES}
+    #                  for ai in range(n_amino_acids)]
+    # print(mu, sigma, n_amino_acids, len(RESIDUES))
+    # TODO:
+    # data = np.random.normal(mu, sigma, size=(n_amino_acids, len(RESIDUES)))
+    # fitness_table = pd.DataFrame(data=data, columns=RESIDUES)
 
+    # TODO: Split into write_fitness_table(fitness_table)
     aminofitsavepath = '%s/start' % runpath
     aminofitfilename = "fitnesslibrary"
     aminofitfullname = os.path.join(aminofitsavepath, aminofitfilename+".csv")
-    with open(aminofitfullname, "w") as aminofile:  # open file
-        # Write header
-        aminofile.write("aminoposition"),
-        for aa in RESIDUES:
-            aminofile.write(",%s" % aa)
-        # Write fitness values
-        for i in range(n_amino_acids):
-            aminofile.write('\n%s' % i),
-            for f in fitnesslib[i]:
-                aminofile.write(',%s' % f)
+    # with open(aminofitfullname, "w") as aminofile:  # open file
+    #     # Write header
+    #     aminofile.write("aminoposition"),
+    #     for aa in RESIDUES:
+    #         aminofile.write(",%s" % aa)
+    #     # Write fitness values
+    #     for ai in range(n_amino_acids):
+    #         aminofile.write('\n%s' % ai),
+    #         # for f in fitness_table[i]:
+    #         #     aminofile.write(',%s' % f)
+    #         for r in RESIDUES:
+    #             aminofile.write(',%s' % RESIDUES[r])
+    # NOTE: This will not include the index column
+    header = ",".join(RESIDUES)
+    np.savetxt(aminofitfullname, fitness_table, delimiter=",", header=header)
+    # fitness_table.to_csv(aminofitfullname)
 
-    return fitnesslib
+    return fitness_table
 
 
 def clone_protein(protein, n_clones):
@@ -300,8 +317,16 @@ def calculate_fitness(protein, fitness_table):
     # for ai, amino_acid in enumerate(protein):
     #     # Append fitness values corresponding to amino_acid at position ai
     #     protein_fitness.append(fitness_table[ai][RESIDUES.index(amino_acid)])
-    protein_fitness = [fitness_table[ai][RESIDUES.index(amino_acid)]
+    # protein_fitness = [fitness_table[ai][RESIDUES.index(amino_acid)]
+    #                    for ai, amino_acid in enumerate(protein)]
+    # protein_fitness = [fitness_table[ai][amino_acid]
+    #                    for ai, amino_acid in enumerate(protein)]
+    # 2d numpy array
+    protein_fitness = [fitness_table[ai, RESIDUES.index(amino_acid)]
                        for ai, amino_acid in enumerate(protein)]
+    # DataFrame
+    # protein_fitness = [fitness_table.loc[ai, amino_acid]
+    #                    for ai, amino_acid in enumerate(protein)]
     return sum(protein_fitness)
 
 
@@ -326,13 +351,17 @@ def superfit(fitness_table, variant_sites, initial_protein, fitness_level):
             sequence = [-1, -2, -3]  # Three highest
 
         aminos = ["M"] * 3
-        for aa in range(1, len(fitness_table)):  # range(n_amino_acids):
-            if aa not in variant_aminos:
-                aminos.append([initial_protein[aa]] * 3)
+        for ai in range(1, len(fitness_table)):  # range(n_amino_acids):
+            if ai not in variant_sites:
+                aminos.append([initial_protein[ai]] * 3)
             else:
-                i_sorted = np.argsort(fitness_table[aa])
-                aminos.append([RESIDUES[fitness_table[aa][i_sorted[start]]]
+                i_sorted = np.argsort(fitness_table[ai])
+                aminos.append([RESIDUES[fitness_table[ai][i_sorted[start]]]
                                for start in sequence])
+                # sorted_aa = sorted(fitness_table[ai], key=lambda k: fitness_table[ai][k])
+                # DataFrame
+                # sorted_aa = RESIDUES[fitness_table.loc[ai].argsort()]
+                # aminos.append(sorted_aa[rank] for rank in sequence)
         afitprotein = []
         # Generate a superunffit protein by randomly picking one of the 3 most fit amino acids at each position
         for candidates in aminos:
@@ -559,7 +588,13 @@ def record_generation_fitness(generation, population, variant_sites,
     if record["dot_fitness"] and (generation == 0 or generation % record["rate"] == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
         # TODO: There will be a bug in plotting the mean fitness at the wrong x point (as before)
         # Store fitness values for each amino in the dataset for the left side of the figure
-        fittrackeryaxis = [fitness_table[aa] for aa in range(n_amino_acids)]
+        # HACK
+        # fittrackeryaxis = [fitness_table[aa] for aa in range(n_amino_acids)]
+        # fittrackeryaxis = [np.array([fitness_table[ai][aa] for aa in RESIDUES]) for ai in range(n_amino_acids)]
+        # 2D numpy array
+        fittrackeryaxis = fitness_table
+        # DataFrame
+        # fittrackeryaxis = fitness_table.values
 
         additionleft = 0  # calculate average fitness of dataset (messy but I can keep track of it)
         pointsleft = 0
@@ -593,6 +628,9 @@ def record_generation_fitness(generation, population, variant_sites,
                 if amino_acid != 'X':
                     pointsright += 1
                     fitvalue = fitness_table[ai][RESIDUES.index(amino_acid)]  # find fitness value corresponding to amino acid at position
+                    # fitvalue = fitness_table[ai][amino_acid]
+                    # DataFrame
+                    # fitvalue = fitness_table.loc[ai, amino_acid]
                     additionright += fitvalue
                     Y2fitness.append(fitvalue)  # append these to list
             plt.plot(len(Y2fitness) * [j + transform], Y2fitness, "o", markersize=1)  # plot right hand side with small markers
@@ -612,7 +650,11 @@ def record_generation_fitness(generation, population, variant_sites,
         plt.savefig(fitfullname)
         plt.close()  # close plot (so you dont generate 100 individual figures)
 
-    disttrackerlist = [fitness_table[i] for i in range(n_amino_acids)]  # build fitness space numbers
+    # disttrackerlist = [fitness_table[i] for i in range(n_amino_acids)]  # build fitness space numbers
+    # disttrackerlist = [np.array([fitness_table[ai][aa] for aa in RESIDUES]) for ai in range(n_amino_acids)]
+    disttrackerlist = fitness_table
+    # DataFrame
+    # disttrackerlist = fitness_table.values
     # disttrackeryaxis = [j for j in i for i in disttrackerlist]
     disttrackeryaxis = []
     for i in disttrackerlist:
@@ -642,6 +684,9 @@ def record_generation_fitness(generation, population, variant_sites,
                 if amino_acid != 'X':
                     pointsdist += 1
                     distvalue = fitness_table[ai][RESIDUES.index(amino_acid)]  # find fitness value corresponding to amino acid at position
+                    # distvalue = fitness_table[ai][amino_acid]
+                    # DataFrame
+                    # distvalue = fitness_table.loc[ai, amino_acid]
                     additiondist += distvalue
                     clonefitnesslist.append(distvalue)
                     disttotalfitness.append(distvalue)  # append these to list
@@ -1186,7 +1231,7 @@ if __name__ == '__main__':
     LGmatrix = np.delete(LGmatrix, 0, 0)  # trim first line of the array as it's not useful
 
     initial_protein = generate_protein(n_amino_acids)  # make first protein
-    fitness_table = get_protein_fitness(initial_protein)  # make first fitness dictionary
+    fitness_table = get_protein_fitness(n_amino_acids)  # make first fitness dictionary
 
     variant_sites = get_allowed_sites(n_amino_acids, n_anchors)  # generate invariant sites
     initial_protein = superfit(fitness_table, variant_sites, initial_protein, fitness_start)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)

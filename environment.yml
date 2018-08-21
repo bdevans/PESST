@@ -9,8 +9,8 @@ dependencies:
   - scipy
   - matplotlib
   - tqdm
-  # - seaborn
   # - pandas
+  # - seaborn
   # - dill
   # - joblib
   # - h5py

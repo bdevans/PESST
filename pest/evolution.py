@@ -305,7 +305,7 @@ def calculate_fitness(protein, fitness_table):
     return sum(protein_fitness)
 
 
-def superfit(fitness_table, variant_aminos, initial_protein, fitness_level):
+def superfit(fitness_table, variant_sites, initial_protein, fitness_level):
     """Generate a protein of a specified fitness.
 
     Make either a superfit protein, a superunfit protein or a 'medium
@@ -352,7 +352,7 @@ def superfit(fitness_table, variant_aminos, initial_protein, fitness_level):
 
         while start_fitness < fitness_threshold+10 or start_fitness > fitness_threshold+20:
             # Mutate the new protein (sample without replacement)
-            chosen_variants = random.sample(variant_aminos, n_variants)
+            chosen_variants = random.sample(variant_sites, n_variants)
             for aa in chosen_variants:
                 new_protein[aa] = random.choice(RESIDUES)
             new_fitness = calculate_fitness(new_protein, fitness_table)

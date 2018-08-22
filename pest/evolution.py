@@ -20,8 +20,10 @@ from tqdm import trange
 
 # define starting variables
 # amino acids - every fitness value string references residues string
-RESIDUES = ("R", "H", "K", "D", "E", "S", "T", "N", "Q", "C",
-            "G", "P", "A", "V", "I", "L", "M", "F", "Y", "W")
+# RESIDUES = ("R", "H", "K", "D", "E", "S", "T", "N", "Q", "C",
+#             "G", "P", "A", "V", "I", "L", "M", "F", "Y", "W")
+RESIDUES = "RHKDESTNQCGPAVILMFYW"  # Strings are immutable
+RESIDUES_INDEX = {aa: ai for ai, aa in enumerate(RESIDUES)}  # Faster than calling .index()
 
 
 def generate_protein(n_amino_acids, start_amino_acid="M"):
@@ -273,7 +275,9 @@ def calculate_fitness(protein, fitness_table):
     # protein_fitness = [fitness_table[ai][amino_acid]
     #                    for ai, amino_acid in enumerate(protein)]
     # 2d numpy array
-    protein_fitness = [fitness_table[ai, RESIDUES.index(amino_acid)]
+    # protein_fitness = [fitness_table[ai, RESIDUES.index(amino_acid)]
+    #                    for ai, amino_acid in enumerate(protein)]
+    protein_fitness = [fitness_table[ai, RESIDUES_INDEX[amino_acid]]
                        for ai, amino_acid in enumerate(protein)]
     # DataFrame
     # protein_fitness = [fitness_table.loc[ai, amino_acid]
@@ -595,7 +599,8 @@ def record_generation_fitness(generation, population, variant_sites,
             for ai, amino_acid in enumerate(Y2aminos):  # generate values from generation x to plot
                 if amino_acid != 'X':
                     # pointsright += 1
-                    fitvalue = fitness_table[ai][RESIDUES.index(amino_acid)]  # find fitness value corresponding to amino acid at position
+                    # fitvalue = fitness_table[ai][RESIDUES.index(amino_acid)]  # find fitness value corresponding to amino acid at position
+                    fitvalue = fitness_table[ai][RESIDUES_INDEX[amino_acid]]  # find fitness value corresponding to amino acid at position
                     # fitvalue = fitness_table[ai][amino_acid]
                     # DataFrame
                     # fitvalue = fitness_table.loc[ai, amino_acid]
@@ -650,7 +655,8 @@ def record_generation_fitness(generation, population, variant_sites,
             for ai, amino_acid in enumerate(disttotalaminos):  # generate values from generation x to plot
                 if amino_acid != 'X':
                     pointsdist += 1
-                    distvalue = fitness_table[ai][RESIDUES.index(amino_acid)]  # find fitness value corresponding to amino acid at position
+                    # distvalue = fitness_table[ai][RESIDUES.index(amino_acid)]  # find fitness value corresponding to amino acid at position
+                    distvalue = fitness_table[ai][RESIDUES_INDEX[amino_acid]]  # find fitness value corresponding to amino acid at position
                     # distvalue = fitness_table[ai][amino_acid]
                     # DataFrame
                     # distvalue = fitness_table.loc[ai, amino_acid]

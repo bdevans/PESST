@@ -831,9 +831,9 @@ def record_generation_fitness(generation, population, variant_sites,
         stats_file.close()
 
         if generation == 0:
-            dist_full_name = os.path.join("fitnessdistribution", "statistics",
+            dist_full_name = os.path.join(run_path, "fitnessdistribution", "statistics",
                                           "normal_distribution_statistics_fitness_space.txt")
-            dist_file = open(dist_full_name, "w+")  # open file
+            dist_file = open(dist_full_name, "w")  # open file
 
             dist_file.write('Tests for normality on the global amino acid fitness space at each position: \n\n\n')
             dist_file.write('Skewness: \n')
@@ -966,7 +966,8 @@ def record_generation_fitness(generation, population, variant_sites,
         plt.text(4.1, 0.42, "$\mu$1 = %s\n$\mu$2 = %s\nthreshold = %s" % (mu1distdp, mu2distdp, fitness_threshold))
 
         disthistfilename = "generation_{}.png".format(generation)  # define dynamic filename
-        disthistfullname = os.path.join("fitnessdistribution", "histograms", disthistfilename)
+        disthistfullname = os.path.join(run_path, "fitnessdistribution",
+                                        "histograms", disthistfilename)
         plt.savefig(disthistfullname)
         plt.close()
     return fitnessdict

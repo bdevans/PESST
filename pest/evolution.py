@@ -22,6 +22,7 @@ from tqdm import trange
 # amino acids - every fitness value string references residues string
 # RESIDUES = ("R", "H", "K", "D", "E", "S", "T", "N", "Q", "C",
 #             "G", "P", "A", "V", "I", "L", "M", "F", "Y", "W")
+# TODO: Make the ordering match LG_matrix?
 RESIDUES = "RHKDESTNQCGPAVILMFYW"  # Strings are immutable
 RESIDUES_INDEX = {aa: ai for ai, aa in enumerate(RESIDUES)}  # Faster than calling .index()
 
@@ -254,16 +255,18 @@ def gamma_ray(n_amino_acids, gamma):  # kappa, theta, n_iterations=100, n_sample
     return [random.choice(average_medians) for aa in range(n_amino_acids)]
 
 
-def mutate_matrix(amino_acid, LG_matrix):  # b = matrix, a = current amino acid
+def mutate_amino_acid(amino_acid, LG_matrix, LG_residues, LG_indicies):  # b = matrix, a = current amino acid
     """Mutate a residue to another residue based on the LG matrix."""
     # Get the order of the aminos corresponding to the values in the array
-    aminolist = LG_matrix[:, 0].ravel().tolist()
+    # aminolist = LG_matrix[:, 0].ravel().tolist()
     # Build cumulative sum of row of probabilities corresponding to amino_acid
-    old_aa_index = aminolist.index(amino_acid)
+    # old_aa_index = aminolist.index(amino_acid)
+    old_aa_index = LG_indicies[amino_acid]
     aa_cumsum = np.cumsum(np.asarray(LG_matrix[old_aa_index, 1:], dtype=float))
     # Return new_aa_index where random variable <= aa_cumsum[new_aa_index]
     new_aa_index = np.searchsorted(aa_cumsum, np.random.uniform(0, 1))
-    return aminolist[new_aa_index]
+    # return aminolist[new_aa_index]
+    return LG_residues[new_aa_index]
 
 
 def calculate_fitness(protein, fitness_table):
@@ -484,7 +487,7 @@ def plot_fitness_histogram(n_proteins, n_amino_acids, fitness_table):
 
 
 def mutate(current_generation, n_mutations_per_generation, variant_sites,
-           gamma_categories, LG_matrix):
+           gamma_categories, LG_matrix, LG_residues, LG_indicies):
     """Mutate a given sequence based on the LG+I+G model of amino acid
     substitution.
     """
@@ -499,6 +502,8 @@ def mutate(current_generation, n_mutations_per_generation, variant_sites,
         # Pick random key, clone to make a random generation
         mutant_key, mutant_clone = random.choice(list(next_generation.items()))
         mutation_target = copy.deepcopy(mutant_clone)  # make a deep copy of the libaries value as to not change it in the library until we want to
+        # NOTE: There is no way to revert to the original so copying is unnecessary?!
+        # mutation_target = mutant_clone
 
         # mutated_residues = []
         # residue_index = [0]
@@ -514,7 +519,7 @@ def mutate(current_generation, n_mutations_per_generation, variant_sites,
         #             continue
         # # residue_index = random.choice(c) # pick a random residue in the selected mutant to mutate that isnt the start M or an anchor (old)
         # target_residue = mutation_target[residue_index[0]]
-        # newresidue = mutate_matrix(target_residue, LG_matrix)  # implement LG
+        # newresidue = mutate_amino_acid(target_residue, LG_matrix)  # implement LG
         # mutation_target[residue_index[0]] = newresidue  # mutate the copy with the randomly chosen residue
 
         # TODO: Could gamma_categories be the length of anchor_sites?
@@ -524,8 +529,8 @@ def mutate(current_generation, n_mutations_per_generation, variant_sites,
         while residue_index not in variant_sites:
             mutant_residue_area = np.random.uniform(0, cumulative_gamma[-1])  # [0, highest_gamma_sum)
             residue_index = np.searchsorted(cumulative_gamma, mutant_residue_area)  # Return index where mutant_residue_area <= cumulative_gamma[i]
-        mutation_target[residue_index] = mutate_matrix(mutation_target[residue_index], LG_matrix)  # mutate the copy with the randomly chosen residue
 
+        mutation_target[residue_index] = mutate_amino_acid(mutation_target[residue_index], LG_matrix, LG_residues, LG_indicies)  # mutate the copy with the randomly chosen residue
         next_generation[mutant_key] = mutation_target  # update with new sequence
 
     return next_generation
@@ -996,7 +1001,7 @@ def replace_protein(protein, candidates, fitnesses, fitness_threshold):
 
 
 def generationator(n_generations, initial_population, fitness_table, fitness_threshold, variant_sites, gamma_categories,
-                   n_mutations_per_generation, fasta_rate, LGmatrix, run_path):
+                   n_mutations_per_generation, fasta_rate, LG_matrix, LG_residues, LG_indicies, run_path):
     """Generation generator - mutate a protein for a defined number of
     generations according to an LG matrix and gamma distribution.
     """
@@ -1055,7 +1060,7 @@ def generationator(n_generations, initial_population, fitness_table, fitness_thr
         # TODO: If no suitable clones are available, re-mutate the generation and start again
         # Mutate population
         population = mutate(population, n_mutations_per_generation,
-                            variant_sites, gamma_categories, LGmatrix)
+                            variant_sites, gamma_categories, LG_matrix, LG_residues, LG_indicies)
         # TODO: Split out writing to file until the end so that all branches are valid
         # Re-calculate fitness
         fitnesses = record_generation_fitness(gen, population, variant_sites,
@@ -1194,10 +1199,12 @@ def get_LG_matrix(full_file_name=None):
     if full_file_name is None:
         full_file_name = os.path.join("data", "LGaa.csv")
     with open(full_file_name) as matrix_file:  # Open in read-only mode
-        LGmatrixlist = list(csv.reader(matrix_file, delimiter=","))
-    LGmatrix = np.array(LGmatrixlist)  # load matrix into a numpy array
-    LGmatrix = np.delete(LGmatrix, 0, 0)  # trim first line of the array as it's not useful
-    return LGmatrix
+        LG_matrix_list = list(csv.reader(matrix_file, delimiter=","))
+    LG_matrix = np.array(LG_matrix_list)  # load matrix into a numpy array
+    LG_residues = LG_matrix[0, 1:]  # Get first row skipping first element ('0')
+    LG_indicies = {aa: ai for ai, aa in enumerate(LG_residues)}
+    LG_matrix = np.delete(LG_matrix, 0, axis=0)  # trim first line of the array as it's not useful
+    return (LG_matrix, LG_residues, LG_indicies)
 
 
 def write_initial_protein(run_path, initial_protein):
@@ -1229,8 +1236,8 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
     run_path = create_output_folders()
     # record run settings
     write_settings_file(run_path)
-    # load matrix
-    LGmatrix = get_LG_matrix()  # os.path.join("data", "LGaa.csv"))
+    # TODO: Refactor to use the same ordering as RESIDUES
+    (LG_matrix, LG_residues, LG_indicies) = get_LG_matrix()  # Load LG matrix
 
     initial_protein = generate_protein(n_amino_acids)  # make first protein
     fitness_table = get_protein_fitness(n_amino_acids)  # make first fitness dictionary
@@ -1241,8 +1248,8 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
     initial_population = clone_protein(initial_protein, n_clones)  # make some clones to seed evolution
     evolution = generationator(n_generations, initial_population, fitness_table,
                                fitness_threshold, variant_sites, gamma_categories,
-                               n_mutations_per_generation,
-                               record["fasta_rate"], LGmatrix, run_path)
+                               n_mutations_per_generation, record["fasta_rate"],
+                               LG_matrix, LG_residues, LG_indicies, run_path)
     fitbit(evolution, n_generations, n_clones, initial_protein, fitness_table, run_path)
 
 

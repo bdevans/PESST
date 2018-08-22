@@ -652,9 +652,8 @@ def record_generation_fitness(generation, population, variant_sites,
         plt.title("\n".join(wrap("Fitness distribution of every sequence in the evolving dataset", 40)), size=8)
         plt.subplots_adjust(top=0.85)
         plt.xticks([])  # remove x axis ticks
-        fitfilename = "generation_%s" % generation  # define dynamic filename
-        fitsavepath = '%s/fitnessdotmatrix' % runpath
-        fitfullname = os.path.join(fitsavepath, fitfilename+".png")
+        fitfilename = "generation_{}.png".format(generation)  # define dynamic filename
+        fitfullname = os.path.join(run_path, "fitnessdotmatrix", fitfilename)
         plt.savefig(fitfullname)
         plt.close()  # close plot (so you dont generate 100 individual figures)
 
@@ -702,17 +701,16 @@ def record_generation_fitness(generation, population, variant_sites,
 
     if record["hist_fitness_stats"] and (generation == 0 or generation % record["rate"] == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
         # This section writes a file describing 5 statistical tests on the global fitness space.
-        distclonetrackfilepath = '%s/statistics' % innerrunpath
-        distclonetrackfilename = "normal_distribution_statistics_generation %s" % generation  # define evo filename
-        distclonetrackfullname = os.path.join(distclonetrackfilepath, distclonetrackfilename+".txt")
-        distclonetrackfile = open(distclonetrackfullname, "w")  # open file
-        distclonetrackfile.write('Tests for normality on the amino acid fitness of each clone: \n\n\n')
+        stats_file_name = "normal_distribution_statistics_generation{}.txt".format(generation)  # define evo filename
+        stats_full_name = os.path.join(run_path, "fitnessdistribution", "statistics", stats_file_name)
+        stats_file = open(stats_full_name, "w")  # open file
+        stats_file.write('Tests for normality on the amino acid fitness of each clone: \n\n\n')
 
         distclonesshapirolist = []
         distclonesandersonlist = []
         distclonesskewkurtalllist = []
 
-        distclonetrackfile.write('Skewness: \n')
+        stats_file.write('Skewness: \n')
 
         for i in distclonefitnesslist:
             distclonesshapirolist.append(sp.stats.shapiro(i))
@@ -721,24 +719,24 @@ def record_generation_fitness(generation, population, variant_sites,
 
         skewness = sp.stats.skew(np.asarray(disttotalfitness))
         # skewstats = sp.stats.normaltest(np.asarray(disttotalfitness))
-        distclonetrackfile.write("\nThe skewness of the data is %s\n\n\n" % skewness)
-        distclonetrackfile.write("Kurtosis: \n")
+        stats_file.write("\nThe skewness of the data is %s\n\n\n" % skewness)
+        stats_file.write("Kurtosis: \n")
 
         clonekurtosis = sp.stats.kurtosis(disttotalfitness)
         # kurtclonestats = sp.stats.kurtosistest(disttotalfitness)
-        distclonetrackfile.write("\nThe kurtosis of the data is %s\n\n\n" % clonekurtosis)
-        distclonetrackfile.write('Shapiro-Wilk test of non-normality: \n')
+        stats_file.write("\nThe kurtosis of the data is %s\n\n\n" % clonekurtosis)
+        stats_file.write('Shapiro-Wilk test of non-normality: \n')
 
         totalcloneshapiro = sp.stats.shapiro(disttotalfitness)
 
         # shapiro-wilk tests
-        distclonetrackfile.write("\nThe Shapiro-Wilk test of non-normality for the entire dataset gives p = %s" % totalcloneshapiro[-1])
+        stats_file.write("\nThe Shapiro-Wilk test of non-normality for the entire dataset gives p = %s" % totalcloneshapiro[-1])
         if totalcloneshapiro[-1] >= 0.05:
             shapiro = 'is not confidently non-normal'
         else:
             shapiro = 'is confidently non-normal'
-        distclonetrackfile.write("\nTherefore the Shapiro-Wilk test suggests whole dataset %s" % shapiro)
-        distclonetrackfile.write("\nHowever if there are more than 5000 datapoints this test is inaccurate. This test uses %s datapoints" % len(disttotalfitness))
+        stats_file.write("\nTherefore the Shapiro-Wilk test suggests whole dataset %s" % shapiro)
+        stats_file.write("\nHowever if there are more than 5000 datapoints this test is inaccurate. This test uses %s datapoints" % len(disttotalfitness))
         clonepasspercentcalc = []
         for i in distclonesshapirolist:
             if i[-1] >= 0.05:
@@ -746,26 +744,26 @@ def record_generation_fitness(generation, population, variant_sites,
             else:
                 clonepasspercentcalc.append(0)
         clonepasspercent = (sum(clonepasspercentcalc) / len(clonepasspercentcalc)) * 100
-        distclonetrackfile.write("\n\nAccording to Shapiro-Wilk test, the proportion of individual positions that are not confidently non-normal is: %s%%" % clonepasspercent)
+        stats_file.write("\n\nAccording to Shapiro-Wilk test, the proportion of individual positions that are not confidently non-normal is: %s%%" % clonepasspercent)
 
         # anderson-darling tests
-        distclonetrackfile.write('\n\n\nAnderson-Darling test of normality: \n')
+        stats_file.write('\n\n\nAnderson-Darling test of normality: \n')
         # x = np.random.rand(10000)
         totalcloneanderson = sp.stats.anderson(disttotalfitness)
-        distclonetrackfile.write("\nThe Anderson-Darling test of normality for the entire dataset gives a test statistic of %s " % totalcloneanderson.statistic)
-        distclonetrackfile.write("and critical values of %s\nTherefore " % totalcloneanderson.critical_values)
+        stats_file.write("\nThe Anderson-Darling test of normality for the entire dataset gives a test statistic of %s " % totalcloneanderson.statistic)
+        stats_file.write("and critical values of %s\nTherefore " % totalcloneanderson.critical_values)
         if totalcloneanderson.statistic < totalcloneanderson.critical_values[0]:
-            distclonetrackfile.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 15% significance level for the entire dataset.")
+            stats_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 15% significance level for the entire dataset.")
         elif totalcloneanderson.critical_values[0] < totalcloneanderson.statistic < totalcloneanderson.critical_values[1]:
-            distclonetrackfile.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 10% significance level for the entire dataset.")
+            stats_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 10% significance level for the entire dataset.")
         elif totalcloneanderson.critical_values[1] < totalcloneanderson.statistic < totalcloneanderson.critical_values[2]:
-            distclonetrackfile.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 5% significance level for the entire dataset.")
+            stats_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 5% significance level for the entire dataset.")
         elif totalcloneanderson.critical_values[2] < totalcloneanderson.statistic < totalcloneanderson.critical_values[3]:
-            distclonetrackfile.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 2.5% significance level for the entire dataset.")
+            stats_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 2.5% significance level for the entire dataset.")
         elif totalcloneanderson.critical_values[3] < totalcloneanderson.statistic < totalcloneanderson.critical_values[4]:
-            distclonetrackfile.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 1% significance level for the entire dataset.")
+            stats_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 1% significance level for the entire dataset.")
         else:
-            distclonetrackfile.write("according to the Anderson-Darling test, the hypothesis of normality is rejected for the entire dataset.")
+            stats_file.write("according to the Anderson-Darling test, the hypothesis of normality is rejected for the entire dataset.")
 
         cloneconffifteen = []
         cloneconften = []
@@ -792,23 +790,23 @@ def record_generation_fitness(generation, population, variant_sites,
         clonepercenttpf = (len(cloneconftpf) / len(distclonesandersonlist)) * 100
         clonepercentone = (len(cloneconfone) / len(distclonesandersonlist)) * 100
         clonepercentreject = (len(clonereject) / len(distclonesandersonlist)) * 100
-        distclonetrackfile.write("\n\nAccording to the Anderson-Darling test the hypothesis of normality is not rejected for each position in the dataset for:")
-        distclonetrackfile.write("\n%s%% of positions at the 15%% significance level" % clonepercentfifteen)
-        distclonetrackfile.write("\n%s%% of positions at the 10%% significance level" % clonepercentten)
-        distclonetrackfile.write("\n%s%% of positions at the 5%% significance level" % clonepercentfive)
-        distclonetrackfile.write("\n%s%% of positions at the 2.5%% significance level" % clonepercenttpf)
-        distclonetrackfile.write("\n%s%% of positions at the 1%% significance level" % clonepercentone)
-        distclonetrackfile.write("\nand %s%% of positions are rejected" % clonepercentreject)
+        stats_file.write("\n\nAccording to the Anderson-Darling test the hypothesis of normality is not rejected for each position in the dataset for:")
+        stats_file.write("\n%s%% of positions at the 15%% significance level" % clonepercentfifteen)
+        stats_file.write("\n%s%% of positions at the 10%% significance level" % clonepercentten)
+        stats_file.write("\n%s%% of positions at the 5%% significance level" % clonepercentfive)
+        stats_file.write("\n%s%% of positions at the 2.5%% significance level" % clonepercenttpf)
+        stats_file.write("\n%s%% of positions at the 1%% significance level" % clonepercentone)
+        stats_file.write("\nand %s%% of positions are rejected" % clonepercentreject)
 
         # skewness-kurtosis all tests
-        distclonetrackfile.write('\n\n\nSkewness-kurtosis all test of difference from normality: \n')
+        stats_file.write('\n\n\nSkewness-kurtosis all test of difference from normality: \n')
         clonetotalskewkurtall = sp.stats.normaltest(disttotalfitness)
 
-        distclonetrackfile.write("\nAccording to the skewness-kurtosis all test, the whole dataset gives p = %s," % clonetotalskewkurtall.pvalue)
+        stats_file.write("\nAccording to the skewness-kurtosis all test, the whole dataset gives p = %s," % clonetotalskewkurtall.pvalue)
         if clonetotalskewkurtall.pvalue >= 0.05:
-            distclonetrackfile.write("\nTherefore the dataset does not differ significantly from a normal distribution")
+            stats_file.write("\nTherefore the dataset does not differ significantly from a normal distribution")
         else:
-            distclonetrackfile.write("\nTherefore the dataset differs significantly from a normal distribution")
+            stats_file.write("\nTherefore the dataset differs significantly from a normal distribution")
 
         cloneskewkurtpass = []
         for i in distclonesskewkurtalllist:
@@ -817,29 +815,28 @@ def record_generation_fitness(generation, population, variant_sites,
             else:
                 cloneskewkurtpass.append(0)
         cloneskewkurtpercent = (sum(cloneskewkurtpass) / len(cloneskewkurtpass)) * 100
-        distclonetrackfile.write("\n\nAccording to the skewness-kurtosis all test, %s%% of sites do not differ significantly from a normal distribution" % cloneskewkurtpercent)
+        stats_file.write("\n\nAccording to the skewness-kurtosis all test, %s%% of sites do not differ significantly from a normal distribution" % cloneskewkurtpercent)
 
         # Kolmogorov-Smirnov test of similarity to original distributuion
         ksdata = sp.stats.ks_2samp(np.asarray(disttotalfitness), np.asarray(disttrackeryaxis))
         ksp = ksdata.pvalue
-        distclonetrackfile.write("\n\n\n2-sided Kolmogorov-Smirnov test of similarity between the fitness space and evolving protein")
-        distclonetrackfile.write("\n\nThe Kolmogorov-Smirnov test between the fitness space an the evolving protein gives a p-value of: %s" % ksp)
+        stats_file.write("\n\n\n2-sided Kolmogorov-Smirnov test of similarity between the fitness space and evolving protein")
+        stats_file.write("\n\nThe Kolmogorov-Smirnov test between the fitness space an the evolving protein gives a p-value of: %s" % ksp)
 
         if ksdata.pvalue < 0.05:
-            distclonetrackfile.write("\nTherefore, as the pvalue is smaller than 0.05 we can reject the hypothesis that the fitness space distribution and the evolving sequence distribution are the same")
+            stats_file.write("\nTherefore, as the pvalue is smaller than 0.05 we can reject the hypothesis that the fitness space distribution and the evolving sequence distribution are the same")
         else:
-            distclonetrackfile.write("\nTherefore, as the pvalue is larger than 0.05 we canot reject the hypothesis that the fitness space distribution and the evolving sequence distribution are the same")
+            stats_file.write("\nTherefore, as the pvalue is larger than 0.05 we canot reject the hypothesis that the fitness space distribution and the evolving sequence distribution are the same")
 
-        distclonetrackfile.close()
+        stats_file.close()
 
         if generation == 0:
-            disttrackfilepath = '%s/statistics' % innerrunpath
-            disttrackfilename = "normal_distribution_statistics_fitness_space"  # define evo filename
-            disttrackfullname = os.path.join(disttrackfilepath, disttrackfilename+".txt")
-            disttrackfile = open(disttrackfullname, "w+")  # open file
+            dist_full_name = os.path.join("fitnessdistribution", "statistics",
+                                          "normal_distribution_statistics_fitness_space.txt")
+            dist_file = open(dist_full_name, "w+")  # open file
 
-            disttrackfile.write('Tests for normality on the global amino acid fitness space at each position: \n\n\n')
-            disttrackfile.write('Skewness: \n')
+            dist_file.write('Tests for normality on the global amino acid fitness space at each position: \n\n\n')
+            dist_file.write('Skewness: \n')
 
             distshapirolist = []
             distandersonlist = []
@@ -851,25 +848,25 @@ def record_generation_fitness(generation, population, variant_sites,
 
             skewness = sp.stats.skew(disttrackeryaxis)
             skewstats = sp.stats.normaltest(disttrackeryaxis)
-            disttrackfile.write("\nThe skewness of the data is %s\n\n\n" % skewness)
+            dist_file.write("\nThe skewness of the data is %s\n\n\n" % skewness)
 
-            disttrackfile.write("Kurtosis: \n")
+            dist_file.write("Kurtosis: \n")
 
             kurtosis = sp.stats.kurtosis(disttrackeryaxis)
             kurtstats = sp.stats.kurtosistest(disttrackeryaxis)
-            disttrackfile.write("\nThe kurtosis of the data is %s\n\n\n" % kurtosis)
+            dist_file.write("\nThe kurtosis of the data is %s\n\n\n" % kurtosis)
 
-            disttrackfile.write('Shapiro-Wilk test of non-normality: \n')
+            dist_file.write('Shapiro-Wilk test of non-normality: \n')
 
             totalshapiro = sp.stats.shapiro(disttrackeryaxis)
 
-            disttrackfile.write(
+            dist_file.write(
                 "\nThe Shapiro-Wilk test of non-normality for the entire dataset gives p = %s" % totalshapiro[-1])
             if totalshapiro[-1] >= 0.05:
                 shapiro = 'is not confidently non-normal'
             else:
                 shapiro = 'is confidently non-normal'
-            disttrackfile.write("\nTherefore the Shapiro-Wilk test suggests whole dataset %s" % shapiro)
+            dist_file.write("\nTherefore the Shapiro-Wilk test suggests whole dataset %s" % shapiro)
             passpercentcalc = []
             for i in distshapirolist:
                 if i[-1] >= 0.05:
@@ -877,25 +874,25 @@ def record_generation_fitness(generation, population, variant_sites,
                 else:
                     passpercentcalc.append(0)
             passpercent = (sum(passpercentcalc) / len(passpercentcalc)) * 100
-            disttrackfile.write("\n\nAccording to Shapiro-Wilk test, the proportion of individual positions that are not confidently non-normal is: %s%%" % passpercent)
+            dist_file.write("\n\nAccording to Shapiro-Wilk test, the proportion of individual positions that are not confidently non-normal is: %s%%" % passpercent)
 
-            disttrackfile.write('\n\n\nAnderson-Darling test of normality: \n')
+            dist_file.write('\n\n\nAnderson-Darling test of normality: \n')
             # x = np.random.rand(10000)
             totalanderson = sp.stats.anderson(disttrackeryaxis)
-            disttrackfile.write("\nThe Anderson-Darling test of normality for the entire dataset gives a test statistic of %s " % totalanderson.statistic)
-            disttrackfile.write("and critical values of %s\nTherefore " % totalanderson.critical_values)
+            dist_file.write("\nThe Anderson-Darling test of normality for the entire dataset gives a test statistic of %s " % totalanderson.statistic)
+            dist_file.write("and critical values of %s\nTherefore " % totalanderson.critical_values)
             if totalanderson.statistic < totalanderson.critical_values[0]:
-                disttrackfile.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 15% significance level for the entire dataset.")
+                dist_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 15% significance level for the entire dataset.")
             elif totalanderson.critical_values[0] < totalanderson.statistic < totalanderson.critical_values[1]:
-                disttrackfile.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 10% significance level for the entire dataset.")
+                dist_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 10% significance level for the entire dataset.")
             elif totalanderson.critical_values[1] < totalanderson.statistic < totalanderson.critical_values[2]:
-                disttrackfile.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 5% significance level for the entire dataset.")
+                dist_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 5% significance level for the entire dataset.")
             elif totalanderson.critical_values[2] < totalanderson.statistic < totalanderson.critical_values[3]:
-                disttrackfile.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 2.5% significance level for the entire dataset.")
+                dist_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 2.5% significance level for the entire dataset.")
             elif totalanderson.critical_values[3] < totalanderson.statistic < totalanderson.critical_values[4]:
-                disttrackfile.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 1% significance level for the entire dataset.")
+                dist_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 1% significance level for the entire dataset.")
             else:
-                disttrackfile.write("according to the Anderson-Darling test, the hypothesis of normality is rejected for the entire dataset.")
+                dist_file.write("according to the Anderson-Darling test, the hypothesis of normality is rejected for the entire dataset.")
             # set up output for significance levels
             conffifteen = []
             conften = []
@@ -922,23 +919,23 @@ def record_generation_fitness(generation, population, variant_sites,
             percenttpf = (len(conftpf) / len(distandersonlist)) * 100
             percentone = (len(confone) / len(distandersonlist)) * 100
             percentreject = (len(reject) / len(distandersonlist)) * 100
-            disttrackfile.write(
+            dist_file.write(
                 "\n\nAccording to the Anderson-Darling test the hypothesis of normality is not rejected for each position in the dataset for:")
-            disttrackfile.write("\n%s%% of positions at the 15%% significance level" % percentfifteen)
-            disttrackfile.write("\n%s%% of positions at the 10%% significance level" % percentten)
-            disttrackfile.write("\n%s%% of positions at the 5%% significance level" % percentfive)
-            disttrackfile.write("\n%s%% of positions at the 2.5%% significance level" % percenttpf)
-            disttrackfile.write("\n%s%% of positions at the 1%% significance level" % percentone)
-            disttrackfile.write("\nand %s%% of positions are rejected" % percentreject)
+            dist_file.write("\n%s%% of positions at the 15%% significance level" % percentfifteen)
+            dist_file.write("\n%s%% of positions at the 10%% significance level" % percentten)
+            dist_file.write("\n%s%% of positions at the 5%% significance level" % percentfive)
+            dist_file.write("\n%s%% of positions at the 2.5%% significance level" % percenttpf)
+            dist_file.write("\n%s%% of positions at the 1%% significance level" % percentone)
+            dist_file.write("\nand %s%% of positions are rejected" % percentreject)
 
-            disttrackfile.write('\n\n\nSkewness-kurtosis all test of difference from normality: \n')
+            dist_file.write('\n\n\nSkewness-kurtosis all test of difference from normality: \n')
             totalskewkurtall = sp.stats.normaltest(disttrackeryaxis)
 
-            disttrackfile.write("\nAccording to the skewness-kurtosis all test, the whole dataset gives p = %s," % totalskewkurtall.pvalue)
+            dist_file.write("\nAccording to the skewness-kurtosis all test, the whole dataset gives p = %s," % totalskewkurtall.pvalue)
             if totalskewkurtall.pvalue >= 0.05:
-                disttrackfile.write("\nTherefore the dataset does not differ significantly from a normal distribution")
+                dist_file.write("\nTherefore the dataset does not differ significantly from a normal distribution")
             else:
-                disttrackfile.write("\nTherefore the dataset differs significantly from a normal distribution")
+                dist_file.write("\nTherefore the dataset differs significantly from a normal distribution")
 
             skewkurtpass = []
             for i in distskewkurtalllist:
@@ -947,8 +944,8 @@ def record_generation_fitness(generation, population, variant_sites,
                 else:
                     skewkurtpass.append(0)
             skewkurtpercent = (sum(skewkurtpass) / len(skewkurtpass)) * 100
-            disttrackfile.write("\n\nAccording to the skewness-kurtosis all test, %s%% of sites do not differ significantly from a normal distribution" % skewkurtpercent)
-            disttrackfile.close()
+            dist_file.write("\n\nAccording to the skewness-kurtosis all test, %s%% of sites do not differ significantly from a normal distribution" % skewkurtpercent)
+            dist_file.close()
 
     if record["hist_fitness"] and (generation == 0 or generation % record["rate"] == 0):  # if the switch is on, and record fitness histograms on the first generation and every x generation thereafter
         # print 'go'
@@ -968,9 +965,8 @@ def record_generation_fitness(generation, population, variant_sites,
         mu2distdp = "%.3f" % mudistspace2
         plt.text(4.1, 0.42, "$\mu$1 = %s\n$\mu$2 = %s\nthreshold = %s" % (mu1distdp, mu2distdp, fitness_threshold))
 
-        disthisttrackfilepath = '%s/histograms' % innerrunpath
-        disthistfilename = "generation_%s" % generation  # define dynamic filename
-        disthistfullname = os.path.join(disthisttrackfilepath, disthistfilename+".png")
+        disthistfilename = "generation_{}.png".format(generation)  # define dynamic filename
+        disthistfullname = os.path.join("fitnessdistribution", "histograms", disthistfilename)
         plt.savefig(disthistfullname)
         plt.close()
     return fitnessdict
@@ -978,9 +974,9 @@ def record_generation_fitness(generation, population, variant_sites,
 
 def write_fasta_alignment(population, generation):  # x = current generation of sequence, y = generation number
     """Write fasta alignment from sequences provided."""
-    fastafilepath = '%s/fastas' % runpath
-    fastafilename = "generation_%s" % generation  # define dynamic filename
-    fullname = os.path.join(fastafilepath, fastafilename+".fasta")
+    fastafilepath = os.path.join(run_path, "fastas")
+    fastafilename = "generation_{}.fasta".format(generation)  # define dynamic filename
+    fullname = os.path.join(fastafilepath, fastafilename)
     with open(fullname, "w") as fastafile:  # open file
         # Write fasta header followed by residue in generation string
         # TODO: This should be an ordered dict or list to preserve the order...
@@ -1002,10 +998,8 @@ def write_final_fasta(population, bifurcations, n_roots):
         for c in clone_selection:
             generation_numbers.append(c)
 
-    treefastafilepath = '%s/treefastas' % runpath
-    treefastafilename = "selected_fastas"
-    fullname = os.path.join(treefastafilepath, treefastafilename+".fasta")
-    with open(fullname, "w") as treefastafile:  # open file
+    full_name = os.path.join(run_path, "treefastas", "selected_fastas.fasta")
+    with open(full_name, "w") as treefastafile:  # open file
         # Write fasta header followed by residue in generation string
         for p in generation_numbers:
             treefastafile.write(">clone_%s\n" % (p+1))
@@ -1046,9 +1040,7 @@ def generationator(n_generations, initial_population, fitness_threshold,
         clonelist.remove(r)
     # rootlist = [clonelist.pop(random.randrange(len(clonelist))) for r in range(n_roots)]
 
-    rootssavepath = "%s/start" % runpath
-    rootsfilename = "Roots"
-    rootsfullname = os.path.join(rootssavepath, rootsfilename+".txt")
+    rootsfullname = os.path.join(run_path, "start", "Roots.txt")
     with open(rootsfullname, "w") as rootsfile:  # open file
         rootsfile.write('Roots:')
         for k in rootlist:
@@ -1177,12 +1169,70 @@ def fitbit(evolution, n_generations, n_clones, initial_protein):
                         r"$\delta$ = {}".format(mutation_rate)]))
 
     # Define dynamic filename
-    fitgraphfilepath = '%s/fitnessgraph' % runpath
-    fitgraphfilename = "fitness_change_over %s generations" % n_generations
-    fitgraphfullname = os.path.join(fitgraphfilepath, fitgraphfilename+".png")
-
+    fitgraphfilename = "fitness_change_over{}generations.png".format(n_generations)
+    fitgraphfullname = os.path.join(run_path, "fitnessgraph", fitgraphfilename)
     plt.savefig(fitgraphfullname)
     return
+
+
+def create_output_folders(output_directory=""):
+
+    paths = ['runsettings', 'start', 'fastas', 'fitnessgraph',
+             'fitnessdotmatrix', 'fitnessdistribution', 'treefastas']
+
+    date_time = "run{}".format(datetime.datetime.now().strftime("%y-%m-%d-%H-%M"))
+    run_path = os.path.join(output_directory, "results", date_time)
+    os.makedirs(run_path)
+    if os.path.isdir(run_path):
+        print("Results directory successfully created: {}".format(os.path.join(os.getcwd(), run_path)))
+    else:
+        warnings.warn("Results directory not created: {}".format(os.path.join(os.getcwd(), run_path)))
+
+    for path in paths:
+        os.makedirs(os.path.join(run_path, path))
+
+    innerpaths = ['statistics', 'histograms']
+    for innerpath in innerpaths:
+        os.makedirs(os.path.join(run_path, "fitnessdistribution", innerpath))
+    return run_path
+
+
+def write_settings_file(run_path, **kwargs):
+    settingsfullname = os.path.join(run_path, "runsettings", "runsettings.txt")
+    # TODO: Change to logger
+    with open(settingsfullname, "w") as sf:  # open file
+        sf.write("Random number generator seed: {}\n".format(seed))
+        sf.write("Protein length: %s" % (n_amino_acids))
+        sf.write("\nAmount of mutations per generation: %s" % n_mutations_per_generation)
+        sf.write("\nAmount of clones in the population: %s" % n_clones)
+        sf.write("\nAmount of generations simulation is run for: %s" % n_generations)
+        sf.write("\nFitness threshold: %s" % fitness_threshold)
+        sf.write("\n\nNormal distribution properties: mu = %s, sigma = %s" % (mu, sigma))
+        sf.write("\nGamma distribution properties: kappa = %s, theta = %s" % (gamma_shape, gamma_scale))
+        sf.write("\n\nWrite rate for FASTA: every %s generations" % record["fasta_rate"])
+        sf.write("\n\nTrack rate for graphing and statistics: every %s generations" % record["rate"])
+        sf.write("\nTracking state: Fitness dot matrix = %s; Fitness histogram = %s; Fitness normality statistics = %s" % (record["dot_fitness"], record["hist_fitness"], record["hist_fitness_stats"]))
+
+
+def get_LG_matrix(file_name):
+    """Get .csv file defining aa substitution probabilities calculated from R
+    matrix multiplied by PI matrix, with diagonals forced to zero as mutation
+    has to happen then conferted to event rates p(lambda) where lambda = sum Qx
+    and p(lambda)x=Qxy/lambda
+    """
+    with open(file_name) as matrix_file:  # Open in read-only mode
+        LGmatrixlist = list(csv.reader(matrix_file, delimiter=","))
+    LGmatrix = np.array(LGmatrixlist)  # load matrix into a numpy array
+    LGmatrix = np.delete(LGmatrix, 0, 0)  # trim first line of the array as it's not useful
+    return LGmatrix
+
+
+def write_initial_protein(run_path, initial_protein):
+    protein_full_name = os.path.join(run_path, "start", "firstprotein.fas")
+    with open(protein_full_name, "w") as ipf:  # open file
+        ipf.write('>firstprotein\n')
+        for prot in initial_protein:
+            ipf.write(prot)
 
 
 if __name__ == '__main__':
@@ -1196,69 +1246,22 @@ if __name__ == '__main__':
     # matplotlib.use('TkAgg')
     mpl.rc('savefig', dpi=300)
 
+    # TODO: Put run_path (and subdirs) in record dict
     # create folder and subfolders
-    paths = ['runsettings', 'start', 'fastas', 'fitnessgraph',
-             'fitnessdotmatrix', 'fitnessdistribution', 'treefastas']
-
-    runpath = "results/run%s" % datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
-    os.makedirs(runpath)
-    if os.path.isdir(runpath):
-        print("Results directory successfully created: {}".format(os.path.join(os.getcwd(), runpath)))
-    else:
-        warnings.warn("Results directory not created: {}".format(os.path.join(os.getcwd(), runpath)))
-    for path in paths:
-        os.makedirs(os.path.join(runpath, path))
-
-    innerpaths = ['statistics', 'histograms']
-    innerrunpath = '%s/fitnessdistribution' % runpath
-    for innerpath in innerpaths:
-        os.makedirs(os.path.join(innerrunpath, innerpath))
-
+    run_path = create_output_folders()
     # record run settings
-    settingsfilepath = '%s/runsettings' % runpath
-    settingsfilename = "runsettings"  # define evo filename
-    settingsfullname = os.path.join(settingsfilepath, settingsfilename+".txt")
-    # TODO: Change to logger
-    with open(settingsfullname, "w") as settingsfile:  # open file
-        settingsfile.write("Protein length: %s" % (n_amino_acids))
-        settingsfile.write("\nAmount of mutations per generation: %s" % n_mutations_per_generation)
-        settingsfile.write("\nAmount of clones in the population: %s" % n_clones)
-        settingsfile.write("\nAmount of generations simulation is run for: %s" % n_generations)
-        settingsfile.write("\nFitness threshold: %s" % fitness_threshold)
-        settingsfile.write("\n\nNormal distribution properties: mu = %s, sigma = %s" % (mu, sigma))
-        settingsfile.write("\nGamma distribution properties: kappa = %s, theta = %s" % (gamma_shape, gamma_scale))
-        settingsfile.write("\n\nWrite rate for FASTA: every %s generations" % record["fasta_rate"])
-        settingsfile.write("\n\nTrack rate for graphing and statistics: every %s generations" % record["rate"])
-        settingsfile.write("\nTracking state: Fitness dot matrix = %s; Fitness histogram = %s; Fitness normality statistics = %s" % (record["dot_fitness"], record["hist_fitness"], record["hist_fitness_stats"]))
-
+    write_settings_file(run_path)
     # load matrix
-    aamatrix = "data/LGaa.csv"  # .csv file defining aa substitution probabilities calculated from R matrix multiplied by PI matrix, with diagonals forced to zero as mutation has to happen then conferted to event rates p(lambda) where lambda = sum Qx and p(lambda)x=Qxy/lambda
-    with open(aamatrix) as matrix_file:  # Open in read-only mode
-        LGmatrixlist = list(csv.reader(matrix_file, delimiter=","))
-    LGmatrix = np.array(LGmatrixlist)  # load matrix into a numpy array
-    LGmatrix = np.delete(LGmatrix, 0, 0)  # trim first line of the array as it's not useful
+    LGmatrix = get_LG_matrix(os.path.join("data", "LGaa.csv"))
 
     initial_protein = generate_protein(n_amino_acids)  # make first protein
     fitness_table = get_protein_fitness(n_amino_acids)  # make first fitness dictionary
-
     variant_sites = get_allowed_sites(n_amino_acids, n_anchors)  # generate invariant sites
     initial_protein = superfit(fitness_table, variant_sites, initial_protein, fitness_start)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
     gammacategories = gamma_ray(n_amino_acids, gamma_shape, gamma_scale, gamma_iterations, gamma_samples)  # generate gamma categories for every site
-
-    firstproteinsavepath = '%s/start' % runpath
-    firstproteinfilename = "firstprotein"
-    firstproteinfullname = os.path.join(firstproteinsavepath, firstproteinfilename+".fas")
-    with open(firstproteinfullname, "w") as firstproteinfile:  # open file
-        firstproteinfile.write('>firstprotein\n')
-        for prot in initial_protein:
-            firstproteinfile.write(prot)
-    # print 'first superfit protein:', initial_protein
-    # print 'fitness of the first protein:', calculate_fitness(initial_protein, fitness_table)
-
+    write_initial_protein(run_path, initial_protein)  # Record initial protein
     initial_population = clone_protein(initial_protein, n_clones)  # make some clones to seed evolution
-
     evolution = generationator(n_generations, initial_population,
                                fitness_threshold, n_mutations_per_generation,
                                record["fasta_rate"], LGmatrix)
-
     fitbit(evolution, n_generations, n_clones, initial_protein)

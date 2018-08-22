@@ -107,12 +107,13 @@ def get_protein_fitness(n_amino_acids, n_variants=len(RESIDUES)):
     # TODO:
     # data = np.random.normal(mu, sigma, size=(n_amino_acids, len(RESIDUES)))
     # fitness_table = pd.DataFrame(data=data, columns=RESIDUES)
+    return fitness_table
 
-    # TODO: Split into write_fitness_table(fitness_table)
-    aminofitsavepath = '%s/start' % runpath
-    aminofitfilename = "fitnesslibrary"
-    aminofitfullname = os.path.join(aminofitsavepath, aminofitfilename+".csv")
-    # with open(aminofitfullname, "w") as aminofile:  # open file
+
+def write_protein_fitness(run_path, directory, fitness_table):
+
+    fitness_file_name = os.path.join(run_path, directory, "fitnesslibrary.csv")
+    # with open(fitness_file_name, "w") as aminofile:  # open file
     #     # Write header
     #     aminofile.write("aminoposition"),
     #     for aa in RESIDUES:
@@ -126,10 +127,8 @@ def get_protein_fitness(n_amino_acids, n_variants=len(RESIDUES)):
     #             aminofile.write(',%s' % RESIDUES[r])
     # NOTE: This will not include the index column
     header = ",".join(RESIDUES)
-    np.savetxt(aminofitfullname, fitness_table, delimiter=",", header=header)
-    # fitness_table.to_csv(aminofitfullname)
-
-    return fitness_table
+    np.savetxt(fitness_file_name, fitness_table, delimiter=",", header=header)
+    # fitness_table.to_csv(fitness_file_name)
 
 
 def clone_protein(protein, n_clones):

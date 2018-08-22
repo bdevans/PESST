@@ -143,6 +143,8 @@ def gamma_ray(n_amino_acids, gamma):  # kappa, theta, n_iterations=100, n_sample
 
     # quartiles = [[] * 4]
     kappa, theta, n_iterations, n_samples = gamma["shape"], gamma["scale"], gamma["iterations"], gamma["samples"]
+    # TODO:
+    # kappa, theta, n_iterations, n_samples = shape, scale, iterations, samples
     medians = np.zeros(shape=(n_iterations, 4))
 
     for i in range(n_iterations):
@@ -1223,11 +1225,12 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
 
     # TODO: Put run_path (and subdirs) in record dict
     # create folder and subfolders
+    # PWD = os.path.dirname(__file__)
     run_path = create_output_folders()
     # record run settings
     write_settings_file(run_path)
     # load matrix
-    LGmatrix = get_LG_matrix()  # os.path.join("data", "LGaa.csv"))
+    LGmatrix = get_LG_matrix()  # os.path.join("data", "LGaa.csv"))
 
     initial_protein = generate_protein(n_amino_acids)  # make first protein
     fitness_table = get_protein_fitness(n_amino_acids)  # make first fitness dictionary
@@ -1244,7 +1247,7 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
 
 
 if __name__ == '__main__':
-
+    # NOTE: __path__ is initialized to be a list containing the name of the directory holding the package’s __init__.py
 
     # from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
     # from matplotlib.figure import Figure
@@ -1261,7 +1264,6 @@ if __name__ == '__main__':
     # parameters for normal distribution used to select fitness values
     mu = -1.2
     sigma = 2.5
-
 
     # TODO: These could possibly gi into their own dictionary too
     n_clones = 52  # amount of clones that will be generated in the first generation #5 10 20 40 80

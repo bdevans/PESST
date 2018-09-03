@@ -902,7 +902,7 @@ def record_generation_fitness(generation, population, variant_sites,
     disttrackeryaxis = []
     for i in disttrackerlist:
         for j in i:
-            disttrackeryaxis.append(j)
+            disttrackeryaxis.append(j)  # Flattened list of fitness_table
 
     if generation == 0 or generation % record["rate"] == 0:
         # Build distribution of fitness values existing in evolving protein

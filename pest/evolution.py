@@ -486,7 +486,7 @@ def plot_fitness_histogram(n_proteins, n_amino_acids, fitness_table):
     return
 
 
-def mutate(current_generation, n_mutations_per_generation, variant_sites,
+def mutate(current_generation, n_mutations_per_gen, variant_sites,
            gamma_categories, LG_matrix, LG_residues, LG_indicies):
     """Mutate a given sequence based on the LG+I+G model of amino acid
     substitution.
@@ -498,7 +498,7 @@ def mutate(current_generation, n_mutations_per_generation, variant_sites,
     # Sum gammas to make a probability distribution to randomly select from.
     cumulative_gamma = np.cumsum(gamma_categories)  # n_amino_acids long
 
-    for q in range(n_mutations_per_generation):  # impliment gamma
+    for q in range(n_mutations_per_gen):  # impliment gamma
         # Pick random key, clone to make a random generation
         mutant_key, mutant_clone = random.choice(list(next_generation.items()))
         mutation_target = copy.deepcopy(mutant_clone)  # make a deep copy of the libaries value as to not change it in the library until we want to
@@ -1001,7 +1001,7 @@ def replace_protein(protein, candidates, fitnesses, fitness_threshold):
 
 
 def generationator(n_generations, initial_population, fitness_table, fitness_threshold, variant_sites, gamma_categories,
-                   n_mutations_per_generation, fasta_rate, LG_matrix, LG_residues, LG_indicies, run_path):
+                   n_mutations_per_gen, fasta_rate, LG_matrix, LG_residues, LG_indicies, run_path):
     """Generation generator - mutate a protein for a defined number of
     generations according to an LG matrix and gamma distribution.
     """
@@ -1059,8 +1059,9 @@ def generationator(n_generations, initial_population, fitness_table, fitness_thr
 
         # TODO: If no suitable clones are available, re-mutate the generation and start again
         # Mutate population
-        population = mutate(population, n_mutations_per_generation,
-                            variant_sites, gamma_categories, LG_matrix, LG_residues, LG_indicies)
+        population = mutate(population, n_mutations_per_gen,
+                            variant_sites, gamma_categories,
+                            LG_matrix, LG_residues, LG_indicies)
         # TODO: Split out writing to file until the end so that all branches are valid
         # Re-calculate fitness
         fitnesses = record_generation_fitness(gen, population, variant_sites,
@@ -1179,7 +1180,7 @@ def write_settings_file(run_path, **kwargs):
     with open(settingsfullname, "w") as sf:  # open file
         sf.write("Random number generator seed: {}\n".format(seed))
         sf.write("Protein length: %s" % (n_amino_acids))
-        sf.write("\nAmount of mutations per generation: %s" % n_mutations_per_generation)
+        sf.write("\nAmount of mutations per generation: %s" % n_mutations_per_gen)
         sf.write("\nAmount of clones in the population: %s" % n_clones)
         sf.write("\nAmount of generations simulation is run for: %s" % n_generations)
         sf.write("\nFitness threshold: %s" % fitness_threshold)
@@ -1216,13 +1217,13 @@ def write_initial_protein(run_path, initial_protein):
 
 
 def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
-         n_clones=52, n_amino_acids=80, mutation_rate=0.001, n_mutations_per_generation=None,
-         n_anchors=None,
+         n_clones=52, n_amino_acids=80, mutation_rate=0.001,
+         n_mutations_per_gen=None, n_anchors=None,
          deaths_per_generations=5, death_ratio=0.05, seed=None,
          n_roots=4, gamma=None, record=None):
 
-    if n_mutations_per_generation is None:
-        n_mutations_per_generation = int(n_clones*(n_amino_acids)*mutation_rate)
+    if n_mutations_per_gen is None:
+        n_mutations_per_gen = int(n_clones*(n_amino_acids)*mutation_rate)
     if n_anchors is None:
         n_anchors = int((n_amino_acids)/10)
     # TODO: switch from random to np.random for proper seeding
@@ -1248,7 +1249,7 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
     initial_population = clone_protein(initial_protein, n_clones)  # make some clones to seed evolution
     evolution = generationator(n_generations, initial_population, fitness_table,
                                fitness_threshold, variant_sites, gamma_categories,
-                               n_mutations_per_generation, record["fasta_rate"],
+                               n_mutations_per_gen, record["fasta_rate"],
                                LG_matrix, LG_residues, LG_indicies, run_path)
     fitbit(evolution, n_generations, n_clones, initial_protein, fitness_table, run_path)
 
@@ -1278,7 +1279,7 @@ if __name__ == '__main__':
     n_amino_acids = 80  # number of amino acids in the protein after the start methionine
     mutation_rate = 0.001  # should be small!
     # TODO: Allow user to pass a number but defau;t to None and calculate as follows
-    n_mutations_per_generation = int(n_clones*(n_amino_acids)*mutation_rate)  # number of mutations per generation
+    n_mutations_per_gen = int(n_clones*(n_amino_acids)*mutation_rate)  # number of mutations per generation
     n_anchors = int((n_amino_acids)/10)  # amount of invariant sites in a generation (not including root)
     deaths_per_generations = 5  # Set to 0 to turn off protein deaths
     death_ratio = 0.05
@@ -1307,5 +1308,5 @@ if __name__ == '__main__':
               "invariants": False}
 
     pest(n_generations, fitness_start, fitness_threshold, mu, sigma, n_clones,
-         n_amino_acids, mutation_rate, n_mutations_per_generation, n_anchors,
+         n_amino_acids, mutation_rate, n_mutations_per_gen, n_anchors,
          deaths_per_generations, death_ratio, seed, n_roots, gamma, record)

@@ -6,7 +6,7 @@ from textwrap import wrap
 from collections import namedtuple
 import warnings
 import random
-# from random import randint, sample, choice, shuffle  # TODO: Consolidate with numpy
+# from random import sample, choice, shuffle  # TODO: Consolidate with numpy
 import numpy as np
 # from numpy.random import normal, uniform, gamma
 import scipy as sp

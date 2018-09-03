@@ -252,7 +252,8 @@ def gamma_ray(n_amino_acids, gamma):  # kappa, theta, n_iterations=100, n_sample
 
     # gammaaminos = [random.choice(average_medians) for aa in range(n_amino_acids)]
 
-    return [random.choice(average_medians) for aa in range(n_amino_acids)]
+    # return [random.choice(average_medians) for aa in range(n_amino_acids)]
+    return random.choices(average_medians, k=n_amino_acids)
 
 
 def mutate_amino_acid(amino_acid, LG_matrix, LG_residues, LG_indicies):  # b = matrix, a = current amino acid

@@ -16,7 +16,8 @@ RUN [ "conda", "update", "conda", "-y" ]
 RUN [ "conda", "update", "--all", "-y" ]
 COPY environment.yml /tmp/environment.yml
 WORKDIR /tmp
-RUN [ "conda", "env", "create" ]
+# RUN [ "conda", "env", "create" ]
+RUN [ "/bin/bash", "-c", "conda", "env", "update", "-n root", "-f /tmp/environment.yml" ]
 
 # Use bash to source our new environment for setting up private dependencies
 # Note that /bin/bash is called in exec mode directly
@@ -33,4 +34,5 @@ VOLUME /usr/pest/results
 
 # We set ENTRYPOINT, so while we still use exec mode, we don’t
 # explicitly call /bin/bash
-CMD [ "source activate pest && exec python pest/evolution.py" ]
+# CMD [ "source activate pest && exec python pest/evolution.py" ]
+CMD [ "exec python pest/evolution.py" ]

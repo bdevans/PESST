@@ -628,6 +628,160 @@ def plot_threshold_fitness(generation, population, variant_sites, fitness_table,
     plt.close()  # close plot (so you dont generate 100 individual figures)
 
 
+def append_ks_statistics(stats_full_name, disttotalfitness, disttrackeryaxis):
+    with open(stats_full_name, "a") as stats_file:  # Append to file
+        # Kolmogorov-Smirnov test of similarity to original distributuion
+        ksdata = sp.stats.ks_2samp(np.asarray(disttotalfitness), np.asarray(disttrackeryaxis))
+        stats_file.write("\n\n\n2-sided Kolmogorov-Smirnov test of similarity "
+                         "between the fitness space and evolving protein:\n\n")
+        stats_file.write("The Kolmogorov-Smirnov test between the fitness "
+                         "space and the evolving protein gives a p-value of: "
+                         "{}\n".format(ksdata.pvalue))
+
+        if ksdata.pvalue < 0.05:
+            stats_file.write("Therefore, as the p-value is smaller than 0.05 "
+                             "we can reject the hypothesis that the fitness "
+                             "space distribution and the evolving sequence "
+                             "distribution are the same.")
+        else:
+            stats_file.write("Therefore, as the p-value is larger than 0.05 "
+                             "we cannot reject the hypothesis that the fitness "
+                             "space distribution and the evolving sequence "
+                             "distribution are the same.")
+
+
+def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
+    """record["hist_fitness_stats"] == True"""
+    # This section writes a file describing 5 statistical tests on the global fitness space.
+
+    stats_file = open(stats_full_name, "w")  # open file
+
+    stats_file.write("Tests for normality on the amino acid fitnesses\n"
+                     "===============================================\n\n\n")
+
+    # distshapirolist = []
+    # distandersonlist = []
+    # distskewkurtalllist = []
+    # # Calculate statistics row by row
+    # for i in aa_variant_fitnesses:  # fitness_table when generation == 0 : np.random.normal(mu, sigma, size=(n_amino_acids, n_variants))
+    #     distshapirolist.append(sp.stats.shapiro(i))
+    #     distandersonlist.append(sp.stats.anderson(i))
+    #     distskewkurtalllist.append(sp.stats.normaltest(i))
+
+    # TODO: Check that the ordering is correct (default: row major)
+    fitnesses = aa_variant_fitnesses.ravel()
+
+    # Skewness
+    stats_file.write("Skewness\n"
+                     "--------\n\n"
+                     "The skewness of the data is: "
+                     "{}\n\n\n".format(sp.stats.skew(fitnesses)))
+
+    # Kurtosis
+    stats_file.write("Kurtosis\n"
+                     "--------\n\n"
+                     "The kurtosis of the data is: "
+                     "{}\n\n\n".format(sp.stats.kurtosis(fitnesses)))
+
+    # Normality (Shapiro-Wilk)
+    stats_file.write("Shapiro-Wilk test of non-normality\n"
+                     "----------------------------------\n\n")
+    W_shapiro, p_shapiro = sp.stats.shapiro(fitnesses)
+    stats_file.write("The Shapiro-Wilk test of non-normality for the entire "
+                     "dataset gives p = {}\n".format(p_shapiro))
+    if p_shapiro >= 0.05:
+        shapiro = 'not '
+    else:
+        shapiro = ''
+    stats_file.write("Therefore the Shapiro-Wilk test suggests that the whole "
+                     "dataset is {}confidently non-normal\n".format(shapiro))
+    stats_file.write("However if there are more than 5000 datapoints this "
+                     "test is inaccurate. This test uses {} datapoints.\n\n"
+                     .format(len(fitnesses)))
+    passpercentcalc = []
+    # for i in distshapirolist:
+    for aa in aa_variant_fitnesses:
+        (_, p_value) = sp.stats.shapiro(aa)
+        if p_value >= 0.05:
+            passpercentcalc.append(1)
+        else:
+            passpercentcalc.append(0)
+    # passpercent = (sum(passpercentcalc) / len(passpercentcalc)) * 100
+    stats_file.write("According to Shapiro-Wilk test, the proportion of "
+                     "individual positions that are not confidently "
+                     "non-normal is: {:.2%}\n\n\n"
+                     .format(sum(passpercentcalc) / len(passpercentcalc)))
+
+    # Normality (Anderson-Darling)
+    significance_levels = (15, 10, 5, 2.5, 1)  # Percentages for normal distribution
+    stats_file.write("Anderson-Darling test of normality\n"
+                     "----------------------------------\n\n")
+    anderson_results = sp.stats.anderson(fitnesses)
+    stats_file.write("The Anderson-Darling test of normality for the entire "
+                     "dataset gives a test statistic of {} "
+                     "and critical values of {}\n"
+                     .format(anderson_results.statistic,
+                             anderson_results.critical_values))
+    if anderson_results.statistic > anderson_results.critical_values[-1]:
+        stats_file.write("Therefore according to the Anderson-Darling test, "
+                         "the hypothesis of normality is rejected for the "
+                         "entire dataset.")
+    else:
+        level_index = np.searchsorted(anderson_results.critical_values,
+                                      anderson_results.statistic, side="left")
+        stats_file.write("Therefore according to the Anderson-Darling test, "
+                         "the hypothesis of normality is not rejected at the "
+                         "{}% significance level for the entire dataset."
+                         .format(significance_levels[level_index]))
+
+    # Set up output for significance levels - final bin represents "reject"
+    # hypothesis_tally = [0 for result in range(len(significance_levels) + 1)]
+    hypothesis_tally = np.zeros(len(significance_levels) + 1)
+    # for result in distandersonlist:
+    for aa in aa_variant_fitnesses:
+        result = sp.stats.anderson(aa)
+        level_index = np.searchsorted(anderson_results.critical_values,
+                                      result.statistic, side="left")
+        hypothesis_tally[level_index] += 1
+    hypothesis_tally /= aa_variant_fitnesses.shape[0]  # Normalise
+    stats_file.write("\n\nAccording to the Anderson-Darling test, "
+                     "the hypothesis of normality is not rejected for each "
+                     "position in the dataset for: ")
+    for proportion, level in zip(hypothesis_tally, significance_levels):
+        stats_file.write("\n{:.2%} of positions at the "
+                         "{}% significance level".format(proportion, level))
+    stats_file.write("\nand {:.2%} of positions are rejected.\n\n\n".format(hypothesis_tally[-1]))
+
+    # Normality (Skewness-Kurtosis)
+    stats_file.write("Skewness-kurtosis all test of difference from normality\n"
+                     "-------------------------------------------------------\n\n")
+    skewkurtall = sp.stats.normaltest(fitnesses)
+
+    stats_file.write("According to the skewness-kurtosis all test, the whole "
+                     "dataset gives p = {}.".format(skewkurtall.pvalue))
+    if skewkurtall.pvalue >= 0.05:
+        stats_file.write("\nTherefore the dataset does not differ significantly "
+                         "from a normal distribution.\n\n")
+    else:
+        stats_file.write("\nTherefore the dataset differs significantly from "
+                         "a normal distribution.\n\n")
+
+    skewkurtpass = []
+    # for i in distskewkurtalllist:
+    for aa in aa_variant_fitnesses:
+        distskewkurt = sp.stats.normaltest(aa)
+        if distskewkurt.pvalue >= 0.05:
+            skewkurtpass.append(1)
+        else:
+            skewkurtpass.append(0)
+    stats_file.write("According to the skewness-kurtosis all test, "
+                     "{:.2%} of sites do not differ significantly from a "
+                     "normal distribution."
+                     .format(sum(skewkurtpass) / len(skewkurtpass)))
+
+    stats_file.close()
+
+
 def plot_histogram_of_fitness(disthistfullname, initial, distributions):
     plt.figure()
     plt.axis([-10, 8, 0, 0.5])  # generate attractive figure
@@ -782,253 +936,275 @@ def record_generation_fitness(generation, population, variant_sites,
                     disttotalfitness.append(distvalue)  # append these to list
             distclonefitnesslist.append(clonefitnesslist)
 
-    if record["hist_fitness_stats"] and (generation == 0 or generation % record["rate"] == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
-        # This section writes a file describing 5 statistical tests on the global fitness space.
-        stats_file_name = "normal_distribution_statistics_generation{}.txt".format(generation)  # define evo filename
-        stats_full_name = os.path.join(run_path, "fitnessdistribution", "statistics", stats_file_name)
-        stats_file = open(stats_full_name, "w")  # open file
-        stats_file.write('Tests for normality on the amino acid fitness of each clone: \n\n\n')
-
-        distclonesshapirolist = []
-        distclonesandersonlist = []
-        distclonesskewkurtalllist = []
-
-        stats_file.write('Skewness: \n')
-
-        for i in distclonefitnesslist:
-            distclonesshapirolist.append(sp.stats.shapiro(i))
-            distclonesandersonlist.append(sp.stats.anderson(i))
-            distclonesskewkurtalllist.append(sp.stats.normaltest(i))
-
-        skewness = sp.stats.skew(np.asarray(disttotalfitness))
-        # skewstats = sp.stats.normaltest(np.asarray(disttotalfitness))
-        stats_file.write("\nThe skewness of the data is %s\n\n\n" % skewness)
-        stats_file.write("Kurtosis: \n")
-
-        clonekurtosis = sp.stats.kurtosis(disttotalfitness)
-        # kurtclonestats = sp.stats.kurtosistest(disttotalfitness)
-        stats_file.write("\nThe kurtosis of the data is %s\n\n\n" % clonekurtosis)
-        stats_file.write('Shapiro-Wilk test of non-normality: \n')
-
-        totalcloneshapiro = sp.stats.shapiro(disttotalfitness)
-
-        # shapiro-wilk tests
-        stats_file.write("\nThe Shapiro-Wilk test of non-normality for the entire dataset gives p = %s" % totalcloneshapiro[-1])
-        if totalcloneshapiro[-1] >= 0.05:
-            shapiro = 'is not confidently non-normal'
-        else:
-            shapiro = 'is confidently non-normal'
-        stats_file.write("\nTherefore the Shapiro-Wilk test suggests whole dataset %s" % shapiro)
-        stats_file.write("\nHowever if there are more than 5000 datapoints this test is inaccurate. This test uses %s datapoints" % len(disttotalfitness))
-        clonepasspercentcalc = []
-        for i in distclonesshapirolist:
-            if i[-1] >= 0.05:
-                clonepasspercentcalc.append(1)
-            else:
-                clonepasspercentcalc.append(0)
-        clonepasspercent = (sum(clonepasspercentcalc) / len(clonepasspercentcalc)) * 100
-        stats_file.write("\n\nAccording to Shapiro-Wilk test, the proportion of individual positions that are not confidently non-normal is: %s%%" % clonepasspercent)
-
-        # anderson-darling tests
-        stats_file.write('\n\n\nAnderson-Darling test of normality: \n')
-        # x = np.random.rand(10000)
-        totalcloneanderson = sp.stats.anderson(disttotalfitness)
-        stats_file.write("\nThe Anderson-Darling test of normality for the entire dataset gives a test statistic of %s " % totalcloneanderson.statistic)
-        stats_file.write("and critical values of %s\nTherefore " % totalcloneanderson.critical_values)
-        if totalcloneanderson.statistic < totalcloneanderson.critical_values[0]:
-            stats_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 15% significance level for the entire dataset.")
-        elif totalcloneanderson.critical_values[0] < totalcloneanderson.statistic < totalcloneanderson.critical_values[1]:
-            stats_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 10% significance level for the entire dataset.")
-        elif totalcloneanderson.critical_values[1] < totalcloneanderson.statistic < totalcloneanderson.critical_values[2]:
-            stats_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 5% significance level for the entire dataset.")
-        elif totalcloneanderson.critical_values[2] < totalcloneanderson.statistic < totalcloneanderson.critical_values[3]:
-            stats_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 2.5% significance level for the entire dataset.")
-        elif totalcloneanderson.critical_values[3] < totalcloneanderson.statistic < totalcloneanderson.critical_values[4]:
-            stats_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 1% significance level for the entire dataset.")
-        else:
-            stats_file.write("according to the Anderson-Darling test, the hypothesis of normality is rejected for the entire dataset.")
-
-        cloneconffifteen = []
-        cloneconften = []
-        cloneconffive = []
-        cloneconftpf = []
-        cloneconfone = []
-        clonereject = []
-        for i in distclonesandersonlist:
-            if i.statistic < i.critical_values[0]:
-                cloneconffifteen.append(1)
-            elif i.critical_values[0] < i.statistic < i.critical_values[1]:
-                cloneconften.append(1)
-            elif i.critical_values[1] < i.statistic < i.critical_values[2]:
-                cloneconffive.append(1)
-            elif i.critical_values[2] < i.statistic < i.critical_values[3]:
-                cloneconftpf.append(1)
-            elif i.critical_values[3] < i.statistic < i.critical_values[4]:
-                cloneconfone.append(1)
-            else:
-                clonereject.append(1)
-        clonepercentfifteen = (len(cloneconffifteen) / len(distclonesandersonlist)) * 100
-        clonepercentten = (len(cloneconften) / len(distclonesandersonlist)) * 100
-        clonepercentfive = (len(cloneconffive) / len(distclonesandersonlist)) * 100
-        clonepercenttpf = (len(cloneconftpf) / len(distclonesandersonlist)) * 100
-        clonepercentone = (len(cloneconfone) / len(distclonesandersonlist)) * 100
-        clonepercentreject = (len(clonereject) / len(distclonesandersonlist)) * 100
-        stats_file.write("\n\nAccording to the Anderson-Darling test the hypothesis of normality is not rejected for each position in the dataset for:")
-        stats_file.write("\n%s%% of positions at the 15%% significance level" % clonepercentfifteen)
-        stats_file.write("\n%s%% of positions at the 10%% significance level" % clonepercentten)
-        stats_file.write("\n%s%% of positions at the 5%% significance level" % clonepercentfive)
-        stats_file.write("\n%s%% of positions at the 2.5%% significance level" % clonepercenttpf)
-        stats_file.write("\n%s%% of positions at the 1%% significance level" % clonepercentone)
-        stats_file.write("\nand %s%% of positions are rejected" % clonepercentreject)
-
-        # skewness-kurtosis all tests
-        stats_file.write('\n\n\nSkewness-kurtosis all test of difference from normality: \n')
-        clonetotalskewkurtall = sp.stats.normaltest(disttotalfitness)
-
-        stats_file.write("\nAccording to the skewness-kurtosis all test, the whole dataset gives p = %s," % clonetotalskewkurtall.pvalue)
-        if clonetotalskewkurtall.pvalue >= 0.05:
-            stats_file.write("\nTherefore the dataset does not differ significantly from a normal distribution")
-        else:
-            stats_file.write("\nTherefore the dataset differs significantly from a normal distribution")
-
-        cloneskewkurtpass = []
-        for i in distclonesskewkurtalllist:
-            if i.pvalue >= 0.05:
-                cloneskewkurtpass.append(1)
-            else:
-                cloneskewkurtpass.append(0)
-        cloneskewkurtpercent = (sum(cloneskewkurtpass) / len(cloneskewkurtpass)) * 100
-        stats_file.write("\n\nAccording to the skewness-kurtosis all test, %s%% of sites do not differ significantly from a normal distribution" % cloneskewkurtpercent)
-
-        # Kolmogorov-Smirnov test of similarity to original distributuion
-        ksdata = sp.stats.ks_2samp(np.asarray(disttotalfitness), np.asarray(disttrackeryaxis))
-        ksp = ksdata.pvalue
-        stats_file.write("\n\n\n2-sided Kolmogorov-Smirnov test of similarity between the fitness space and evolving protein")
-        stats_file.write("\n\nThe Kolmogorov-Smirnov test between the fitness space an the evolving protein gives a p-value of: %s" % ksp)
-
-        if ksdata.pvalue < 0.05:
-            stats_file.write("\nTherefore, as the pvalue is smaller than 0.05 we can reject the hypothesis that the fitness space distribution and the evolving sequence distribution are the same")
-        else:
-            stats_file.write("\nTherefore, as the pvalue is larger than 0.05 we canot reject the hypothesis that the fitness space distribution and the evolving sequence distribution are the same")
-
-        stats_file.close()
-
+    if record["hist_fitness_stats"]:
+        # Write a file describing 5 statistical tests on the protein fitness space
         if generation == 0:
-            dist_full_name = os.path.join(run_path, "fitnessdistribution", "statistics",
-                                          "normal_distribution_statistics_fitness_space.txt")
-            dist_file = open(dist_full_name, "w")  # open file
+            stats_file_name = "normal_distribution_statistics_fitness_space.txt"
+            distributions = fitness_table
+        else:
+            stats_file_name = "normal_distribution_statistics_generation{}.txt".format(generation)
+            distributions = np.asarray(distclonefitnesslist)
+        stats_full_name = os.path.join(run_path, "fitnessdistribution",
+                                       "statistics", stats_file_name)
+        write_histogram_statistics(stats_full_name, distributions)
+        if generation > 0:
+            append_ks_statistics(stats_full_name, distributions.ravel(), fitness_table.ravel())
 
-            dist_file.write('Tests for normality on the global amino acid fitness space at each position: \n\n\n')
-            dist_file.write('Skewness: \n')
 
-            distshapirolist = []
-            distandersonlist = []
-            distskewkurtalllist = []
-            for i in disttrackerlist:
-                distshapirolist.append(sp.stats.shapiro(i))
-                distandersonlist.append(sp.stats.anderson(i))
-                distskewkurtalllist.append(sp.stats.normaltest(i))
-
-            skewness = sp.stats.skew(disttrackeryaxis)
-            skewstats = sp.stats.normaltest(disttrackeryaxis)
-            dist_file.write("\nThe skewness of the data is %s\n\n\n" % skewness)
-
-            dist_file.write("Kurtosis: \n")
-
-            kurtosis = sp.stats.kurtosis(disttrackeryaxis)
-            kurtstats = sp.stats.kurtosistest(disttrackeryaxis)
-            dist_file.write("\nThe kurtosis of the data is %s\n\n\n" % kurtosis)
-
-            dist_file.write('Shapiro-Wilk test of non-normality: \n')
-
-            totalshapiro = sp.stats.shapiro(disttrackeryaxis)
-
-            dist_file.write(
-                "\nThe Shapiro-Wilk test of non-normality for the entire dataset gives p = %s" % totalshapiro[-1])
-            if totalshapiro[-1] >= 0.05:
-                shapiro = 'is not confidently non-normal'
-            else:
-                shapiro = 'is confidently non-normal'
-            dist_file.write("\nTherefore the Shapiro-Wilk test suggests whole dataset %s" % shapiro)
-            passpercentcalc = []
-            for i in distshapirolist:
-                if i[-1] >= 0.05:
-                    passpercentcalc.append(1)
-                else:
-                    passpercentcalc.append(0)
-            passpercent = (sum(passpercentcalc) / len(passpercentcalc)) * 100
-            dist_file.write("\n\nAccording to Shapiro-Wilk test, the proportion of individual positions that are not confidently non-normal is: %s%%" % passpercent)
-
-            dist_file.write('\n\n\nAnderson-Darling test of normality: \n')
-            # x = np.random.rand(10000)
-            totalanderson = sp.stats.anderson(disttrackeryaxis)
-            dist_file.write("\nThe Anderson-Darling test of normality for the entire dataset gives a test statistic of %s " % totalanderson.statistic)
-            dist_file.write("and critical values of %s\nTherefore " % totalanderson.critical_values)
-            if totalanderson.statistic < totalanderson.critical_values[0]:
-                dist_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 15% significance level for the entire dataset.")
-            elif totalanderson.critical_values[0] < totalanderson.statistic < totalanderson.critical_values[1]:
-                dist_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 10% significance level for the entire dataset.")
-            elif totalanderson.critical_values[1] < totalanderson.statistic < totalanderson.critical_values[2]:
-                dist_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 5% significance level for the entire dataset.")
-            elif totalanderson.critical_values[2] < totalanderson.statistic < totalanderson.critical_values[3]:
-                dist_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 2.5% significance level for the entire dataset.")
-            elif totalanderson.critical_values[3] < totalanderson.statistic < totalanderson.critical_values[4]:
-                dist_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 1% significance level for the entire dataset.")
-            else:
-                dist_file.write("according to the Anderson-Darling test, the hypothesis of normality is rejected for the entire dataset.")
-            # set up output for significance levels
-            conffifteen = []
-            conften = []
-            conffive = []
-            conftpf = []
-            confone = []
-            reject = []
-            for i in distandersonlist:
-                if i.statistic < i.critical_values[0]:
-                    conffifteen.append(1)
-                elif i.critical_values[0] < i.statistic < i.critical_values[1]:
-                    conften.append(1)
-                elif i.critical_values[1] < i.statistic < i.critical_values[2]:
-                    conffive.append(1)
-                elif i.critical_values[2] < i.statistic < i.critical_values[3]:
-                    conftpf.append(1)
-                elif i.critical_values[3] < i.statistic < i.critical_values[4]:
-                    confone.append(1)
-                else:
-                    reject.append(1)
-            percentfifteen = (len(conffifteen) / len(distandersonlist)) * 100
-            percentten = (len(conften) / len(distandersonlist)) * 100
-            percentfive = (len(conffive) / len(distandersonlist)) * 100
-            percenttpf = (len(conftpf) / len(distandersonlist)) * 100
-            percentone = (len(confone) / len(distandersonlist)) * 100
-            percentreject = (len(reject) / len(distandersonlist)) * 100
-            dist_file.write(
-                "\n\nAccording to the Anderson-Darling test the hypothesis of normality is not rejected for each position in the dataset for:")
-            dist_file.write("\n%s%% of positions at the 15%% significance level" % percentfifteen)
-            dist_file.write("\n%s%% of positions at the 10%% significance level" % percentten)
-            dist_file.write("\n%s%% of positions at the 5%% significance level" % percentfive)
-            dist_file.write("\n%s%% of positions at the 2.5%% significance level" % percenttpf)
-            dist_file.write("\n%s%% of positions at the 1%% significance level" % percentone)
-            dist_file.write("\nand %s%% of positions are rejected" % percentreject)
-
-            dist_file.write('\n\n\nSkewness-kurtosis all test of difference from normality: \n')
-            totalskewkurtall = sp.stats.normaltest(disttrackeryaxis)
-
-            dist_file.write("\nAccording to the skewness-kurtosis all test, the whole dataset gives p = %s," % totalskewkurtall.pvalue)
-            if totalskewkurtall.pvalue >= 0.05:
-                dist_file.write("\nTherefore the dataset does not differ significantly from a normal distribution")
-            else:
-                dist_file.write("\nTherefore the dataset differs significantly from a normal distribution")
-
-            skewkurtpass = []
-            for i in distskewkurtalllist:
-                if i.pvalue >= 0.05:
-                    skewkurtpass.append(1)
-                else:
-                    skewkurtpass.append(0)
-            skewkurtpercent = (sum(skewkurtpass) / len(skewkurtpass)) * 100
-            dist_file.write("\n\nAccording to the skewness-kurtosis all test, %s%% of sites do not differ significantly from a normal distribution" % skewkurtpercent)
-            dist_file.close()
+    # if 0 and record["hist_fitness_stats"] and (generation == 0 or generation % record["rate"] == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
+    #     # This section writes a file describing 5 statistical tests on the global fitness space.
+    #     if generation == 0:
+    #         stats_file_name = "normal_distribution_statistics_fitness_space.txt"
+    #     else:
+    #         stats_file_name = "normal_distribution_statistics_generation{}.txt".format(generation)  # define evo filename
+    #     stats_full_name = os.path.join(run_path, "fitnessdistribution", "statistics", stats_file_name)
+    #     stats_file = open(stats_full_name, "w")  # open file
+    #
+    #     if generation == 0:
+    #         stats_file.write('Tests for normality on the global amino acid fitness space at each position: \n\n\n')
+    #     else:
+    #         stats_file.write('Tests for normality on the amino acid fitness of each clone: \n\n\n')
+    #
+    #     distclonesshapirolist = []
+    #     distclonesandersonlist = []
+    #     distclonesskewkurtalllist = []
+    #
+    #     stats_file.write('Skewness: \n')
+    #
+    #     for i in distclonefitnesslist:
+    #         distclonesshapirolist.append(sp.stats.shapiro(i))
+    #         distclonesandersonlist.append(sp.stats.anderson(i))
+    #         distclonesskewkurtalllist.append(sp.stats.normaltest(i))
+    #
+    #     skewness = sp.stats.skew(np.asarray(disttotalfitness))
+    #     # skewstats = sp.stats.normaltest(np.asarray(disttotalfitness))
+    #     stats_file.write("\nThe skewness of the data is %s\n\n\n" % skewness)
+    #     stats_file.write("Kurtosis: \n")
+    #
+    #     clonekurtosis = sp.stats.kurtosis(disttotalfitness)
+    #     # kurtclonestats = sp.stats.kurtosistest(disttotalfitness)
+    #     stats_file.write("\nThe kurtosis of the data is %s\n\n\n" % clonekurtosis)
+    #     stats_file.write('Shapiro-Wilk test of non-normality: \n')
+    #
+    #     totalcloneshapiro = sp.stats.shapiro(disttotalfitness)
+    #
+    #     # shapiro-wilk tests
+    #     stats_file.write("\nThe Shapiro-Wilk test of non-normality for the entire dataset gives p = %s" % totalcloneshapiro[-1])
+    #     if totalcloneshapiro[-1] >= 0.05:
+    #         shapiro = 'is not confidently non-normal'
+    #     else:
+    #         shapiro = 'is confidently non-normal'
+    #     stats_file.write("\nTherefore the Shapiro-Wilk test suggests whole dataset %s" % shapiro)
+    #     stats_file.write("\nHowever if there are more than 5000 datapoints this test is inaccurate. This test uses %s datapoints" % len(disttotalfitness))
+    #     clonepasspercentcalc = []
+    #     for i in distclonesshapirolist:
+    #         if i[-1] >= 0.05:
+    #             clonepasspercentcalc.append(1)
+    #         else:
+    #             clonepasspercentcalc.append(0)
+    #     clonepasspercent = (sum(clonepasspercentcalc) / len(clonepasspercentcalc)) * 100
+    #     stats_file.write("\n\nAccording to Shapiro-Wilk test, the proportion of individual positions that are not confidently non-normal is: %s%%" % clonepasspercent)
+    #
+    #     # anderson-darling tests
+    #     stats_file.write('\n\n\nAnderson-Darling test of normality: \n')
+    #     # x = np.random.rand(10000)
+    #     totalcloneanderson = sp.stats.anderson(disttotalfitness)
+    #     stats_file.write("\nThe Anderson-Darling test of normality for the entire dataset gives a test statistic of %s " % totalcloneanderson.statistic)
+    #     stats_file.write("and critical values of %s\nTherefore " % totalcloneanderson.critical_values)
+    #     if totalcloneanderson.statistic < totalcloneanderson.critical_values[0]:
+    #         stats_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 15% significance level for the entire dataset.")
+    #     elif totalcloneanderson.critical_values[0] < totalcloneanderson.statistic < totalcloneanderson.critical_values[1]:
+    #         stats_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 10% significance level for the entire dataset.")
+    #     elif totalcloneanderson.critical_values[1] < totalcloneanderson.statistic < totalcloneanderson.critical_values[2]:
+    #         stats_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 5% significance level for the entire dataset.")
+    #     elif totalcloneanderson.critical_values[2] < totalcloneanderson.statistic < totalcloneanderson.critical_values[3]:
+    #         stats_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 2.5% significance level for the entire dataset.")
+    #     elif totalcloneanderson.critical_values[3] < totalcloneanderson.statistic < totalcloneanderson.critical_values[4]:
+    #         stats_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 1% significance level for the entire dataset.")
+    #     else:
+    #         stats_file.write("according to the Anderson-Darling test, the hypothesis of normality is rejected for the entire dataset.")
+    #
+    #     cloneconffifteen = []
+    #     cloneconften = []
+    #     cloneconffive = []
+    #     cloneconftpf = []
+    #     cloneconfone = []
+    #     clonereject = []
+    #     for i in distclonesandersonlist:
+    #         if i.statistic < i.critical_values[0]:
+    #             cloneconffifteen.append(1)
+    #         elif i.critical_values[0] < i.statistic < i.critical_values[1]:
+    #             cloneconften.append(1)
+    #         elif i.critical_values[1] < i.statistic < i.critical_values[2]:
+    #             cloneconffive.append(1)
+    #         elif i.critical_values[2] < i.statistic < i.critical_values[3]:
+    #             cloneconftpf.append(1)
+    #         elif i.critical_values[3] < i.statistic < i.critical_values[4]:
+    #             cloneconfone.append(1)
+    #         else:
+    #             clonereject.append(1)
+    #     clonepercentfifteen = (len(cloneconffifteen) / len(distclonesandersonlist)) * 100
+    #     clonepercentten = (len(cloneconften) / len(distclonesandersonlist)) * 100
+    #     clonepercentfive = (len(cloneconffive) / len(distclonesandersonlist)) * 100
+    #     clonepercenttpf = (len(cloneconftpf) / len(distclonesandersonlist)) * 100
+    #     clonepercentone = (len(cloneconfone) / len(distclonesandersonlist)) * 100
+    #     clonepercentreject = (len(clonereject) / len(distclonesandersonlist)) * 100
+    #     stats_file.write("\n\nAccording to the Anderson-Darling test the hypothesis of normality is not rejected for each position in the dataset for:")
+    #     stats_file.write("\n%s%% of positions at the 15%% significance level" % clonepercentfifteen)
+    #     stats_file.write("\n%s%% of positions at the 10%% significance level" % clonepercentten)
+    #     stats_file.write("\n%s%% of positions at the 5%% significance level" % clonepercentfive)
+    #     stats_file.write("\n%s%% of positions at the 2.5%% significance level" % clonepercenttpf)
+    #     stats_file.write("\n%s%% of positions at the 1%% significance level" % clonepercentone)
+    #     stats_file.write("\nand %s%% of positions are rejected" % clonepercentreject)
+    #
+    #     # skewness-kurtosis all tests
+    #     stats_file.write('\n\n\nSkewness-kurtosis all test of difference from normality: \n')
+    #     clonetotalskewkurtall = sp.stats.normaltest(disttotalfitness)
+    #
+    #     stats_file.write("\nAccording to the skewness-kurtosis all test, the whole dataset gives p = %s," % clonetotalskewkurtall.pvalue)
+    #     if clonetotalskewkurtall.pvalue >= 0.05:
+    #         stats_file.write("\nTherefore the dataset does not differ significantly from a normal distribution")
+    #     else:
+    #         stats_file.write("\nTherefore the dataset differs significantly from a normal distribution")
+    #
+    #     cloneskewkurtpass = []
+    #     for i in distclonesskewkurtalllist:
+    #         if i.pvalue >= 0.05:
+    #             cloneskewkurtpass.append(1)
+    #         else:
+    #             cloneskewkurtpass.append(0)
+    #     cloneskewkurtpercent = (sum(cloneskewkurtpass) / len(cloneskewkurtpass)) * 100
+    #     stats_file.write("\n\nAccording to the skewness-kurtosis all test, %s%% of sites do not differ significantly from a normal distribution" % cloneskewkurtpercent)
+    #
+    #     # Kolmogorov-Smirnov test of similarity to original distributuion
+    #     ksdata = sp.stats.ks_2samp(np.asarray(disttotalfitness), np.asarray(disttrackeryaxis))
+    #     ksp = ksdata.pvalue
+    #     stats_file.write("\n\n\n2-sided Kolmogorov-Smirnov test of similarity between the fitness space and evolving protein")
+    #     stats_file.write("\n\nThe Kolmogorov-Smirnov test between the fitness space an the evolving protein gives a p-value of: %s" % ksp)
+    #
+    #     if ksdata.pvalue < 0.05:
+    #         stats_file.write("\nTherefore, as the pvalue is smaller than 0.05 we can reject the hypothesis that the fitness space distribution and the evolving sequence distribution are the same")
+    #     else:
+    #         stats_file.write("\nTherefore, as the pvalue is larger than 0.05 we cannot reject the hypothesis that the fitness space distribution and the evolving sequence distribution are the same")
+    #
+    #     stats_file.close()
+    #
+    #     if generation == 0:
+    #         dist_full_name = os.path.join(run_path, "fitnessdistribution", "statistics",
+    #                                       "normal_distribution_statistics_fitness_space.txt")
+    #         dist_file = open(dist_full_name, "w")  # open file
+    #
+    #         dist_file.write('Tests for normality on the global amino acid fitness space at each position: \n\n\n')
+    #         dist_file.write('Skewness: \n')
+    #
+    #         distshapirolist = []
+    #         distandersonlist = []
+    #         distskewkurtalllist = []
+    #         for i in disttrackerlist:
+    #             distshapirolist.append(sp.stats.shapiro(i))
+    #             distandersonlist.append(sp.stats.anderson(i))
+    #             distskewkurtalllist.append(sp.stats.normaltest(i))
+    #
+    #         skewness = sp.stats.skew(disttrackeryaxis)
+    #         # skewstats = sp.stats.normaltest(disttrackeryaxis)
+    #         dist_file.write("\nThe skewness of the data is %s\n\n\n" % skewness)
+    #
+    #         dist_file.write("Kurtosis: \n")
+    #
+    #         kurtosis = sp.stats.kurtosis(disttrackeryaxis)
+    #         # kurtstats = sp.stats.kurtosistest(disttrackeryaxis)
+    #         dist_file.write("\nThe kurtosis of the data is %s\n\n\n" % kurtosis)
+    #
+    #         dist_file.write('Shapiro-Wilk test of non-normality: \n')
+    #
+    #         totalshapiro = sp.stats.shapiro(disttrackeryaxis)
+    #
+    #         dist_file.write(
+    #             "\nThe Shapiro-Wilk test of non-normality for the entire dataset gives p = %s" % totalshapiro[-1])
+    #         if totalshapiro[-1] >= 0.05:
+    #             shapiro = 'is not confidently non-normal'
+    #         else:
+    #             shapiro = 'is confidently non-normal'
+    #         dist_file.write("\nTherefore the Shapiro-Wilk test suggests whole dataset %s" % shapiro)
+    #         passpercentcalc = []
+    #         for i in distshapirolist:
+    #             if i[-1] >= 0.05:
+    #                 passpercentcalc.append(1)
+    #             else:
+    #                 passpercentcalc.append(0)
+    #         passpercent = (sum(passpercentcalc) / len(passpercentcalc)) * 100
+    #         dist_file.write("\n\nAccording to Shapiro-Wilk test, the proportion of individual positions that are not confidently non-normal is: %s%%" % passpercent)
+    #
+    #         dist_file.write('\n\n\nAnderson-Darling test of normality: \n')
+    #         # x = np.random.rand(10000)
+    #         totalanderson = sp.stats.anderson(disttrackeryaxis)
+    #         dist_file.write("\nThe Anderson-Darling test of normality for the entire dataset gives a test statistic of %s " % totalanderson.statistic)
+    #         dist_file.write("and critical values of %s\nTherefore " % totalanderson.critical_values)
+    #         if totalanderson.statistic < totalanderson.critical_values[0]:
+    #             dist_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 15% significance level for the entire dataset.")
+    #         elif totalanderson.critical_values[0] < totalanderson.statistic < totalanderson.critical_values[1]:
+    #             dist_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 10% significance level for the entire dataset.")
+    #         elif totalanderson.critical_values[1] < totalanderson.statistic < totalanderson.critical_values[2]:
+    #             dist_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 5% significance level for the entire dataset.")
+    #         elif totalanderson.critical_values[2] < totalanderson.statistic < totalanderson.critical_values[3]:
+    #             dist_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 2.5% significance level for the entire dataset.")
+    #         elif totalanderson.critical_values[3] < totalanderson.statistic < totalanderson.critical_values[4]:
+    #             dist_file.write("according to the Anderson-Darling test, the hypothesis of normality not rejected at 1% significance level for the entire dataset.")
+    #         else:
+    #             dist_file.write("according to the Anderson-Darling test, the hypothesis of normality is rejected for the entire dataset.")
+    #         # set up output for significance levels
+    #         conffifteen = []
+    #         conften = []
+    #         conffive = []
+    #         conftpf = []
+    #         confone = []
+    #         reject = []
+    #         for i in distandersonlist:
+    #             if i.statistic < i.critical_values[0]:
+    #                 conffifteen.append(1)
+    #             elif i.critical_values[0] < i.statistic < i.critical_values[1]:
+    #                 conften.append(1)
+    #             elif i.critical_values[1] < i.statistic < i.critical_values[2]:
+    #                 conffive.append(1)
+    #             elif i.critical_values[2] < i.statistic < i.critical_values[3]:
+    #                 conftpf.append(1)
+    #             elif i.critical_values[3] < i.statistic < i.critical_values[4]:
+    #                 confone.append(1)
+    #             else:
+    #                 reject.append(1)
+    #         percentfifteen = (len(conffifteen) / len(distandersonlist)) * 100
+    #         percentten = (len(conften) / len(distandersonlist)) * 100
+    #         percentfive = (len(conffive) / len(distandersonlist)) * 100
+    #         percenttpf = (len(conftpf) / len(distandersonlist)) * 100
+    #         percentone = (len(confone) / len(distandersonlist)) * 100
+    #         percentreject = (len(reject) / len(distandersonlist)) * 100
+    #         dist_file.write(
+    #             "\n\nAccording to the Anderson-Darling test the hypothesis of normality is not rejected for each position in the dataset for:")
+    #         dist_file.write("\n%s%% of positions at the 15%% significance level" % percentfifteen)
+    #         dist_file.write("\n%s%% of positions at the 10%% significance level" % percentten)
+    #         dist_file.write("\n%s%% of positions at the 5%% significance level" % percentfive)
+    #         dist_file.write("\n%s%% of positions at the 2.5%% significance level" % percenttpf)
+    #         dist_file.write("\n%s%% of positions at the 1%% significance level" % percentone)
+    #         dist_file.write("\nand %s%% of positions are rejected" % percentreject)
+    #
+    #         dist_file.write('\n\n\nSkewness-kurtosis all test of difference from normality: \n')
+    #         totalskewkurtall = sp.stats.normaltest(disttrackeryaxis)
+    #
+    #         dist_file.write("\nAccording to the skewness-kurtosis all test, the whole dataset gives p = %s," % totalskewkurtall.pvalue)
+    #         if totalskewkurtall.pvalue >= 0.05:
+    #             dist_file.write("\nTherefore the dataset does not differ significantly from a normal distribution")
+    #         else:
+    #             dist_file.write("\nTherefore the dataset differs significantly from a normal distribution")
+    #
+    #         skewkurtpass = []
+    #         for i in distskewkurtalllist:
+    #             if i.pvalue >= 0.05:
+    #                 skewkurtpass.append(1)
+    #             else:
+    #                 skewkurtpass.append(0)
+    #         skewkurtpercent = (sum(skewkurtpass) / len(skewkurtpass)) * 100
+    #         dist_file.write("\n\nAccording to the skewness-kurtosis all test, %s%% of sites do not differ significantly from a normal distribution" % skewkurtpercent)
+    #         dist_file.close()
 
     if record["hist_fitness"]:  # and (generation == 0 or generation % record["rate"] == 0):  # if the switch is on, and record fitness histograms on the first generation and every x generation thereafter
 

@@ -1049,11 +1049,11 @@ def generationator(n_generations, initial_population, fitness_table, fitness_thr
         # Bifuricationmaker. Bifuricates in even generation numbers so every branch on tree has 3 leaves that have been evolving by the last generation
         if gen % bifurgeneration == 0 and gen > 0 and len(clonelistlist[0]) > 3:
             lists = []  # space to store bifurcations before adding them to clonelistlist
-            for j in clonelistlist:  # bifuricate each set of leaves
-                random.shuffle(j)
-                midpoint = int(len(j)/2)
-                lists.append(j[midpoint:])
-                lists.append(j[:midpoint])
+            for clones in clonelistlist:  # bifuricate each set of leaves
+                random.shuffle(clones)
+                midpoint = int(len(clones)/2)
+                lists.append(clones[midpoint:])
+                lists.append(clones[:midpoint])
             del clonelistlist[:]
             for k in lists:  # append bifurcations to a cleared clonelistlist
                 clonelistlist.append(k)

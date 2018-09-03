@@ -537,6 +537,27 @@ def mutate(current_generation, n_mutations_per_gen, variant_sites,
     return next_generation
 
 
+def plot_histogram_of_fitness(disthistfullname, initial, distributions):
+    plt.figure()
+    plt.axis([-10, 8, 0, 0.5])  # generate attractive figure
+
+    mudistspace = sum(initial) / len(initial)  # plot normal distribution of the original fitness space
+    plt.hist(initial, 50, density=True, color='k', alpha=0.4)
+    plt.title("\n".join(wrap('Fitness distribution of the total fitness space', 60)), fontweight='bold')
+    plt.axvline(x=mudistspace, color="#404040", linestyle=":")
+
+    mudistspace2 = sum(distributions) / len(distributions)
+    plt.hist(distributions, 50, density=True, color='r', alpha=0.4)
+    plt.title("\n".join(wrap('Fitness distribution of the total fitness space vs changing fitness distribution across every evolving clone', 60)), fontweight='bold')
+    plt.axvline(x=mudistspace2, color="#404040", linestyle=":")
+    mu1distdp = "%.3f" % mudistspace
+    mu2distdp = "%.3f" % mudistspace2
+    plt.text(4.1, 0.42, "$\mu$1 = %s\n$\mu$2 = %s\nthreshold = %s" % (mu1distdp, mu2distdp, fitness_threshold))
+
+    plt.savefig(disthistfullname)
+    plt.close()
+
+
 # NOTE: variant_sites is passed in as invariant_sites!
 def record_generation_fitness(generation, population, variant_sites,
                               fitness_table, fitness_threshold, record, run_path):
@@ -921,30 +942,32 @@ def record_generation_fitness(generation, population, variant_sites,
             dist_file.write("\n\nAccording to the skewness-kurtosis all test, %s%% of sites do not differ significantly from a normal distribution" % skewkurtpercent)
             dist_file.close()
 
-    if record["hist_fitness"] and (generation == 0 or generation % record["rate"] == 0):  # if the switch is on, and record fitness histograms on the first generation and every x generation thereafter
-        # print 'go'
-        plt.figure()
-        plt.axis([-10, 8, 0, 0.5])  # generate attractive figure
+    if record["hist_fitness"]:  # and (generation == 0 or generation % record["rate"] == 0):  # if the switch is on, and record fitness histograms on the first generation and every x generation thereafter
 
-        mudistspace = sum(disttrackeryaxis) / len(disttrackeryaxis)  # plot normal distribution of the original fitness space
-        plt.hist(disttrackeryaxis, 50, density=True, color='k', alpha=0.4)
-        plt.title("\n".join(wrap('Fitness distribution of the total fitness space', 60)), fontweight='bold')
-        plt.axvline(x=mudistspace, color="#404040", linestyle=":")
-
-        mudistspace2 = additiondist / pointsdist
-        plt.hist(disttotalfitness, 50, density=True, color='r', alpha=0.4)
-        plt.title("\n".join(wrap('Fitness distribution of the total fitness space vs changing fitness distribution across every evolving clone', 60)), fontweight='bold')
-        plt.axvline(x=mudistspace2, color="#404040", linestyle=":")
-        mu1distdp = "%.3f" % mudistspace
-        mu2distdp = "%.3f" % mudistspace2
-        plt.text(4.1, 0.42, "$\mu$1 = %s\n$\mu$2 = %s\nthreshold = %s" % (mu1distdp, mu2distdp, fitness_threshold))
+        # plt.figure()
+        # plt.axis([-10, 8, 0, 0.5])  # generate attractive figure
+        #
+        # mudistspace = sum(disttrackeryaxis) / len(disttrackeryaxis)  # plot normal distribution of the original fitness space
+        # plt.hist(disttrackeryaxis, 50, density=True, color='k', alpha=0.4)
+        # plt.title("\n".join(wrap('Fitness distribution of the total fitness space', 60)), fontweight='bold')
+        # plt.axvline(x=mudistspace, color="#404040", linestyle=":")
+        #
+        # mudistspace2 = additiondist / pointsdist
+        # plt.hist(disttotalfitness, 50, density=True, color='r', alpha=0.4)
+        # plt.title("\n".join(wrap('Fitness distribution of the total fitness space vs changing fitness distribution across every evolving clone', 60)), fontweight='bold')
+        # plt.axvline(x=mudistspace2, color="#404040", linestyle=":")
+        # mu1distdp = "%.3f" % mudistspace
+        # mu2distdp = "%.3f" % mudistspace2
+        # plt.text(4.1, 0.42, "$\mu$1 = %s\n$\mu$2 = %s\nthreshold = %s" % (mu1distdp, mu2distdp, fitness_threshold))
 
         disthistfilename = "generation_{}.png".format(generation)  # define dynamic filename
         disthistfullname = os.path.join(run_path, "fitnessdistribution",
                                         "histograms", disthistfilename)
-        plt.savefig(disthistfullname)
-        plt.close()
     return fitnessdict
+        # plt.savefig(disthistfullname)
+        # plt.close()
+
+        plot_histogram_of_fitness(disthistfullname, fitness_table.ravel(), disttotalfitness)
 
 
 def write_fasta_alignment(population, generation, run_path):  # x = current generation of sequence, y = generation number

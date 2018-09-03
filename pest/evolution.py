@@ -537,6 +537,17 @@ def mutate(current_generation, n_mutations_per_gen, variant_sites,
     return next_generation
 
 
+def calculate_generation_fitness(population, fitness_table):
+    """Calculate the fitness of every protein in a population."""
+    # Record calculated fitness for each protein in dictionary
+    return {pi: calculate_fitness(protein, fitness_table)
+            for pi, protein in list(population.items())}
+            # for pi, protein in enumerate(population)}
+    # TODO: Replace with list once population is a list (or OrderedDict)
+    # fitnesslist = [calculate_fitness(protein, fitness_table)
+    #                for pi, protein in list(population.items())]
+
+
 def plot_histogram_of_fitness(disthistfullname, initial, distributions):
     plt.figure()
     plt.axis([-10, 8, 0, 0.5])  # generate attractive figure
@@ -565,12 +576,8 @@ def record_generation_fitness(generation, population, variant_sites,
     dictionary. Optionally generate data and figures about fitness.
     """
     # Record calculated fitness for each protein in dictionary
-    fitnessdict = {pi: calculate_fitness(protein, fitness_table)
-                   for pi, protein in list(population.items())}
-                   # for pi, protein in enumerate(population)}
-    # TODO: Replace with list once population is a list (or OrderedDict)
-    # fitnesslist = [calculate_fitness(protein, fitness_table)
-    #                for pi, protein in list(population.items())]
+    # fitnessdict = {pi: calculate_fitness(protein, fitness_table)
+    #                for pi, protein in list(population.items())}
 
     if record["dot_fitness"] and (generation == 0 or generation % record["rate"] == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
         # TODO: There will be a bug in plotting the mean fitness at the wrong x point (as before)
@@ -963,11 +970,11 @@ def record_generation_fitness(generation, population, variant_sites,
         disthistfilename = "generation_{}.png".format(generation)  # define dynamic filename
         disthistfullname = os.path.join(run_path, "fitnessdistribution",
                                         "histograms", disthistfilename)
-    return fitnessdict
         # plt.savefig(disthistfullname)
         # plt.close()
 
         plot_histogram_of_fitness(disthistfullname, fitness_table.ravel(), disttotalfitness)
+    # return fitnessdict
 
 
 def write_fasta_alignment(population, generation, run_path):  # x = current generation of sequence, y = generation number
@@ -1057,10 +1064,11 @@ def generationator(n_generations, initial_population, fitness_table, fitness_thr
     clonelistlist = []  # place to store bifurcations (list of lists of clone keys)
     clonelistlist.append(clonelist)  # store all clones that are not root to start
     population = copy.deepcopy(initial_population)  # current generation
+    fitnesses = calculate_generation_fitness(population, fitness_table)
     # Record initial population
-    fitnesses = record_generation_fitness(0, population, variant_sites,
-                                          fitness_table, fitness_threshold,
-                                          record, run_path)
+    record_generation_fitness(0, population, variant_sites,
+                              fitness_table, fitness_threshold,
+                              record, run_path)
     write_fasta_alignment(population, 0, run_path)
 
     # Store each generation along with its fitness
@@ -1088,9 +1096,11 @@ def generationator(n_generations, initial_population, fitness_table, fitness_thr
                             LG_matrix, LG_residues, LG_indicies)
         # TODO: Split out writing to file until the end so that all branches are valid
         # Re-calculate fitness
-        fitnesses = record_generation_fitness(gen, population, variant_sites,
-                                              fitness_table, fitness_threshold,
-                                              record, run_path)
+        if gen == 0 or gen % record["rate"] == 0:
+            fitnesses = calculate_generation_fitness(population, fitness_table)
+            record_generation_fitness(gen, population, variant_sites,
+                                      fitness_table, fitness_threshold,
+                                      record, run_path)
 
         for pi in range(len(fitnesses)):  # if there are, start loop on fitnesses
             if fitnesses[pi] < fitness_threshold:  # if fitness is less than threshold clone a random sequence in its place.

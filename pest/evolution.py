@@ -1154,7 +1154,10 @@ def fitbit(evolution, n_generations, n_clones, initial_protein, fitness_table, r
 
 
 def create_output_folders(output_directory=""):
+    """Create output directory structure.
 
+    Each run will be saved in a time-stamped folder within the run path.
+    """
     paths = ['runsettings', 'start', 'fastas', 'fitnessgraph',
              'fitnessdotmatrix', 'fitnessdistribution', 'treefastas']
 

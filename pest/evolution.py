@@ -938,9 +938,6 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
         # Re-calculate fitness
         if gen == 0 or gen % record["rate"] == 0:  # TODO: (gen+1) see write_fasta_alignment
             fitnesses = calculate_generation_fitness(population, fitness_table)
-            record_generation_fitness(gen, population, variant_sites,
-                                      fitness_table, fitness_threshold,
-                                      record, run_path)
 
         for pi in range(len(fitnesses)):  # if there are, start loop on fitnesses
             if fitnesses[pi] < fitness_threshold:  # if fitness is less than threshold clone a random sequence in its place.
@@ -980,6 +977,10 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
                 else:
                     population[pi] = population[clonekey]  # Replace dead protein
 
+        # Record population details at the end of processing
+        record_generation_fitness(gen, population, variant_sites,
+                                  fitness_table, fitness_threshold,
+                                  record, run_path)
         evolution.append(Generation(population=population, fitness=fitnesses))
         # NOTE: Should this be at the end of each timestep? FIXED
         if ((gen+1) % fasta_rate) == 0:  # write fasta every record["fasta_rate"] generations

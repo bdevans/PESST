@@ -1131,6 +1131,7 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
                      n_mutations_per_gen, record["fasta_rate"],
                      LG_matrix, LG_residues, LG_indicies, run_path)
     plot_evolution(history, n_clones, initial_protein, fitness_table, run_path)
+    return history
 
 
 if __name__ == '__main__':
@@ -1186,6 +1187,7 @@ if __name__ == '__main__':
               "hist_fitness": False,
               "invariants": False}
 
-    pest(n_generations, fitness_start, fitness_threshold, mu, sigma, n_clones,
-         n_amino_acids, mutation_rate, n_mutations_per_gen, n_anchors,
-         deaths_per_generation, death_ratio, seed, n_roots, gamma, record)
+    history = pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
+                   n_clones, n_amino_acids, mutation_rate, n_mutations_per_gen,
+                   n_anchors, deaths_per_generation, death_ratio, seed,
+                   n_roots, gamma, record)

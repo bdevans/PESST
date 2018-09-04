@@ -990,7 +990,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
     return evolution
 
 
-def fitbit(history, n_clones, initial_protein, fitness_table, run_path):
+def plot_evolution(history, n_clones, initial_protein, fitness_table, run_path):
     """Plot fitness against generation for all clones."""
     # NOTE: Final element previously excluded - for i in range(len(evolution)-1):  FIXED
     # Create array of fitness values with shape (n_generations, n_clones)
@@ -1130,7 +1130,7 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
                      fitness_threshold, variant_sites, gamma_categories,
                      n_mutations_per_gen, record["fasta_rate"],
                      LG_matrix, LG_residues, LG_indicies, run_path)
-    fitbit(history, n_clones, initial_protein, fitness_table, run_path)
+    plot_evolution(history, n_clones, initial_protein, fitness_table, run_path)
 
 
 if __name__ == '__main__':

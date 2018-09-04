@@ -870,8 +870,9 @@ def replace_protein(protein, candidates, fitnesses, fitness_threshold):
     return new_protein
 
 
-def generationator(n_generations, initial_population, fitness_table, fitness_threshold, variant_sites, gamma_categories,
-                   n_mutations_per_gen, fasta_rate, LG_matrix, LG_residues, LG_indicies, run_path):
+def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
+           variant_sites, gamma_categories, n_mutations_per_gen, fasta_rate,
+           LG_matrix, LG_residues, LG_indicies, run_path):
     """Generation generator - mutate a protein for a defined number of
     generations according to an LG matrix and gamma distribution.
     """
@@ -1123,10 +1124,10 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
     gamma_categories = gamma_ray(n_amino_acids, gamma)  # generate gamma categories for every site
     write_initial_protein(run_path, initial_protein)  # Record initial protein
     initial_population = clone_protein(initial_protein, n_clones)  # make some clones to seed evolution
-    evolution = generationator(n_generations, initial_population, fitness_table,
-                               fitness_threshold, variant_sites, gamma_categories,
-                               n_mutations_per_gen, record["fasta_rate"],
-                               LG_matrix, LG_residues, LG_indicies, run_path)
+    evolution = evolve(n_generations, initial_population, fitness_table,
+                       fitness_threshold, variant_sites, gamma_categories,
+                       n_mutations_per_gen, record["fasta_rate"],
+                       LG_matrix, LG_residues, LG_indicies, run_path)
     fitbit(evolution, n_generations, n_clones, initial_protein, fitness_table, run_path)
 
 

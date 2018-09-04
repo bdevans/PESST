@@ -990,13 +990,14 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
     return evolution
 
 
-def fitbit(evolution, n_generations, n_clones, initial_protein, fitness_table, run_path):
+def fitbit(history, n_clones, initial_protein, fitness_table, run_path):
     """Plot fitness against generation for all clones."""
     # NOTE: Final element previously excluded - for i in range(len(evolution)-1):  FIXED
     # Create array of fitness values with shape (n_generations, n_clones)
     # fitnesses = np.array([[evolution[g][-1][c] for c in range(n_clones)]
     #                       for g in range(n_generations)])
-    fitnesses = np.array([[evolution[g].fitness[c] for c in range(n_clones)]
+    n_generations = len(history) - 1  # First entry is the initial state
+    fitnesses = np.array([[history[g].fitness[c] for c in range(n_clones)]
                           for g in range(n_generations+1)])
 
     initial_fitness = calculate_fitness(initial_protein, fitness_table)
@@ -1125,11 +1126,11 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
     gamma_categories = gamma_ray(n_amino_acids, gamma)  # generate gamma categories for every site
     write_initial_protein(run_path, initial_protein)  # Record initial protein
     initial_population = clone_protein(initial_protein, n_clones)  # make some clones to seed evolution
-    evolution = evolve(n_generations, initial_population, fitness_table,
-                       fitness_threshold, variant_sites, gamma_categories,
-                       n_mutations_per_gen, record["fasta_rate"],
-                       LG_matrix, LG_residues, LG_indicies, run_path)
-    fitbit(evolution, n_generations, n_clones, initial_protein, fitness_table, run_path)
+    history = evolve(n_generations, initial_population, fitness_table,
+                     fitness_threshold, variant_sites, gamma_categories,
+                     n_mutations_per_gen, record["fasta_rate"],
+                     LG_matrix, LG_residues, LG_indicies, run_path)
+    fitbit(history, n_clones, initial_protein, fitness_table, run_path)
 
 
 if __name__ == '__main__':

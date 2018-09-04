@@ -734,7 +734,7 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
                                       anderson_results.statistic, side="left")
         stats_file.write("Therefore according to the Anderson-Darling test, "
                          "the hypothesis of normality is not rejected at the "
-                         "{}% significance level for the entire dataset."
+                         "{}% significance level for the entire dataset.\n\n"
                          .format(significance_levels[level_index]))
 
     # Set up output for significance levels - final bin represents "reject"
@@ -747,13 +747,14 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
                                       result.statistic, side="left")
         hypothesis_tally[level_index] += 1
     hypothesis_tally /= aa_variant_fitnesses.shape[0]  # Normalise
-    stats_file.write("\n\nAccording to the Anderson-Darling test, "
+    stats_file.write("According to the Anderson-Darling test, "
                      "the hypothesis of normality is not rejected for each "
-                     "position in the dataset for: ")
+                     "position in the dataset for: \n")
     for proportion, level in zip(hypothesis_tally, significance_levels):
-        stats_file.write("\n{:.2%} of positions at the "
-                         "{}% significance level".format(proportion, level))
-    stats_file.write("\nand {:.2%} of positions are rejected.\n\n\n".format(hypothesis_tally[-1]))
+        stats_file.write("{:.2%} of positions at the "
+                         "{}% significance level\n".format(proportion, level))
+    stats_file.write("and {:.2%} of positions are rejected.\n\n\n"
+                     .format(hypothesis_tally[-1]))
 
     # Normality (Skewness-Kurtosis)
     stats_file.write("Skewness-kurtosis all test of difference from normality\n"

@@ -1380,7 +1380,7 @@ def generationator(n_generations, initial_population, fitness_table, fitness_thr
                     population[pi] = population[clonekey]  # swap out unfit clone for fit clone
 
         # Allow sequences to die and be replacecd at a predefined rate
-        if deaths_per_generations > 0 and gen % deaths_per_generations == 0:
+        if deaths_per_generation > 0 and gen % deaths_per_generation == 0:
             # NOTE: Originally this was sampled with replacement: FIXED
             mortals = random.sample(range(n_clones), int(n_clones * death_ratio))
             for pi in mortals:
@@ -1513,7 +1513,7 @@ def write_initial_protein(run_path, initial_protein):
 def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
          n_clones=52, n_amino_acids=80, mutation_rate=0.001,
          n_mutations_per_gen=None, n_anchors=None,
-         deaths_per_generations=5, death_ratio=0.05, seed=None,
+         deaths_per_generation=5, death_ratio=0.05, seed=None,
          n_roots=4, gamma=None, record=None):
 
     if n_mutations_per_gen is None:
@@ -1575,7 +1575,7 @@ if __name__ == '__main__':
     # TODO: Allow user to pass a number but defau;t to None and calculate as follows
     n_mutations_per_gen = int(n_clones*(n_amino_acids)*mutation_rate)  # number of mutations per generation
     n_anchors = int((n_amino_acids)/10)  # amount of invariant sites in a generation (not including root)
-    deaths_per_generations = 5  # Set to 0 to turn off protein deaths
+    deaths_per_generation = 5  # Set to 0 to turn off protein deaths
     death_ratio = 0.05
     seed = 42
 
@@ -1603,4 +1603,4 @@ if __name__ == '__main__':
 
     pest(n_generations, fitness_start, fitness_threshold, mu, sigma, n_clones,
          n_amino_acids, mutation_rate, n_mutations_per_gen, n_anchors,
-         deaths_per_generations, death_ratio, seed, n_roots, gamma, record)
+         deaths_per_generation, death_ratio, seed, n_roots, gamma, record)

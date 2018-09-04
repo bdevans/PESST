@@ -895,16 +895,16 @@ def record_generation_fitness(generation, population, variant_sites,
         # plt.close()  # close plot (so you dont generate 100 individual figures)
         plot_threshold_fitness(generation, population, variant_sites, fitness_table, fitfullname)
 
-    # disttrackerlist = [fitness_table[i] for i in range(n_amino_acids)]  # build fitness space numbers
-    # disttrackerlist = [np.array([fitness_table[ai][aa] for aa in RESIDUES]) for ai in range(n_amino_acids)]
-    disttrackerlist = fitness_table
-    # DataFrame
-    # disttrackerlist = fitness_table.values
-    # disttrackeryaxis = [j for j in i for i in disttrackerlist]
-    disttrackeryaxis = []
-    for i in disttrackerlist:
-        for j in i:
-            disttrackeryaxis.append(j)  # Flattened list of fitness_table
+    # # disttrackerlist = [fitness_table[i] for i in range(n_amino_acids)]  # build fitness space numbers
+    # # disttrackerlist = [np.array([fitness_table[ai][aa] for aa in RESIDUES]) for ai in range(n_amino_acids)]
+    # disttrackerlist = fitness_table
+    # # DataFrame
+    # # disttrackerlist = fitness_table.values
+    # # disttrackeryaxis = [j for j in i for i in disttrackerlist]
+    # disttrackeryaxis = []
+    # for i in disttrackerlist:
+    #     for j in i:
+    #         disttrackeryaxis.append(j)  # Flattened list of fitness_table
 
     if generation == 0 or generation % record["rate"] == 0:
         # Build distribution of fitness values existing in evolving protein

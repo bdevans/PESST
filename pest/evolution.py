@@ -594,85 +594,38 @@ def build_generation_fitness_table(population, variant_sites, fitness_table):
 
 
 def plot_threshold_fitness(generation, population, variant_sites, fitness_table, fitfullname):
-    # TODO: There will be a bug in plotting the mean fitness at the wrong x point (as before)
     # Store fitness values for each amino in the dataset for the left side of the figure
-    # HACK
-    # fittrackeryaxis = [fitness_table[aa] for aa in range(n_amino_acids)]
-    # fittrackeryaxis = [np.array([fitness_table[ai][aa] for aa in RESIDUES]) for ai in range(n_amino_acids)]
-    # 2D numpy array
-    # fittrackeryaxis = fitness_table
-    # DataFrame
-    # fittrackeryaxis = fitness_table.values
+    # (n_amino_acids, n_variants) = fitness_table.shape
+    mean_initial_fitness = np.mean(fitness_table)  # Average across flattened array
 
-    # additionleft = 0  # calculate average fitness of dataset (messy but I can keep track of it)
-    # pointsleft = 0
-    # for i in fittrackeryaxis:
-    #     for j in i:
-    #         pointsleft += 1
-    #         additionleft += j
-    # avgtoplotleft = additionleft / pointsleft
-    avgtoplotleft = np.mean(fitness_table)  # Average across flattened array
-
-    plt.figure()  # make individual figure in pyplot
+    plt.figure()
     plt.subplot(121)
-    # for i in range(len(fittrackeryaxis)):  # range(n_amino_acids)
-    #     yaxistoplot = fittrackeryaxis[i]
-    #     plt.plot(len(yaxistoplot) * [i], yaxistoplot, ".", color='k')  # plot data
-    # for i in range(len(RESIDUES)):
-    #     plt.plot(np.arange(n_amino_acids), fittrackeryaxis[:, i], ".", color='k')
-
     # Plot each column of fitness_table as a separate dataseries against 0..N-1
-    plt.plot(fitness_table, ".", color='k')
-    plt.plot([0, n_amino_acids], [avgtoplotleft, avgtoplotleft], 'r--', lw=3)
-    plt.ylim(((-4 * sigma) - 1), ((4 * sigma) + 1))  # generate attractive figure
-    muleftdistdp = "%.3f" % avgtoplotleft
-    plt.text(0, 4*sigma, "\n".join([r"$\mu_1$ = %s" % muleftdistdp,
-                                    "threshold = %s" % fitness_threshold]), size=6.5)
-    plt.xticks([])
-    plt.title("\n".join(wrap(r"Fitness distribution of $\Delta T_m$ matrix", 40)), size=8)
+    plt.plot(fitness_table, ".", color='k')  # np.arange(n_amino_acids)+1,
+    plt.plot([0, n_amino_acids-1], [mean_initial_fitness, mean_initial_fitness], 'r--', lw=3)
+    plt.ylim(((-4 * sigma) - 1), ((4 * sigma) + 1))
+    plt.xticks([])  # n_variants
+    plt.text(0, 3.5*sigma, "\n".join([r"$\mu_1$ = {:.3}".format(mean_initial_fitness),
+                                    "threshold = {}".format(fitness_threshold)]), size=6.5)
+    plt.title(r"Fitness distribution of $\Delta T_m$ matrix", size=8)
 
-    plt.subplot(122)
-    # transform = n_amino_acids + (n_amino_acids / 10)  # generate values for right side of the figure. Transform function sets offet to make figure look nice.
-    # additionright = 0
-    # pointsright = 0
     # Find and plot all fitness values in the current generation
-    for pi, protein in list(population.items()):
-        Y2fitness = []  # space for values to plot
-        if record["invariants"]:  # check if invariants need to be ignored
-            Y2aminos = protein  # load fitness of each gen (keys are numbers so easy to iterate)
-        else:
-            Y2aminos = []  # ignore variant sites
-            for ai in range(n_amino_acids):
-                if ai in variant_sites:
-                    Y2aminos.append(protein[ai])
-                else:
-                    Y2aminos.append('X')
-        for ai, amino_acid in enumerate(Y2aminos):  # generate values from generation x to plot
-            if amino_acid != 'X':
-                # pointsright += 1
-                # fitvalue = fitness_table[ai][RESIDUES.index(amino_acid)]  # find fitness value corresponding to amino acid at position
-                fitvalue = fitness_table[ai][RESIDUES_INDEX[amino_acid]]  # find fitness value corresponding to amino acid at position
-                # fitvalue = fitness_table[ai][amino_acid]
-                # DataFrame
-                # fitvalue = fitness_table.loc[ai, amino_acid]
-                # additionright += fitvalue
-                Y2fitness.append(fitvalue)  # append these to list
-        plt.plot(len(Y2fitness) * [pi], Y2fitness, "o", markersize=2)  # plot right hand side with small markers
-    plt.suptitle(('Generation %s' % generation), fontweight='bold')
-    # avgtoplotright = additionright / pointsright  # calculate right side average
-    avgtoplotright = np.mean(Y2fitness)
-    plt.ylim(((-4 * sigma) - 1), ((4 * sigma) + 1))  # generate attractive figure
-    plt.plot([0, len(population)], [avgtoplotright, avgtoplotright], 'r--', lw=3)
-    murightdistdp = "%.3f" % avgtoplotright
-    plt.text(0, 4*sigma, "\n".join([r"$\mu_2$ = %s" % murightdistdp,
-                                    "threshold = %s" % fitness_threshold]), size=6.5)
+    generation_fitneses = build_generation_fitness_table(population, variant_sites, fitness_table)
+    # TODO: Check this is the intended average value to check. Previously it was np.mean(Y2fitness) i.e. the mean of the last protein in the loop
+    mean_generation_fitness = np.mean(generation_fitneses)
+    plt.subplot(122)
+    plt.plot(np.arange(len(population)), generation_fitneses, "o", markersize=2)  # plot y using x as index array 0..N-1
+    plt.plot([0, len(population)-1], [mean_generation_fitness, mean_generation_fitness], 'r--', lw=3)
+    plt.ylim(((-4 * sigma) - 1), ((4 * sigma) + 1))
+    plt.xticks([])  # len(population)
+    plt.text(0, 3.5*sigma, "\n".join([r"$\mu_2$ = {:.3}".format(mean_generation_fitness),
+                                    "threshold = {}".format(fitness_threshold)]), size=6.5)
     plt.title("\n".join(wrap("Fitness distribution of every sequence in the evolving dataset", 40)), size=8)
+
     plt.subplots_adjust(top=0.85)
-    plt.xticks([])  # remove x axis ticks
-    # fitfilename = "generation_{}.png".format(generation)  # define dynamic filename
-    # fitfullname = os.path.join(run_path, "fitnessdotmatrix", fitfilename)
+    plt.suptitle(('Generation %s' % generation), fontweight='bold')
     plt.savefig(fitfullname)
-    plt.close()  # close plot (so you dont generate 100 individual figures)
+    plt.close()
 
 
 def append_ks_statistics(stats_full_name, distribution_fitness, initial_fitness):

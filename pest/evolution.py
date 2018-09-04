@@ -786,18 +786,18 @@ def plot_histogram_of_fitness(disthistfullname, initial, distributions):
     plt.figure()
     plt.axis([-10, 8, 0, 0.5])  # generate attractive figure
 
-    mudistspace = sum(initial) / len(initial)  # plot normal distribution of the original fitness space
+    mu1distspace = sum(initial) / len(initial)  # plot normal distribution of the original fitness space
     plt.hist(initial, 50, density=True, color='k', alpha=0.4)
     plt.title("\n".join(wrap('Fitness distribution of the total fitness space', 60)), fontweight='bold')
-    plt.axvline(x=mudistspace, color="#404040", linestyle=":")
+    plt.axvline(x=mu1distspace, color="#404040", linestyle=":")
 
-    mudistspace2 = sum(distributions) / len(distributions)
+    mu2distspace = sum(distributions) / len(distributions)
     plt.hist(distributions, 50, density=True, color='r', alpha=0.4)
-    plt.title("\n".join(wrap('Fitness distribution of the total fitness space vs changing fitness distribution across every evolving clone', 60)), fontweight='bold')
-    plt.axvline(x=mudistspace2, color="#404040", linestyle=":")
-    mu1distdp = "%.3f" % mudistspace
-    mu2distdp = "%.3f" % mudistspace2
-    plt.text(4.1, 0.42, "$\mu$1 = %s\n$\mu$2 = %s\nthreshold = %s" % (mu1distdp, mu2distdp, fitness_threshold))
+    plt.title("\n".join(wrap('Fitness distribution of the total fitness space vs. changing fitness distribution across every evolving clone', 60)), fontweight='bold')
+    plt.axvline(x=mu2distspace, color="#404040", linestyle=":")
+    plt.text(4.1, 0.42, "\n".join([r"$\mu_1$ = {:.3}".format(mu1distspace),
+                                   r"$\mu_2$ = {:.3}".format(mu2distspace),
+                                   "threshold = {}".format(fitness_threshold)]))
 
     plt.savefig(disthistfullname)
     plt.close()

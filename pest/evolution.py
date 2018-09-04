@@ -786,7 +786,7 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
     stats_file.close()
 
 
-def plot_histogram_of_fitness(disthistfullname, initial, distributions):
+def plot_histogram_of_fitness(disthistfullname, distributions, initial):
     plt.figure()
     plt.axis([-10, 8, 0, 0.5])  # generate attractive figure
 
@@ -872,7 +872,8 @@ def record_generation_fitness(generation, population, variant_sites,
         disthistfullname = os.path.join(run_path, "fitnessdistribution",
                                         "histograms", disthistfilename)
 
-        plot_histogram_of_fitness(disthistfullname, fitness_table.ravel(), disttotalfitness)
+        plot_histogram_of_fitness(disthistfullname, dist_fitness_table.ravel(),
+                                  fitness_table.ravel())
 
 
 def write_fasta_alignment(population, generation, run_path):  # x = current generation of sequence, y = generation number

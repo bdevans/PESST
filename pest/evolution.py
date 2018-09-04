@@ -548,6 +548,51 @@ def calculate_generation_fitness(population, fitness_table):
     #                for pi, protein in list(population.items())]
 
 
+def build_generation_fitness_table(population, variant_sites, fitness_table):
+    """Build a fitness table for given generation's population.
+
+    The array has one row for each protein in the population and the fitness
+    value for each amino acid in its position.
+    """
+    # Build distribution of fitness values existing in evolving protein
+    dist_clone_fitness = []
+    # Find and plot all fitness values in the current generation
+    for pi, protein in list(population.items()):
+        # if record["invariants"]:
+        #     clone = protein  # load fitness of each clone (as keys are numbers so easy to iterate)
+        # else:
+        #     clone = []  # ignore variant sites
+        #     for ai, amino_acid in enumerate(protein):
+        #         if ai in variant_sites:
+        #             clone.append(amino_acid)
+        #         else:
+        #             clone.append('X')
+        # if not record["invariants"]:
+        #     clone = [amino_acid if ai in variant_sites else "X"
+        #              for ai, amino_acid in enumerate(protein)]
+        # else:
+        #     clone = protein
+        # # clone_fitness = []
+        # # for ai, amino_acid in enumerate(clone):  # generate values from generation x to plot
+        # #     if amino_acid != 'X':
+        # #         fitness = fitness_table[ai][RESIDUES_INDEX[amino_acid]]  # find fitness value corresponding to amino acid at position
+        # #         clone_fitness.append(fitness)
+        # protein_fitness = [fitness_table[ai, RESIDUES_INDEX[amino_acid]]
+        #                    for ai, amino_acid in enumerate(clone)
+        #                    if amino_acid != "X"]
+
+        if record["invariants"]:
+            protein_fitness = [fitness_table[ai, RESIDUES_INDEX[amino_acid]]
+                               for ai, amino_acid in enumerate(protein)]
+        else:
+            protein_fitness = [fitness_table[ai, RESIDUES_INDEX[amino_acid]]
+                               for ai, amino_acid in enumerate(protein)
+                               if ai in variant_sites]
+
+        dist_clone_fitness.append(protein_fitness)  # Becomes a new row
+    return np.asarray(dist_clone_fitness)
+
+
 def plot_threshold_fitness(generation, population, variant_sites, fitness_table, fitfullname):
     # TODO: There will be a bug in plotting the mean fitness at the wrong x point (as before)
     # Store fitness values for each amino in the dataset for the left side of the figure

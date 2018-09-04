@@ -18,7 +18,6 @@ from matplotlib import pyplot as plt
 from tqdm import trange
 
 
-# define starting variables
 # amino acids - every fitness value string references residues string
 # RESIDUES = ("R", "H", "K", "D", "E", "S", "T", "N", "Q", "C",
 #             "G", "P", "A", "V", "I", "L", "M", "F", "Y", "W")
@@ -554,32 +553,9 @@ def build_generation_fitness_table(population, variant_sites, fitness_table):
     The array has one row for each protein in the population and the fitness
     value for each amino acid in its position.
     """
-    # Build distribution of fitness values existing in evolving protein
     dist_clone_fitness = []
     # Find and plot all fitness values in the current generation
     for pi, protein in list(population.items()):
-        # if record["invariants"]:
-        #     clone = protein  # load fitness of each clone (as keys are numbers so easy to iterate)
-        # else:
-        #     clone = []  # ignore variant sites
-        #     for ai, amino_acid in enumerate(protein):
-        #         if ai in variant_sites:
-        #             clone.append(amino_acid)
-        #         else:
-        #             clone.append('X')
-        # if not record["invariants"]:
-        #     clone = [amino_acid if ai in variant_sites else "X"
-        #              for ai, amino_acid in enumerate(protein)]
-        # else:
-        #     clone = protein
-        # # clone_fitness = []
-        # # for ai, amino_acid in enumerate(clone):  # generate values from generation x to plot
-        # #     if amino_acid != 'X':
-        # #         fitness = fitness_table[ai][RESIDUES_INDEX[amino_acid]]  # find fitness value corresponding to amino acid at position
-        # #         clone_fitness.append(fitness)
-        # protein_fitness = [fitness_table[ai, RESIDUES_INDEX[amino_acid]]
-        #                    for ai, amino_acid in enumerate(clone)
-        #                    if amino_acid != "X"]
 
         if record["invariants"]:
             protein_fitness = [fitness_table[ai, RESIDUES_INDEX[amino_acid]]
@@ -658,15 +634,6 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
 
     stats_file.write("Tests for normality on the amino acid fitnesses\n"
                      "===============================================\n\n\n")
-
-    # distshapirolist = []
-    # distandersonlist = []
-    # distskewkurtalllist = []
-    # # Calculate statistics row by row
-    # for i in aa_variant_fitnesses:  # fitness_table when generation == 0 : np.random.normal(mu, sigma, size=(n_amino_acids, n_variants))
-    #     distshapirolist.append(sp.stats.shapiro(i))
-    #     distandersonlist.append(sp.stats.anderson(i))
-    #     distskewkurtalllist.append(sp.stats.normaltest(i))
 
     # TODO: Check that the ordering is correct (default: row major)
     fitnesses = aa_variant_fitnesses.ravel()
@@ -822,34 +789,7 @@ def record_generation_fitness(generation, population, variant_sites,
         plot_threshold_fitness(generation, population, variant_sites, fitness_table, fitfullname)
 
     # Build distribution of fitness values existing in evolving protein
-    dist_clone_fitness = []
-    # Find and plot all fitness values in the current generation
     generation_fitneses = build_generation_fitness_table(population, variant_sites, fitness_table)
-    # for pi, protein in list(population.items()):
-    #     if record["invariants"]:
-    #         protein_fitness = [fitness_table[ai, RESIDUES_INDEX[amino_acid]]
-    #                            for ai, amino_acid in enumerate(protein)]
-    #     else:
-    #         protein_fitness = [fitness_table[ai, RESIDUES_INDEX[amino_acid]]
-    #                            for ai, amino_acid in enumerate(protein)
-    #                            if ai in variant_sites]
-    #     # if record["invariants"]:
-    #     #     clone = protein  # load fitness of each clone (as keys are numbers so easy to iterate)
-    #     # else:
-    #     #     clone = []  # ignore variant sites
-    #     #     for ai, amino_acid in enumerate(protein):
-    #     #         if ai in variant_sites:
-    #     #             clone.append(amino_acid)
-    #     #         else:
-    #     #             clone.append('X')
-    #     # clone_fitness = []
-    #     # for ai, amino_acid in enumerate(clone):  # generate values from generation x to plot
-    #     #     if amino_acid != 'X':
-    #     #         fitness = fitness_table[ai][RESIDUES_INDEX[amino_acid]]  # find fitness value corresponding to amino acid at position
-    #     #         clone_fitness.append(fitness)
-    #     # dist_clone_fitness.append(clone_fitness)
-    #     dist_clone_fitness.append(protein_fitness)
-    # generation_fitneses = np.asarray(dist_clone_fitness)
 
     if record["hist_fitness_stats"]:
         # Write a file describing 5 statistical tests on the protein fitness space

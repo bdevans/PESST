@@ -486,9 +486,9 @@ def plot_fitness_histogram(n_proteins, n_amino_acids, fitness_table):
     return
 
 
-def mutate(current_generation, n_mutations_per_gen, variant_sites,
-           gamma_categories, LG_matrix, LG_residues, LG_indicies):
-    """Mutate a given sequence based on the LG+I+G model of amino acid
+def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
+                      gamma_categories, LG_matrix, LG_residues, LG_indicies):
+    """Mutate a set of sequences based on the LG+I+G model of amino acid
     substitution.
     """
     # NOTE: This could be removed for speed after checking it is not used later
@@ -931,9 +931,9 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
 
         # TODO: If no suitable clones are available, re-mutate the generation and start again
         # Mutate population
-        population = mutate(population, n_mutations_per_gen,
-                            variant_sites, gamma_categories,
-                            LG_matrix, LG_residues, LG_indicies)
+        population = mutate_population(population, n_mutations_per_gen,
+                                       variant_sites, gamma_categories,
+                                       LG_matrix, LG_residues, LG_indicies)
         # TODO: Split out writing to file until the end so that all branches are valid
         # Re-calculate fitness
         if gen == 0 or gen % record["rate"] == 0:  # TODO: (gen+1) see write_fasta_alignment

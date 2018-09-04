@@ -870,24 +870,33 @@ def record_generation_fitness(generation, population, variant_sites,
 
     # Build distribution of fitness values existing in evolving protein
     dist_clone_fitness = []
-    # find and plot all fitness values in the current generation
-    for pi, protein in list(population.items()):
-        if record["invariants"]:
-            clone = protein  # load fitness of each clone (as keys are numbers so easy to iterate)
-        else:
-            clone = []  # ignore variant sites
-            for ai, amino_acid in enumerate(protein):
-                if ai in variant_sites:
-                    clone.append(amino_acid)
-                else:
-                    clone.append('X')
-        clone_fitness = []
-        for ai, amino_acid in enumerate(clone):  # generate values from generation x to plot
-            if amino_acid != 'X':
-                fitness = fitness_table[ai][RESIDUES_INDEX[amino_acid]]  # find fitness value corresponding to amino acid at position
-                clone_fitness.append(fitness)
-        dist_clone_fitness.append(clone_fitness)
-        dist_fitness_table = np.asarray(dist_clone_fitness)
+    # Find and plot all fitness values in the current generation
+    generation_fitneses = build_generation_fitness_table(population, variant_sites, fitness_table)
+    # for pi, protein in list(population.items()):
+    #     if record["invariants"]:
+    #         protein_fitness = [fitness_table[ai, RESIDUES_INDEX[amino_acid]]
+    #                            for ai, amino_acid in enumerate(protein)]
+    #     else:
+    #         protein_fitness = [fitness_table[ai, RESIDUES_INDEX[amino_acid]]
+    #                            for ai, amino_acid in enumerate(protein)
+    #                            if ai in variant_sites]
+    #     # if record["invariants"]:
+    #     #     clone = protein  # load fitness of each clone (as keys are numbers so easy to iterate)
+    #     # else:
+    #     #     clone = []  # ignore variant sites
+    #     #     for ai, amino_acid in enumerate(protein):
+    #     #         if ai in variant_sites:
+    #     #             clone.append(amino_acid)
+    #     #         else:
+    #     #             clone.append('X')
+    #     # clone_fitness = []
+    #     # for ai, amino_acid in enumerate(clone):  # generate values from generation x to plot
+    #     #     if amino_acid != 'X':
+    #     #         fitness = fitness_table[ai][RESIDUES_INDEX[amino_acid]]  # find fitness value corresponding to amino acid at position
+    #     #         clone_fitness.append(fitness)
+    #     # dist_clone_fitness.append(clone_fitness)
+    #     dist_clone_fitness.append(protein_fitness)
+    # generation_fitneses = np.asarray(dist_clone_fitness)
 
     if record["hist_fitness_stats"]:
         # Write a file describing 5 statistical tests on the protein fitness space
@@ -896,7 +905,7 @@ def record_generation_fitness(generation, population, variant_sites,
             distributions = fitness_table
         else:
             stats_file_name = "normal_distribution_statistics_generation{}.txt".format(generation)
-            distributions = dist_fitness_table
+            distributions = generation_fitneses
         stats_full_name = os.path.join(run_path, "fitnessdistribution",
                                        "statistics", stats_file_name)
         write_histogram_statistics(stats_full_name, distributions)
@@ -910,7 +919,7 @@ def record_generation_fitness(generation, population, variant_sites,
         disthistfullname = os.path.join(run_path, "fitnessdistribution",
                                         "histograms", disthistfilename)
 
-        plot_histogram_of_fitness(disthistfullname, dist_fitness_table.ravel(),
+        plot_histogram_of_fitness(disthistfullname, generation_fitneses.ravel(),
                                   fitness_table.ravel())
 
 

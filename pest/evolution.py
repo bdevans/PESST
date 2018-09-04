@@ -814,43 +814,35 @@ def record_generation_fitness(generation, population, variant_sites,
     dictionary. Optionally generate data and figures about fitness.
     """
 
-    if record["dot_fitness"] and (generation == 0 or generation % record["rate"] == 0):  # if the switch is on, and record fitness on the first generation and every x generation thereafter
+    if not (generation == 0 or generation % record["rate"] == 0):
+        return
+
+    if record["dot_fitness"]:
         # # TODO: There will be a bug in plotting the mean fitness at the wrong x point (as before)
         fitfilename = "generation_{}.png".format(generation)  # define dynamic filename
         fitfullname = os.path.join(run_path, "fitnessdotmatrix", fitfilename)
         plot_threshold_fitness(generation, population, variant_sites, fitness_table, fitfullname)
 
-    if generation == 0 or generation % record["rate"] == 0:
-        # Build distribution of fitness values existing in evolving protein
-        additiondist = 0
-        pointsdist = 0
-        distclonefitnesslist = []
-        disttotalfitness = []  # space for values to plot
-
-        # find and plot all fitness values in the current generation
-        for pi, protein in list(population.items()):
-            if record["invariants"]:
-                disttotalaminos = protein  # load fitness of each clone (as keys are numbers so easy to iterate)
-            else:
-                disttotalaminos = []  # ignore variant sites
-                for ai, amino_acid in enumerate(protein):
-                    if ai in variant_sites:
-                        disttotalaminos.append(amino_acid)
-                    else:
-                        disttotalaminos.append('X')
-            clonefitnesslist = []
-            for ai, amino_acid in enumerate(disttotalaminos):  # generate values from generation x to plot
-                if amino_acid != 'X':
-                    pointsdist += 1
-                    # distvalue = fitness_table[ai][RESIDUES.index(amino_acid)]  # find fitness value corresponding to amino acid at position
-                    distvalue = fitness_table[ai][RESIDUES_INDEX[amino_acid]]  # find fitness value corresponding to amino acid at position
-                    # distvalue = fitness_table[ai][amino_acid]
-                    # DataFrame
-                    # distvalue = fitness_table.loc[ai, amino_acid]
-                    additiondist += distvalue
-                    clonefitnesslist.append(distvalue)
-                    disttotalfitness.append(distvalue)  # append these to list
-            distclonefitnesslist.append(clonefitnesslist)
+    # Build distribution of fitness values existing in evolving protein
+    dist_clone_fitness = []
+    # find and plot all fitness values in the current generation
+    for pi, protein in list(population.items()):
+        if record["invariants"]:
+            clone = protein  # load fitness of each clone (as keys are numbers so easy to iterate)
+        else:
+            clone = []  # ignore variant sites
+            for ai, amino_acid in enumerate(protein):
+                if ai in variant_sites:
+                    clone.append(amino_acid)
+                else:
+                    clone.append('X')
+        clone_fitness = []
+        for ai, amino_acid in enumerate(clone):  # generate values from generation x to plot
+            if amino_acid != 'X':
+                fitness = fitness_table[ai][RESIDUES_INDEX[amino_acid]]  # find fitness value corresponding to amino acid at position
+                clone_fitness.append(fitness)
+        dist_clone_fitness.append(clone_fitness)
+        dist_fitness_table = np.asarray(dist_clone_fitness)
 
     if record["hist_fitness_stats"]:
         # Write a file describing 5 statistical tests on the protein fitness space
@@ -859,14 +851,15 @@ def record_generation_fitness(generation, population, variant_sites,
             distributions = fitness_table
         else:
             stats_file_name = "normal_distribution_statistics_generation{}.txt".format(generation)
-            distributions = np.asarray(distclonefitnesslist)
+            distributions = dist_fitness_table
         stats_full_name = os.path.join(run_path, "fitnessdistribution",
                                        "statistics", stats_file_name)
         write_histogram_statistics(stats_full_name, distributions)
         if generation > 0:
-            append_ks_statistics(stats_full_name, distributions.ravel(), fitness_table.ravel())
+            append_ks_statistics(stats_full_name, distributions.ravel(),
+                                 fitness_table.ravel())
 
-    if record["hist_fitness"]:  # and (generation == 0 or generation % record["rate"] == 0):  # if the switch is on, and record fitness histograms on the first generation and every x generation thereafter
+    if record["hist_fitness"]:
 
         disthistfilename = "generation_{}.png".format(generation)  # define dynamic filename
         disthistfullname = os.path.join(run_path, "fitnessdistribution",

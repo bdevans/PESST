@@ -630,10 +630,10 @@ def plot_threshold_fitness(generation, population, variant_sites, fitness_table,
     plt.close()  # close plot (so you dont generate 100 individual figures)
 
 
-def append_ks_statistics(stats_full_name, disttotalfitness, disttrackeryaxis):
+def append_ks_statistics(stats_full_name, distribution_fitness, initial_fitness):
     with open(stats_full_name, "a") as stats_file:  # Append to file
         # Kolmogorov-Smirnov test of similarity to original distributuion
-        ksdata = sp.stats.ks_2samp(np.asarray(disttotalfitness), np.asarray(disttrackeryaxis))
+        ksdata = sp.stats.ks_2samp(distribution_fitness, initial_fitness)
         stats_file.write("\n\n\n2-sided Kolmogorov-Smirnov test of similarity "
                          "between the fitness space and evolving protein:\n\n")
         stats_file.write("The Kolmogorov-Smirnov test between the fitness "

@@ -581,7 +581,8 @@ def plot_threshold_fitness(generation, population, variant_sites, fitness_table,
     plt.plot([0, n_amino_acids], [avgtoplotleft, avgtoplotleft], 'r--', lw=3)
     plt.ylim(((-4 * sigma) - 1), ((4 * sigma) + 1))  # generate attractive figure
     muleftdistdp = "%.3f" % avgtoplotleft
-    plt.text(0, 4*sigma, "$\mu$1 = %s\nthreshold = %s" % (muleftdistdp, fitness_threshold), size=6.5)
+    plt.text(0, 4*sigma, "\n".join([r"$\mu_1$ = %s" % muleftdistdp,
+                                    "threshold = %s" % fitness_threshold]), size=6.5)
     plt.xticks([])
     plt.title("\n".join(wrap(r"Fitness distribution of $\Delta T_m$ matrix", 40)), size=8)
 
@@ -618,7 +619,8 @@ def plot_threshold_fitness(generation, population, variant_sites, fitness_table,
     plt.ylim(((-4 * sigma) - 1), ((4 * sigma) + 1))  # generate attractive figure
     plt.plot([0, len(population)], [avgtoplotright, avgtoplotright], 'r--', lw=3)
     murightdistdp = "%.3f" % avgtoplotright
-    plt.text(0, 4*sigma, "\n".join([r"$\mu$2 = %s" % murightdistdp, "threshold = %s" % fitness_threshold]), size=6.5)
+    plt.text(0, 4*sigma, "\n".join([r"$\mu_2$ = %s" % murightdistdp,
+                                    "threshold = %s" % fitness_threshold]), size=6.5)
     plt.title("\n".join(wrap("Fitness distribution of every sequence in the evolving dataset", 40)), size=8)
     plt.subplots_adjust(top=0.85)
     plt.xticks([])  # remove x axis ticks

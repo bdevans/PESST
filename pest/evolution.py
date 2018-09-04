@@ -594,7 +594,7 @@ def plot_threshold_fitness(generation, population, variant_sites, fitness_table,
     for pi, protein in list(population.items()):
         Y2fitness = []  # space for values to plot
         if record["invariants"]:  # check if invariants need to be ignored
-            Y2aminos = protein  # load fitness of each gen (a keys are numbers so easy to iterate)
+            Y2aminos = protein  # load fitness of each gen (keys are numbers so easy to iterate)
         else:
             Y2aminos = []  # ignore variant sites
             for ai in range(n_amino_acids):
@@ -715,7 +715,8 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
                      .format(sum(passpercentcalc) / len(passpercentcalc)))
 
     # Normality (Anderson-Darling)
-    significance_levels = (15, 10, 5, 2.5, 1)  # Percentages for normal distribution
+    # Significance levels (percentages) for normal distributions
+    significance_levels = (15, 10, 5, 2.5, 1)
     stats_file.write("Anderson-Darling test of normality\n"
                      "----------------------------------\n\n")
     anderson_results = sp.stats.anderson(fitnesses)
@@ -1355,7 +1356,7 @@ def generationator(n_generations, initial_population, fitness_table, fitness_thr
                             LG_matrix, LG_residues, LG_indicies)
         # TODO: Split out writing to file until the end so that all branches are valid
         # Re-calculate fitness
-        if gen == 0 or gen % record["rate"] == 0:
+        if gen == 0 or gen % record["rate"] == 0:  # TODO: (gen+1) see write_fasta_alignment
             fitnesses = calculate_generation_fitness(population, fitness_table)
             record_generation_fitness(gen, population, variant_sites,
                                       fitness_table, fitness_threshold,

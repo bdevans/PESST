@@ -1059,9 +1059,9 @@ def write_settings_file(run_path, **kwargs):
     with open(settingsfullname, "w") as sf:  # open file
         sf.write("Random number generator seed: {}\n".format(seed))
         sf.write("Protein length: %s" % (n_amino_acids))
-        sf.write("\nAmount of mutations per generation: %s" % n_mutations_per_gen)
-        sf.write("\nAmount of clones in the population: %s" % n_clones)
-        sf.write("\nAmount of generations simulation is run for: %s" % n_generations)
+        sf.write("\nNumber of mutations per generation: %s" % n_mutations_per_gen)
+        sf.write("\nNumber of clones in the population: %s" % n_clones)
+        sf.write("\nNumber of generations simulation is run for: %s" % n_generations)
         sf.write("\nFitness threshold: %s" % fitness_threshold)
         sf.write("\n\nNormal distribution properties: mu = %s, sigma = %s" % (mu, sigma))
         sf.write("\nGamma distribution properties: kappa = %s, theta = %s" % (gamma["shape"], gamma["scale"]))

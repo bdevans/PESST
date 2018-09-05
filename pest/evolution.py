@@ -106,7 +106,10 @@ def get_allowed_sites(n_amino_acids, n_anchors):
     # anchored_sequences = [allowed_values.pop(random.randrange(len(allowed_values))) for r in range(n_anchors)]
     # NOTE: Should this be appended (as it may mean indexing out of range)?
     # allowed_values.append(n_amino_acids)
-    return allowed_values
+    Sites = namedtuple('Sites', ['invariant', 'variant'])
+    # Return a namedtuple with anchors and available sites
+    return Sites(invariant=anchored_sequences, variant=allowed_values)
+    # return allowed_values
 
 
 def gamma_ray(n_amino_acids, gamma):  # kappa, theta, n_iterations=100, n_samples=10000):
@@ -1126,13 +1129,13 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
 
     initial_protein = generate_protein(n_amino_acids)  # make first protein
     fitness_table = get_protein_fitness(n_amino_acids)  # make first fitness dictionary
-    variant_sites = get_allowed_sites(n_amino_acids, n_anchors)  # generate invariant sites
-    initial_protein = superfit(fitness_table, variant_sites, initial_protein, fitness_start)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
+    sites = get_allowed_sites(n_amino_acids, n_anchors)  # generate invariant sites
+    initial_protein = superfit(fitness_table, sites.variant, initial_protein, fitness_start)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
     gamma_categories = gamma_ray(n_amino_acids, gamma)  # generate gamma categories for every site
     write_initial_protein(run_path, initial_protein)  # Record initial protein
     initial_population = clone_protein(initial_protein, n_clones)  # make some clones to seed evolution
     history = evolve(n_generations, initial_population, fitness_table,
-                     fitness_threshold, variant_sites, gamma_categories,
+                     fitness_threshold, sites.variant, gamma_categories,
                      n_mutations_per_gen, record["fasta_rate"],
                      LG_matrix, LG_residues, LG_indicies, run_path)
     plot_evolution(history, n_clones, initial_protein, fitness_table, run_path)

@@ -26,6 +26,9 @@ RESIDUES = "RHKDESTNQCGPAVILMFYW"  # Strings are immutable
 RESIDUES_INDEX = {aa: ai for ai, aa in enumerate(RESIDUES)}  # Faster than calling .index()
 
 
+def print_protein(protein):
+    """Takes a list of amino acids and prints them as a string."""
+    print(''.join(protein))
 
 
 # NOTE: unused

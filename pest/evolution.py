@@ -260,7 +260,8 @@ def gamma_ray(n_amino_acids, sites, gamma):  # kappa, theta, n_iterations=100, n
     return cumulative_gamma/sum(cumulative_gamma)  # p_location
 
 
-def mutate_amino_acid(amino_acid, LG_matrix, LG_residues, LG_indicies):  # b = matrix, a = current amino acid
+def mutatate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies):
+# def mutate_amino_acid(amino_acid, LG_matrix, LG_residues, LG_indicies):  # b = matrix, a = current amino acid
     """Mutate a residue to another residue based on the LG matrix."""
     # Get the order of the aminos corresponding to the values in the array
     # aminolist = LG_matrix[:, 0].ravel().tolist()
@@ -272,9 +273,16 @@ def mutate_amino_acid(amino_acid, LG_matrix, LG_residues, LG_indicies):  # b = m
     # new_aa_index = np.searchsorted(aa_cumsum, np.random.uniform(0, 1))
     # # return aminolist[new_aa_index]
     # return LG_residues[new_aa_index]
-    p_location = np.asarray(LG_matrix[LG_indicies[amino_acid], 1:], dtype=float)
-    location = np.random.choice(len(p_location), p=p_location)
-    return LG_residues[location]
+    mutant = copy.deepcopy(protein)  # Necessary!
+    location = np.random.choice(len(mutant), p=p_location)
+    amino_acid = mutant[location]
+    p_transition = np.asarray(LG_matrix[LG_indicies[amino_acid], 1:], dtype=float)
+    mutant[location] = np.random.choice(LG_residues, p=p_transition)
+    return mutant
+
+    # p_location = np.asarray(LG_matrix[LG_indicies[amino_acid], 1:], dtype=float)
+    # location = np.random.choice(len(p_location), p=p_location)
+    # return LG_residues[location]
 
 
 def calculate_fitness(protein, fitness_table):
@@ -522,8 +530,8 @@ def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
 
     for q in range(n_mutations_per_gen):  # impliment gamma
         # Pick random key, clone to make a random generation
-        mutant_key, mutant_orig = random.choice(list(next_generation.items()))
-        mutant = copy.deepcopy(mutant_orig)  # Necessary!
+        pi, protein = random.choice(list(next_generation.items()))
+
 
         # mutated_residues = []
         # residue_index = [0]
@@ -550,10 +558,12 @@ def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
         #     mutant_residue_area = np.random.uniform(0, cumulative_gamma[-1])  # [0, highest_gamma_sum)
         #     location = np.searchsorted(cumulative_gamma, mutant_residue_area)  # Return index where mutant_residue_area <= cumulative_gamma[i]
 
-        location = np.random.choice(len(mutant), p=p_location)
+        # location = np.random.choice(len(mutant), p=p_location)
+        # mutant[location] = mutate_amino_acid(mutant[location], LG_matrix, LG_residues, LG_indicies)  # mutate the copy with the randomly chosen residue
+        mutant = mutatate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies)
+        next_generation[pi] = mutant  # update with new sequence
 
-        mutant[location] = mutate_amino_acid(mutant[location], LG_matrix, LG_residues, LG_indicies)  # mutate the copy with the randomly chosen residue
-        next_generation[mutant_key] = mutant  # update with new sequence
+
 
     return next_generation
 

@@ -91,7 +91,7 @@ def clone_protein(protein, n_clones):
     """Generate a dictionary containing n_clones of generated protein
     - this contains the evolving dataset.
     """
-    return {l: protein for l in range(n_clones)}
+    return {l: copy.deepcopy(protein) for l in range(n_clones)}
 
 
 def get_allowed_sites(n_amino_acids, n_anchors):

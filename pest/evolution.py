@@ -318,7 +318,7 @@ def get_random_protein(n_amino_acids, start_amino_acid="M"):
     return protein
 
 
-def mutate_protein(protein, mutation_sites, fitness_table):
+def twist_protein(protein, mutation_sites, fitness_table):
     mutant = protein[:]  # copy.deepcopy(start_protein)
     for ai in mutation_sites:
         mutant[ai] = random.choice(RESIDUES)
@@ -383,7 +383,7 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
             # for ai in chosen_variants:
             #     new_protein[ai] = random.choice(RESIDUES)
             # new_fitness = calculate_fitness(new_protein, fitness_table)
-            (new_protein, new_fitness) = mutate_protein(start_protein, chosen_variants, fitness_table)
+            (new_protein, new_fitness) = twist_protein(start_protein, chosen_variants, fitness_table)
             counter = 0
 
             if start_fitness < fitness_threshold+5:  # setting lower bounds of medium fitness
@@ -393,7 +393,7 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
                     # for ai in chosen_variants:
                     #     new_protein[ai] = random.choice(RESIDUES)
                     # new_fitness = calculate_fitness(new_protein, fitness_table)
-                    (new_protein, new_fitness) = mutate_protein(start_protein, chosen_variants, fitness_table)
+                    (new_protein, new_fitness) = twist_protein(start_protein, chosen_variants, fitness_table)
                     counter += 1
 
             elif start_fitness > fitness_threshold+10:  # set upper bounds of medium fitness
@@ -403,7 +403,7 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
                     # for ai in chosen_variants:
                     #     new_protein[ai] = random.choice(RESIDUES)
                     # new_fitness = calculate_fitness(new_protein, fitness_table)
-                    (new_protein, new_fitness) = mutate_protein(start_protein, chosen_variants, fitness_table)
+                    (new_protein, new_fitness) = twist_protein(start_protein, chosen_variants, fitness_table)
                     counter += 1
 
             start_protein = new_protein

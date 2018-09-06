@@ -266,17 +266,15 @@ def mutate_amino_acid(amino_acid, LG_matrix, LG_residues, LG_indicies):  # b = m
     # aminolist = LG_matrix[:, 0].ravel().tolist()
     # Build cumulative sum of row of probabilities corresponding to amino_acid
     # old_aa_index = aminolist.index(amino_acid)
-    old_aa_index = LG_indicies[amino_acid]
-    aa_cumsum = np.cumsum(np.asarray(LG_matrix[old_aa_index, 1:], dtype=float))
-    # Return new_aa_index where random variable <= aa_cumsum[new_aa_index]
-    new_aa_index = np.searchsorted(aa_cumsum, np.random.uniform(0, 1))
-    # return aminolist[new_aa_index]
-    return LG_residues[new_aa_index]
-
-    # TODO
-    # p_location = LG_matrix[LG_indicies[amino_acid], 1:]
-    # location = np.random.choice(range(1, 1+len(p_location)), p=p_location)
-    # return LG_residues[location]
+    # old_aa_index = LG_indicies[amino_acid]
+    # aa_cumsum = np.cumsum(np.asarray(LG_matrix[old_aa_index, 1:], dtype=float))
+    # # Return new_aa_index where random variable <= aa_cumsum[new_aa_index]
+    # new_aa_index = np.searchsorted(aa_cumsum, np.random.uniform(0, 1))
+    # # return aminolist[new_aa_index]
+    # return LG_residues[new_aa_index]
+    p_location = np.asarray(LG_matrix[LG_indicies[amino_acid], 1:], dtype=float)
+    location = np.random.choice(len(p_location), p=p_location)
+    return LG_residues[location]
 
 
 def calculate_fitness(protein, fitness_table):

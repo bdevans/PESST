@@ -360,10 +360,10 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
                 # DataFrame
                 # sorted_aa = RESIDUES[fitness_table.loc[ai].argsort()]
                 # aminos.append(sorted_aa[rank] for rank in sequence)
-        afitprotein = []
+        fitted_protein = []
         # Generate a superunffit protein by randomly picking one of the 3 most fit amino acids at each position
         for candidates in aminos:
-            afitprotein.append(random.choice(candidates))
+            fitted_protein.append(random.choice(candidates))
 
     # Generate medium fitness protein. This module is a little buggy. It takes
     # the starting protein sequence, mutates 5 residues until the protein is
@@ -408,9 +408,9 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
 
             start_protein = new_protein
             start_fitness = calculate_fitness(start_protein, fitness_table)
-        afitprotein = start_protein
+        fitted_protein = start_protein
 
-    return afitprotein
+    return fitted_protein
 
 
     # if fitness_level == 'low':  # generate unfit protein

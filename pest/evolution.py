@@ -862,14 +862,14 @@ def write_fasta_alignment(population, generation, run_path):  # x = current gene
                 fastafile.write(residue)
 
 
-def write_final_fasta(population, bifurcations, n_roots, run_path):
+def write_final_fasta(population, tree, run_path):
     bifsize = 0
-    for bifs in bifurcations:
+    for bifs in tree["branches"]:
         bifsize += len(bifs)
-    bifursize = bifsize/len(bifurcations)
+    bifursize = bifsize/len(tree["branches"])
     n_clones_to_take = int((bifursize-1)/2)  # if 5, gives 2, if 4 gives 2, if 3 gives 1.
     generation_numbers = []
-    for i in bifurcations:
+    for i in tree["branches"]:
         clone_selection = random.sample(set(i), n_clones_to_take)  # NOTE: Only sample from unique clones? YES
         for c in clone_selection:
             generation_numbers.append(c)
@@ -883,10 +883,11 @@ def write_final_fasta(population, bifurcations, n_roots, run_path):
                 treefastafile.write(residue)
             treefastafile.write('\n')
         # Choose a random root to write
-        root = population[random.choice(n_roots)]
+        # BUG: This was originally choosing from n_roots
+        # root = population[random.choice(n_roots)]
+        root = population[random.choice(tree["roots"])]
         treefastafile.write(">root\n")
-        for m in root:
-            treefastafile.write(m)
+        treefastafile.write(''.join(root))
 
 
 def select_from_pool(protein_index, candidates, fitnesses, fitness_threshold):
@@ -904,13 +905,13 @@ def select_from_pool(protein_index, candidates, fitnesses, fitness_threshold):
     return new_protein_index
 
 
-def replace_protein(protein_index, roots, bifurcations, fitnesses, fitness_threshold):
+def replace_protein(protein_index, tree, fitnesses, fitness_threshold):
 
-    if protein_index in roots:
-        new_index = select_from_pool(protein_index, roots, fitnesses,
+    if protein_index in tree["roots"]:
+        new_index = select_from_pool(protein_index, tree["roots"], fitnesses,
                                      fitness_threshold)
     else:  # Protein is in one of the branches
-        for branch in bifurcations:
+        for branch in tree["branches"]:
             if protein_index in branch:
                 new_index = select_from_pool(protein_index, branch, fitnesses,
                                              fitness_threshold)
@@ -924,20 +925,23 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
     generations according to an LG matrix and gamma distribution.
     """
 
+    n_clones = len(initial_population)
     # Generate list of clone keys for bifurication
-    proteins = list(range(n_clones))
+    protein_keys = list(range(n_clones))
+    tree = {}  # Dictionary of keys for roots and branches in the population
     # Randomly sample without replacement n_roots items from clonelist
-    roots = random.sample(proteins, n_roots)
-    for r in roots:
-        proteins.remove(r)
-    # roots = [clonelist.pop(random.randrange(len(clonelist))) for r in range(n_roots)]
+    root_keys = random.sample(protein_keys, n_roots)
+    for r in root_keys:
+        protein_keys.remove(r)
+    # root_keys = [clonelist.pop(random.randrange(len(clonelist))) for r in range(n_roots)]
 
     rootsfullname = os.path.join(run_path, "start", "Roots.txt")
     with open(rootsfullname, "w") as rootsfile:  # open file
         rootsfile.write('Roots:')
-        for k in roots:
+        for k in root_keys:
             rootsfile.write('\nClone %s' % str(k+1))
 
+    tree["roots"] = root_keys
     # Calculate number of bifurications per generation.
     # bifuraction_start = n_clones - n_roots
     # bifurlist = [1]
@@ -957,7 +961,8 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
         n_bifurcations += 1
     n_gens_per_bifurcation = int(n_generations/n_bifurcations)  # number of generations per bifurcation.
 
-    bifurcations = [proteins]  # lists of protein keys intialised with non-roots
+    # bifurcations = [proteins]  # lists of protein keys intialised with non-roots
+    tree["branches"] = [protein_keys]  # lists of protein keys intialised with non-roots
     population = copy.deepcopy(initial_population)  # current generation
     fitnesses = calculate_generation_fitness(population, fitness_table)
     # Record initial population
@@ -977,14 +982,14 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
 
         # Bifuricate in even generation numbers so every branch on tree has
         # 3 leaves that have been evolving by the last generation
-        if gen > 0 and gen % n_gens_per_bifurcation == 0 and len(bifurcations[0]) > 3:
+        if gen > 0 and gen % n_gens_per_bifurcation == 0 and len(tree["branches"][0]) > 3:
             new_bifurcations = []  # temporary store for new bifurcations
-            for branch in bifurcations:  # bifuricate each set of leaves
+            for branch in tree["branches"]:  # bifuricate each set of leaves
                 random.shuffle(branch)
                 midpoint = int(len(branch)/2)
                 new_bifurcations.append(branch[:midpoint])
                 new_bifurcations.append(branch[midpoint:])
-            bifurcations = new_bifurcations[:]
+            tree["branches"] = new_bifurcations[:]
 
         counter = 0
         successful_mutation = False
@@ -1006,7 +1011,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
             for pi in range(len(fitnesses)):  # if there are, start loop on fitnesses
                 if fitnesses[pi] < fitness_threshold:  # if fitness is less than threshold clone a random sequence in its place.
 
-                    mutant_index = replace_protein(pi, roots, bifurcations,
+                    mutant_index = replace_protein(pi, tree,
                                                    fitnesses, fitness_threshold)
                     # If no suitable clones are available, re-mutate the generation and start again
                     if mutant_index is None:
@@ -1020,7 +1025,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
         if deaths_per_generation > 0 and gen % deaths_per_generation == 0:
             mortals = random.sample(range(n_clones), int(n_clones * death_ratio))
             for pi in mortals:
-                mortal_index = replace_protein(pi, roots, bifurcations,
+                mortal_index = replace_protein(pi, tree,
                                                fitnesses, fitness_threshold)
                 if mortal_index is None:
                     warnings.warn("Unable to kill protein {}! Gen: {}; Count: {}".format(pi, gen, counter))
@@ -1047,7 +1052,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
                                   fitness_table, fitness_threshold,
                                   record, run_path)
 
-    write_final_fasta(population, bifurcations, roots, run_path)
+    write_final_fasta(population, tree, run_path)
 
     return evolution
 

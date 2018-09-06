@@ -115,7 +115,7 @@ def get_allowed_sites(n_amino_acids, n_anchors):
     # return allowed_values
 
 
-def gamma_ray(n_amino_acids, gamma):  # kappa, theta, n_iterations=100, n_samples=10000):
+def gamma_ray(n_amino_acids, sites, gamma):  # kappa, theta, n_iterations=100, n_samples=10000):
 # def gammaray(a, b, c, d, e):  # a = iterations to run gamma sampling, b = number of gamma samples per iteration, c = gamma shape (kappa), d = gamma scale (theta), e = amount of aminos
     """Generate a set of gamma rate categories.
 
@@ -250,7 +250,13 @@ def gamma_ray(n_amino_acids, gamma):  # kappa, theta, n_iterations=100, n_sample
     # gammaaminos = [random.choice(average_medians) for aa in range(n_amino_acids)]
 
     # return [random.choice(average_medians) for aa in range(n_amino_acids)]
-    return random.choices(average_medians, k=n_amino_acids)
+    # return random.choices(average_medians, k=n_amino_acids)
+
+    gamma_categories = random.choices(average_medians, k=n_amino_acids)
+    # Sum gammas to make a probability distribution to randomly select from.
+    cumulative_gamma = np.cumsum(gamma_categories)  # n_amino_acids long
+    cumulative_gamma[sites.invariant] = 0
+    return cumulative_gamma/sum(cumulative_gamma)  # p_location
 
 
 def mutate_amino_acid(amino_acid, LG_matrix, LG_residues, LG_indicies):  # b = matrix, a = current amino acid
@@ -498,7 +504,7 @@ def plot_fitness_histogram(n_proteins, n_amino_acids, fitness_table):
 
 
 def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
-                      gamma_categories, LG_matrix, LG_residues, LG_indicies):
+                      p_location, LG_matrix, LG_residues, LG_indicies):
     """Mutate a set of sequences based on the LG+I+G model of amino acid
     substitution.
     """
@@ -507,7 +513,8 @@ def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
     next_generation = current_generation
 
     # Sum gammas to make a probability distribution to randomly select from.
-    cumulative_gamma = np.cumsum(gamma_categories)  # n_amino_acids long
+    # gamma_categories = p_location
+    # cumulative_gamma = np.cumsum(gamma_categories)  # n_amino_acids long
 
     for q in range(n_mutations_per_gen):  # impliment gamma
         # Pick random key, clone to make a random generation
@@ -534,15 +541,17 @@ def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
         # mutation_target[residue_index[0]] = newresidue  # mutate the copy with the randomly chosen residue
 
         # TODO: Could gamma_categories be the length of anchor_sites?
-        residue_index = 0
-        # cumulative_gamma[anchor_sites] = -np.inf  # Would this work instead of while loop?
-        # while residue_index in anchor_sites:
-        while residue_index not in variant_sites:
-            mutant_residue_area = np.random.uniform(0, cumulative_gamma[-1])  # [0, highest_gamma_sum)
-            residue_index = np.searchsorted(cumulative_gamma, mutant_residue_area)  # Return index where mutant_residue_area <= cumulative_gamma[i]
+        # location = 0
+        # # cumulative_gamma[anchor_sites] = -np.inf  # Would this work instead of while loop?
+        # # while residue_index in anchor_sites:
+        # while location not in variant_sites:
+        #     mutant_residue_area = np.random.uniform(0, cumulative_gamma[-1])  # [0, highest_gamma_sum)
+        #     location = np.searchsorted(cumulative_gamma, mutant_residue_area)  # Return index where mutant_residue_area <= cumulative_gamma[i]
 
-        mutation_target[residue_index] = mutate_amino_acid(mutation_target[residue_index], LG_matrix, LG_residues, LG_indicies)  # mutate the copy with the randomly chosen residue
-        next_generation[mutant_key] = mutation_target  # update with new sequence
+        location = np.random.choice(len(mutant), p=p_location)
+
+        mutant[location] = mutate_amino_acid(mutant[location], LG_matrix, LG_residues, LG_indicies)  # mutate the copy with the randomly chosen residue
+        next_generation[mutant_key] = mutant  # update with new sequence
 
     return next_generation
 
@@ -882,7 +891,7 @@ def replace_protein(protein, candidates, fitnesses, fitness_threshold):
 
 
 def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
-           variant_sites, gamma_categories, n_mutations_per_gen, fasta_rate,
+           variant_sites, p_location, n_mutations_per_gen, fasta_rate,
            LG_matrix, LG_residues, LG_indicies, run_path):
     """Generation generator - mutate a protein for a defined number of
     generations according to an LG matrix and gamma distribution.
@@ -1149,11 +1158,12 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
     fitness_table = get_protein_fitness(n_amino_acids)  # make first fitness dictionary
     sites = get_allowed_sites(n_amino_acids, n_anchors)  # generate invariant sites
     initial_protein = superfit(fitness_table, sites.variant, initial_protein, fitness_start)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
-    gamma_categories = gamma_ray(n_amino_acids, gamma)  # generate gamma categories for every site
+    # NOTE: Should this change throughout the generations and even proteins?
+    p_location = gamma_ray(n_amino_acids, sites, gamma)  # generate gamma categories for every site
     write_initial_protein(run_path, initial_protein)  # Record initial protein
     initial_population = clone_protein(initial_protein, n_clones)  # make some clones to seed evolution
     history = evolve(n_generations, initial_population, fitness_table,
-                     fitness_threshold, sites.variant, gamma_categories,
+                     fitness_threshold, sites.variant, p_location,
                      n_mutations_per_gen, record["fasta_rate"],
                      LG_matrix, LG_residues, LG_indicies, run_path)
     plot_evolution(history, n_clones, initial_protein, fitness_table, run_path)

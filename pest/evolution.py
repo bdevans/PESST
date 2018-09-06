@@ -889,31 +889,39 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
     """
 
     # Generate list of clone keys for bifurication
-    clonelist = list(range(n_clones))
+    proteins = list(range(n_clones))
     # Randomly sample without replacement n_roots items from clonelist
-    rootlist = random.sample(clonelist, n_roots)
-    for r in rootlist:
-        clonelist.remove(r)
-    # rootlist = [clonelist.pop(random.randrange(len(clonelist))) for r in range(n_roots)]
+    roots = random.sample(proteins, n_roots)
+    for r in roots:
+        proteins.remove(r)
+    # roots = [clonelist.pop(random.randrange(len(clonelist))) for r in range(n_roots)]
 
     rootsfullname = os.path.join(run_path, "start", "Roots.txt")
     with open(rootsfullname, "w") as rootsfile:  # open file
         rootsfile.write('Roots:')
-        for k in rootlist:
+        for k in roots:
             rootsfile.write('\nClone %s' % str(k+1))
 
     # Calculate number of bifurications per generation.
-    bifuraction_start = n_clones - n_roots
-    bifurlist = [1]
-    for m in bifurlist:
-        bifurlist.append(1)
-        bifuraction_start /= 2
-        if bifuraction_start < 6:  # stop when there are 3, 4, 5 or 6 leaves per branch.
-            break
-    bifurgeneration = int(n_generations/len(bifurlist))  # number of generations per bifurication.
+    # bifuraction_start = n_clones - n_roots
+    # bifurlist = [1]
+    # for m in bifurlist:
+    #     bifurlist.append(1)
+    #     bifuraction_start /= 2
+    #     if bifuraction_start < 6:  # stop when there are 3, 4, 5 or 6 leaves per branch.
+    #         break
+    # print(len(bifurlist))
+    # n_gens_per_bifurcation = int(n_generations/len(bifurlist))  # number of generations per bifurcation.
 
-    clonelistlist = []  # place to store bifurcations (list of lists of clone keys)
-    clonelistlist.append(clonelist)  # store all clones that are not root to start
+    # Calculate number of bifurications per generation.
+    pool = n_clones - n_roots
+    n_bifurcations = 1
+    while pool >= 6:  # stop when there are 3, 4, 5 or 6 leaves per branch.
+        pool //= 2  # Floor division
+        n_bifurcations += 1
+    n_gens_per_bifurcation = int(n_generations/n_bifurcations)  # number of generations per bifurcation.
+
+    bifurcations = [proteins]  # lists of protein keys intialised with non-roots
     population = copy.deepcopy(initial_population)  # current generation
     fitnesses = calculate_generation_fitness(population, fitness_table)
     # Record initial population
@@ -927,76 +935,83 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
     # Create a list of generations and add initial population and fitness
     evolution = [Generation(population=population, fitness=fitnesses)]
 
+    # pprint({k: (''.join(p), calculate_fitness(p, fitness_table)) for k, p in population.items()})
+
     for gen in trange(n_generations):  # run evolution for n_generations
-        # Bifuricationmaker. Bifuricates in even generation numbers so every branch on tree has 3 leaves that have been evolving by the last generation
-        if gen % bifurgeneration == 0 and gen > 0 and len(clonelistlist[0]) > 3:
-            lists = []  # space to store bifurcations before adding them to clonelistlist
-            for clones in clonelistlist:  # bifuricate each set of leaves
-                random.shuffle(clones)
-                midpoint = int(len(clones)/2)
-                lists.append(clones[midpoint:])
-                lists.append(clones[:midpoint])
-            del clonelistlist[:]
-            for k in lists:  # append bifurcations to a cleared clonelistlist
-                clonelistlist.append(k)
 
-        # TODO: If no suitable clones are available, re-mutate the generation and start again
-        # Mutate population
-        population = mutate_population(population, n_mutations_per_gen,
-                                       variant_sites, gamma_categories,
-                                       LG_matrix, LG_residues, LG_indicies)
-        # TODO: Split out writing to file until the end so that all branches are valid
-        # Re-calculate fitness
-        if gen == 0 or gen % record["rate"] == 0:  # TODO: (gen+1) see write_fasta_alignment
-            fitnesses = calculate_generation_fitness(population, fitness_table)
+        # Bifuricate in even generation numbers so every branch on tree has
+        # 3 leaves that have been evolving by the last generation
+        if gen > 0 and gen % n_gens_per_bifurcation == 0 and len(bifurcations[0]) > 3:
+            new_bifurcations = []  # temporary store for new bifurcations
+            for branch in bifurcations:  # bifuricate each set of leaves
+                random.shuffle(branch)
+                midpoint = int(len(branch)/2)
+                new_bifurcations.append(branch[:midpoint])
+                new_bifurcations.append(branch[midpoint:])
+            bifurcations = new_bifurcations[:]
 
-        for pi in range(len(fitnesses)):  # if there are, start loop on fitnesses
-            if fitnesses[pi] < fitness_threshold:  # if fitness is less than threshold clone a random sequence in its place.
-                if pi in rootlist:
-                    clonekey = replace_protein(pi, rootlist, fitnesses,
-                                               fitness_threshold)
-                else:  # Protein is in one of the branches
-                    for branch in clonelistlist:
-                        if pi in branch:
-                            clonekey = replace_protein(pi, branch, fitnesses,
-                                                       fitness_threshold)
-                if np.isnan(clonekey):
-                    # Could not find fit enough candidate
-                    warnings.warn("clone %s is unfit with a value of %s, it will be replaced by:" % (pi, fitnesses[pi]))
-                    warnings.warn("clone %s with a fitness of %s" % (clonekey, fitnesses[clonekey]))
-                    warnings.warn('Clonekey fitness is too low or mutation rate is too high')  # Bug in this section that causes infinite loop if mutation rate is too high. Happens when a bifurication has a small number of clones to be replaced by, and the high mutation rate causes all clones to dip below the threshold in one generation.
-                    print(fitnesses)
-                    print(clonelistlist)
-                else:
-                    population[pi] = population[clonekey]  # swap out unfit clone for fit clone
+        counter = 0
+        successful_mutation = False
+        # next_generation = copy.deepcopy(population)
+        while not successful_mutation:  # mutant_index is None or mortal_index is None:
+
+            successful_mutation = True
+            # TODO: Store population with fitnesses in Generation namedtuple and move checks to within mutate_population
+            # Mutate population
+            next_generation = mutate_population(population, n_mutations_per_gen,
+                                                variant_sites, p_location,
+                                                LG_matrix, LG_residues, LG_indicies)
+            # Re-calculate fitness
+            # NOTE: This only used to be computed if gen == 0 or gen % record["rate"] == 0
+            fitnesses = calculate_generation_fitness(next_generation, fitness_table)
+
+            # pprint({k: (''.join(p), fitnesses[k]) for k, p in next_generation.items()})
+
+            for pi in range(len(fitnesses)):  # if there are, start loop on fitnesses
+                if fitnesses[pi] < fitness_threshold:  # if fitness is less than threshold clone a random sequence in its place.
+
+                    mutant_index = replace_protein(pi, roots, bifurcations,
+                                                   fitnesses, fitness_threshold)
+                    # If no suitable clones are available, re-mutate the generation and start again
+                    if mutant_index is None:
+                        # warnings.warn("Unable to replace protein {}! Gen: {}; Count: {}".format(pi, gen, counter))
+                        successful_mutation = False
+                        break  # out of loop over fitnesses
+                    else:
+                        next_generation[pi] = next_generation[mutant_index]  # swap out unfit clone for fit clone
 
         # Allow sequences to die and be replacecd at a predefined rate
         if deaths_per_generation > 0 and gen % deaths_per_generation == 0:
-            # NOTE: Originally this was sampled with replacement: FIXED
             mortals = random.sample(range(n_clones), int(n_clones * death_ratio))
             for pi in mortals:
-                if pi in rootlist:
-                    clonekey = replace_protein(pi, rootlist, fitnesses,
-                                               fitness_threshold)
-                else:  # Protein is in one of the branches
-                    for branch in clonelistlist:
-                        if pi in branch:
-                            clonekey = replace_protein(pi, branch, fitnesses,
-                                                       fitness_threshold)
-                if np.isnan(clonekey):
-                    warnings.warn("Unable to kill protein {} - no suitable replacements!".format(pi))
+                mortal_index = replace_protein(pi, roots, bifurcations,
+                                               fitnesses, fitness_threshold)
+                if mortal_index is None:
+                    warnings.warn("Unable to kill protein {}! Gen: {}; Count: {}".format(pi, gen, counter))
+                    # retry_mutation = True
+                    # break  # out of loop over fitnesses
+                    raise Exception("No suitable candidates on branch!")
                 else:
-                    population[pi] = population[clonekey]  # Replace dead protein
+                    next_generation[pi] = next_generation[mortal_index]  # Replace dead protein
 
+            counter += 1
+            if counter == 1000:
+                warnings.warn("mutant_index: {}; mortal_index: {}".format(mutant_index, mortal_index))
+                raise Exception("Maximum tries exceeded!")
+
+        # The population becomes next_generation only if bifurcations and deaths were successful
+        population = next_generation
+
+        evolution.append(Generation(population=population, fitness=fitnesses))
+        if ((gen+1) % fasta_rate) == 0:  # write fasta every record["fasta_rate"] generations
+            write_fasta_alignment(population, gen+1, run_path)
         # Record population details at the end of processing
+        # if gen == 0 or gen % record["rate"] == 0:  # TODO: (gen+1) see write_fasta_alignment
         record_generation_fitness(gen, population, variant_sites,
                                   fitness_table, fitness_threshold,
                                   record, run_path)
-        evolution.append(Generation(population=population, fitness=fitnesses))
-        # NOTE: Should this be at the end of each timestep? FIXED
-        if ((gen+1) % fasta_rate) == 0:  # write fasta every record["fasta_rate"] generations
-            write_fasta_alignment(population, gen+1, run_path)
-    write_final_fasta(population, clonelistlist, rootlist, run_path)
+
+    write_final_fasta(population, bifurcations, roots, run_path)
 
     return evolution
 

@@ -3,6 +3,7 @@ import os  # .path
 import csv
 import datetime
 from textwrap import wrap
+# from pprint import pprint
 from collections import namedtuple
 import warnings
 import random
@@ -271,6 +272,11 @@ def mutate_amino_acid(amino_acid, LG_matrix, LG_residues, LG_indicies):  # b = m
     new_aa_index = np.searchsorted(aa_cumsum, np.random.uniform(0, 1))
     # return aminolist[new_aa_index]
     return LG_residues[new_aa_index]
+
+    # TODO
+    # p_location = LG_matrix[LG_indicies[amino_acid], 1:]
+    # location = np.random.choice(range(1, 1+len(p_location)), p=p_location)
+    # return LG_residues[location]
 
 
 def calculate_fitness(protein, fitness_table):
@@ -1044,7 +1050,7 @@ def plot_evolution(history, n_clones, initial_protein, fitness_table, run_path):
     # Create array of fitness values with shape (n_generations, n_clones)
     # fitnesses = np.array([[evolution[g][-1][c] for c in range(n_clones)]
     #                       for g in range(n_generations)])
-    n_generations = len(history) - 1  # First entry is the initial state
+    n_generations = len(history) - 1  # First entry is the initial state
     fitnesses = np.array([[history[g].fitness[c] for c in range(n_clones)]
                           for g in range(n_generations+1)])
 

@@ -1185,14 +1185,13 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
     write_settings_file(run_path)
     # TODO: Refactor to use the same ordering as RESIDUES
     (LG_matrix, LG_residues, LG_indicies) = get_LG_matrix()  # Load LG matrix
-
-    # initial_protein = generate_protein(n_amino_acids)  # make first protein
     fitness_table = get_protein_fitness(n_amino_acids)  # make first fitness dictionary
+
     sites = get_allowed_sites(n_amino_acids, n_anchors)  # generate invariant sites
-    initial_protein = superfit(fitness_table, sites.variant, n_amino_acids, fitness_start)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
-    write_initial_protein(initial_protein, run_path)  # Record initial protein
     # NOTE: Should this change throughout the generations and even proteins?
     p_location = gamma_ray(n_amino_acids, sites, gamma)  # generate gamma categories for every site
+    initial_protein = superfit(fitness_table, sites.variant, n_amino_acids, fitness_start)  # generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
+    write_initial_protein(initial_protein, run_path)  # Record initial protein
     initial_population = clone_protein(initial_protein, n_clones)  # make some clones to seed evolution
     history = evolve(n_generations, initial_population, fitness_table,
                      fitness_threshold, sites.variant, p_location,

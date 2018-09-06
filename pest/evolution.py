@@ -877,17 +877,32 @@ def write_final_fasta(population, bifurcations, n_roots, run_path):
             treefastafile.write(m)
 
 
-def replace_protein(protein, candidates, fitnesses, fitness_threshold):
+def select_from_pool(protein_index, candidates, fitnesses, fitness_threshold):
     # Filter out original protein and those below the fitness threshold
     pool = [c for c in candidates
-            if c != protein and fitnesses[c] >= fitness_threshold]
+            if c != protein_index and fitnesses[c] >= fitness_threshold]
     if len(pool) > 0:
-        new_protein = random.choice(pool)
+        new_protein_index = random.choice(pool)
     else:
         # raise Exception("No suitable candidates on branch!")
-        warnings.warn("No suitable candidates on branch!")
-        new_protein = np.nan
-    return new_protein
+        # warnings.warn("No suitable candidates on branch!")
+        # new_protein = np.nan
+        new_protein_index = None
+        # print({c: fitnesses[c] for c in candidates})
+    return new_protein_index
+
+
+def replace_protein(protein_index, roots, bifurcations, fitnesses, fitness_threshold):
+
+    if protein_index in roots:
+        new_index = select_from_pool(protein_index, roots, fitnesses,
+                                     fitness_threshold)
+    else:  # Protein is in one of the branches
+        for branch in bifurcations:
+            if protein_index in branch:
+                new_index = select_from_pool(protein_index, branch, fitnesses,
+                                             fitness_threshold)
+    return new_index
 
 
 def evolve(n_generations, initial_population, fitness_table, fitness_threshold,

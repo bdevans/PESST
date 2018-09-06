@@ -509,8 +509,8 @@ def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
     substitution.
     """
     # NOTE: This could be removed for speed after checking it is not used later
-    # next_generation = copy.deepcopy(current_generation)  # make a deep copy of the library so changing the library in the function doesn't change the library outside the function
-    next_generation = current_generation
+    next_generation = copy.deepcopy(current_generation)  # make a deep copy of the library so changing the library in the function doesn't change the library outside the function
+    # next_generation = current_generation
 
     # Sum gammas to make a probability distribution to randomly select from.
     # gamma_categories = p_location
@@ -518,10 +518,8 @@ def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
 
     for q in range(n_mutations_per_gen):  # impliment gamma
         # Pick random key, clone to make a random generation
-        mutant_key, mutant_clone = random.choice(list(next_generation.items()))
-        mutation_target = copy.deepcopy(mutant_clone)  # make a deep copy of the libaries value as to not change it in the library until we want to
-        # NOTE: There is no way to revert to the original so copying is unnecessary?!
-        # mutation_target = mutant_clone
+        mutant_key, mutant_orig = random.choice(list(next_generation.items()))
+        mutant = copy.deepcopy(mutant_orig)  # Necessary!
 
         # mutated_residues = []
         # residue_index = [0]

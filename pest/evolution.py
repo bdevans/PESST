@@ -900,8 +900,7 @@ def write_fasta_alignment(population, generation, run_path):  # x = current gene
         # TODO: This should be an ordered dict or list to preserve the order...
         for p, protein in list(population.items()):
             fastafile.write("\n>clone_%s\n" % (p+1))
-            for residue in protein:
-                fastafile.write(residue)
+            fastafile.write(''.join(protein))
 
 
 def write_final_fasta(population, tree, run_path):
@@ -921,8 +920,7 @@ def write_final_fasta(population, tree, run_path):
         # Write fasta header followed by residue in generation string
         for p in generation_numbers:
             treefastafile.write(">clone_%s\n" % (p+1))
-            for residue in population[p]:
-                treefastafile.write(residue)
+            treefastafile.write(''.join(population[p]))
             treefastafile.write('\n')
         # Choose a random root to write
         # BUG: This was originally choosing from n_roots

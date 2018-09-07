@@ -354,20 +354,21 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
         elif fitness_level == 'high':  # generate superfit protein
             sequence = [-1, -2, -3]  # Three highest
 
-        aminos = ["M"] * 3
+        aminos = [["M"] * 3]
         for ai in range(1, len(fitness_table)):  # range(n_amino_acids):
             if ai in sites.variant:
                 aminos.append([initial_protein[ai]] * 3)
             else:
                 i_sorted = np.argsort(fitness_table[ai])
-                aminos.append([RESIDUES[fitness_table[ai][i_sorted[start]]]
-                               for start in sequence])
+                # aminos.append([RESIDUES[fitness_table[ai, i_sorted[start]]]
+                #                for start in sequence])
+                aminos.append([RESIDUES[i_sorted[start]] for start in sequence])
                 # sorted_aa = sorted(fitness_table[ai], key=lambda k: fitness_table[ai][k])
                 # DataFrame
                 # sorted_aa = RESIDUES[fitness_table.loc[ai].argsort()]
                 # aminos.append(sorted_aa[rank] for rank in sequence)
         protein = []
-        # Generate a superunffit protein by randomly picking one of the 3 most fit amino acids at each position
+        # Generate a superunfit protein by randomly picking one of the 3 most fit amino acids at each position
         for candidates in aminos:
             protein.append(random.choice(candidates))
 

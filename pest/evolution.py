@@ -23,8 +23,8 @@ from tqdm import trange
 # RESIDUES = ("R", "H", "K", "D", "E", "S", "T", "N", "Q", "C",
 #             "G", "P", "A", "V", "I", "L", "M", "F", "Y", "W")
 # TODO: Make the ordering match LG_matrix? YES!
-RESIDUES = "RHKDESTNQCGPAVILMFYW"  # Strings are immutable
-RESIDUES_INDEX = {aa: ai for ai, aa in enumerate(RESIDUES)}  # Faster than calling .index()
+RESIDUES = "ARNDCQEGHILKMFPSTWYV"  # Strings are immutable
+RESIDUES_INDEX = {aa: ai for ai, aa in enumerate(RESIDUES)}  # Faster than calling .index()
 
 
 def print_protein(protein):

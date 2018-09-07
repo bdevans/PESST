@@ -375,38 +375,38 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
         start_protein = initial_protein  # Copies the external initial_protein
         start_fitness = calculate_fitness(start_protein, fitness_table)
         # NOTE: This chooses from anchored_sequences whereas the other conditions exclude them FIXED
-        new_protein = start_protein  # copy.deepcopy(start_protein)
+        protein = start_protein  # copy.deepcopy(start_protein)
 
         while start_fitness < fitness_threshold+10 or start_fitness > fitness_threshold+20:
             # Mutate the new protein (sample without replacement)
             chosen_variants = random.sample(sites.variant, n_variants)
             # for ai in chosen_variants:
-            #     new_protein[ai] = random.choice(RESIDUES)
-            # fitness = calculate_fitness(new_protein, fitness_table)
-            (new_protein, fitness) = twist_protein(start_protein, chosen_variants, fitness_table)
+            #     protein[ai] = random.choice(RESIDUES)
+            # fitness = calculate_fitness(protein, fitness_table)
+            (protein, fitness) = twist_protein(start_protein, chosen_variants, fitness_table)
             counter = 0
 
             if start_fitness < fitness_threshold+5:  # setting lower bounds of medium fitness
                 while fitness < start_fitness and counter <= 100:
                     # Continue to mutate until it is better than the start_protein
-                    # new_protein = start_protein  # copy.deepcopy(start_protein)
+                    # protein = start_protein  # copy.deepcopy(start_protein)
                     # for ai in chosen_variants:
-                    #     new_protein[ai] = random.choice(RESIDUES)
-                    # fitness = calculate_fitness(new_protein, fitness_table)
-                    (new_protein, fitness) = twist_protein(start_protein, chosen_variants, fitness_table)
+                    #     protein[ai] = random.choice(RESIDUES)
+                    # fitness = calculate_fitness(protein, fitness_table)
+                    (protein, fitness) = twist_protein(start_protein, chosen_variants, fitness_table)
                     counter += 1
 
             elif start_fitness > fitness_threshold+10:  # set upper bounds of medium fitness
                 while fitness > start_fitness and counter <= 100:
                     # Continue to mutate until it is better than the start_protein
-                    # new_protein = start_protein  # copy.deepcopy(start_protein)
+                    # protein = start_protein  # copy.deepcopy(start_protein)
                     # for ai in chosen_variants:
-                    #     new_protein[ai] = random.choice(RESIDUES)
-                    # fitness = calculate_fitness(new_protein, fitness_table)
-                    (new_protein, fitness) = twist_protein(start_protein, chosen_variants, fitness_table)
+                    #     protein[ai] = random.choice(RESIDUES)
+                    # fitness = calculate_fitness(protein, fitness_table)
+                    (protein, fitness) = twist_protein(start_protein, chosen_variants, fitness_table)
                     counter += 1
 
-            start_protein = new_protein
+            start_protein = protein
             start_fitness = calculate_fitness(start_protein, fitness_table)
         protein = start_protein
 

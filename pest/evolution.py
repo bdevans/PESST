@@ -22,7 +22,7 @@ from tqdm import trange
 # amino acids - every fitness value string references residues string
 # RESIDUES = ("R", "H", "K", "D", "E", "S", "T", "N", "Q", "C",
 #             "G", "P", "A", "V", "I", "L", "M", "F", "Y", "W")
-# TODO: Make the ordering match LG_matrix?
+# TODO: Make the ordering match LG_matrix? YES!
 RESIDUES = "RHKDESTNQCGPAVILMFYW"  # Strings are immutable
 RESIDUES_INDEX = {aa: ai for ai, aa in enumerate(RESIDUES)}  # Faster than calling .index()
 
@@ -230,6 +230,10 @@ def gamma_ray(n_amino_acids, sites, gamma):  # kappa, theta, n_iterations=100, n
     # for i in topquarts:
         # topquartupperbounds.append(i[-1])
 
+
+
+    # TODO: Replot the gamma distributuion as a check
+
     # plot the distribution as well as the quartiles and medians
     # xtoplot = [np.mean(bottomquartlowerbounds), np.mean(bottomquartupperbounds), np.mean(bottommidquartupperbounds),
                # np.mean(topmidquartupperbounds), np.mean(topquartupperbounds)]
@@ -256,6 +260,7 @@ def gamma_ray(n_amino_acids, sites, gamma):  # kappa, theta, n_iterations=100, n
     gamma_categories = random.choices(average_medians, k=n_amino_acids)
     # Sum gammas to make a probability distribution to randomly select from.
     cumulative_gamma = np.cumsum(gamma_categories)  # n_amino_acids long
+    # NOTE: Before or after cumsum
     cumulative_gamma[sites.invariant] = 0
     return cumulative_gamma/sum(cumulative_gamma)  # p_location
 
@@ -343,6 +348,7 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
 
     if fitness_level != 'medium':
         if fitness_level == 'low':  # generate unfit protein
+            # TODO: Adjust threshold in this case or unable to build proteins above threshold
             sequence = [0, 1, 2]  # Three lowest
 
         elif fitness_level == 'high':  # generate superfit protein
@@ -1030,6 +1036,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
         counter = 0
         successful_mutation = False
         # next_generation = copy.deepcopy(population)
+        # TODO: Add a counter to exit warning that the mutation rate is too high or mu is too low or sigma is too small
         while not successful_mutation:  # mutant_index is None or mortal_index is None:
 
             successful_mutation = True
@@ -1040,6 +1047,8 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
                                                 LG_matrix, LG_residues, LG_indicies)
             # Re-calculate fitness
             # NOTE: This only used to be computed if gen == 0 or gen % record["rate"] == 0
+            # NOTE: These should be computed after mutation but before replacement to show sub-threshold proteins in fitnessgraph
+            # TODO: Save fitnesses pre and post replacement to plot an accurate mean on the fitnessgraph
             fitnesses = calculate_generation_fitness(next_generation, fitness_table)
 
             # pprint({k: (''.join(p), fitnesses[k]) for k, p in next_generation.items()})
@@ -1095,6 +1104,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
 
 def plot_evolution(history, n_clones, initial_protein, fitness_table, run_path):
     """Plot fitness against generation for all clones."""
+    # NOTE: This plots after mutation but before their replacements so that it shows subthreshold proteins briefly existing
     # NOTE: Final element previously excluded - for i in range(len(evolution)-1):  FIXED
     # Create array of fitness values with shape (n_generations, n_clones)
     # fitnesses = np.array([[evolution[g][-1][c] for c in range(n_clones)]
@@ -1105,6 +1115,8 @@ def plot_evolution(history, n_clones, initial_protein, fitness_table, run_path):
 
     initial_fitness = calculate_fitness(initial_protein, fitness_table)
     generation_numbers = np.arange(n_generations+1)  # Skip initial generation
+
+    # TODO: Make threshold plotting optional so they can add convergence value instead i.e. epsillon len(protein) * mean(fitness_table)
 
     plt.figure()
     plt.plot(generation_numbers, fitnesses)
@@ -1217,7 +1229,7 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
     # PWD = os.path.dirname(__file__)
     run_path = create_output_folders()
     write_settings_file(run_path)  # record run settings
-    # TODO: Refactor to use the same ordering as RESIDUES
+    # TODO: Refactor to use the same ordering as RESIDUES - YES
     (LG_matrix, LG_residues, LG_indicies) = get_LG_matrix()  # Load LG matrix
     fitness_table = get_protein_fitness(n_amino_acids)  # make first fitness dictionary
 

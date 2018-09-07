@@ -382,28 +382,28 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
             chosen_variants = random.sample(sites.variant, n_variants)
             # for ai in chosen_variants:
             #     new_protein[ai] = random.choice(RESIDUES)
-            # new_fitness = calculate_fitness(new_protein, fitness_table)
-            (new_protein, new_fitness) = twist_protein(start_protein, chosen_variants, fitness_table)
+            # fitness = calculate_fitness(new_protein, fitness_table)
+            (new_protein, fitness) = twist_protein(start_protein, chosen_variants, fitness_table)
             counter = 0
 
             if start_fitness < fitness_threshold+5:  # setting lower bounds of medium fitness
-                while new_fitness < start_fitness and counter <= 100:
+                while fitness < start_fitness and counter <= 100:
                     # Continue to mutate until it is better than the start_protein
                     # new_protein = start_protein  # copy.deepcopy(start_protein)
                     # for ai in chosen_variants:
                     #     new_protein[ai] = random.choice(RESIDUES)
-                    # new_fitness = calculate_fitness(new_protein, fitness_table)
-                    (new_protein, new_fitness) = twist_protein(start_protein, chosen_variants, fitness_table)
+                    # fitness = calculate_fitness(new_protein, fitness_table)
+                    (new_protein, fitness) = twist_protein(start_protein, chosen_variants, fitness_table)
                     counter += 1
 
             elif start_fitness > fitness_threshold+10:  # set upper bounds of medium fitness
-                while new_fitness > start_fitness and counter <= 100:
+                while fitness > start_fitness and counter <= 100:
                     # Continue to mutate until it is better than the start_protein
                     # new_protein = start_protein  # copy.deepcopy(start_protein)
                     # for ai in chosen_variants:
                     #     new_protein[ai] = random.choice(RESIDUES)
-                    # new_fitness = calculate_fitness(new_protein, fitness_table)
-                    (new_protein, new_fitness) = twist_protein(start_protein, chosen_variants, fitness_table)
+                    # fitness = calculate_fitness(new_protein, fitness_table)
+                    (new_protein, fitness) = twist_protein(start_protein, chosen_variants, fitness_table)
                     counter += 1
 
             start_protein = new_protein

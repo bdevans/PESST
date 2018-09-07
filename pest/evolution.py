@@ -378,11 +378,20 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
     # If it cannot make a fitter protein with the 5 residues its mutating it
     # reverts back to the previous state and picks 5 new residues.
     elif fitness_level == 'medium':
+        # TODO: Parameterise medium fitness bounds as arguments
         n_variants = 5
         # start_protein = initial_protein  # Copies the external initial_protein
         initial_fitness = calculate_fitness(initial_protein, fitness_table)
         # NOTE: This chooses from anchored_sequences whereas the other conditions exclude them FIXED
         protein = initial_protein[:]  # copy.deepcopy(initial_protein)
+        # TODO: This is slightly different to the original algorithm (below) but should give similar results
+        # fitness = initial_fitness
+        # counter = 0
+        # while (fitness < fitness_threshold+10 or fitness > fitness_threshold+20) and counter <= 100:
+        #     # Mutate the new protein (sample without replacement)
+        #     chosen_variants = random.sample(sites.variant, n_variants)
+        #     (protein, fitness) = twist_protein(initial_protein, chosen_variants, fitness_table)
+        #     counter += 1
 
         while initial_fitness < fitness_threshold+10 or initial_fitness > fitness_threshold+20:
             # Mutate the new protein (sample without replacement)
@@ -541,7 +550,6 @@ def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
         # Pick random key, clone to make a random generation
         pi, protein = random.choice(list(next_generation.items()))
 
-
         # mutated_residues = []
         # residue_index = [0]
         # while residue_index[0] not in variant_sites:  # always initiates as residue_index set to 0 and residue zero 0 should always be disallowed (start methionine locked). Also ensures only mutates at variant sites
@@ -575,6 +583,29 @@ def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
     return next_generation
 
 
+# def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
+#                       p_location, LG_matrix, LG_residues, LG_indicies, tree, fitness_threshold, fitness_table):
+#     # NOTE: This could be removed for speed after checking it is not used later
+#     next_generation = copy.deepcopy(current_generation)  # make a deep copy of the library so changing the library in the function doesn't change the library outside the function
+#
+#     for q in range(n_mutations_per_gen):  # impliment gamma
+#         # Pick random key, clone to make a random generation
+#         pi, protein = random.choice(list(next_generation.items()))
+#         successful_mutation = False
+#         while not successful_mutation:
+#             mutant = mutate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies)
+#             if calculate_fitness(protein, fitness_table) < fitness_threshold:
+#                 mutant_index = replace_protein(pi, tree,
+#                                                fitnesses, fitness_threshold)
+#                 # If no suitable clones are available, re-mutate the generation and start again
+#                 if mutant_index is None:
+#                     # warnings.warn("Unable to replace protein {}! Gen: {}; Count: {}".format(pi, gen, counter))
+#                     successful_mutation = False
+#                     break  # out of loop over fitnesses
+#                 else:
+#                     next_generation[pi] = next_generation[mutant_index]  # swap out unfit clone for fit clone
+#                     successful_mutation = True
+#     return next_generation
     #     # TODO
     #     fitness = -np.inf
     #     while fitness < fitness_threshold:

@@ -1263,7 +1263,7 @@ if __name__ == '__main__':
     # parameters of protein evolution
     n_generations = 2000  # amount of generations the protein evolves for
     fitness_start = 'medium'  # high, medium or low; must be lower case. If selecting low, fitness threshold needs to be significantly smaller (i.e. 4x) than #positions*mu
-    # TODO: Create parameters for the numeric literals which define teh medium boundaries
+    # TODO: Create parameters for the numeric literals which define the medium boundaries
     fitness_threshold = 0  # arbitrary number for fitness threshold
     # parameters for normal distribution used to select fitness values
     mu = -1.2
@@ -1287,7 +1287,7 @@ if __name__ == '__main__':
     # TODO: Put into dictionary
     # parameters for forming discrete gamma distribution used for evolution of protein
     gamma = {"shape": 1.9,  # Most phylogenetic systems that use gamma only let you set kappa (often called shape alpha) and calculate theta as 1/kappa giving mean of 1
-             "scale": 1/1.9,  # NOTE: 1/gamma_shape. Set as default in func?
+             "scale": 1/1.9,  # NOTE: 1/gamma_shape. Set as default in func?
              "iterations": 50,
              "samples": 10000}
     # gamma_iterations = 100

@@ -576,9 +576,36 @@ def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
         mutant = mutatate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies)
         next_generation[pi] = mutant  # update with new sequence
 
-
-
     return next_generation
+
+
+    #     # TODO
+    #     fitness = -np.inf
+    #     while fitness < fitness_threshold:
+    #         mutant = mutatate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies)
+    #         fitness = calculate_fitness(mutant, fitness_table)
+    #         # REFACTOR: Re-calculate fitness
+    #         # NOTE: This only used to be computed if gen == 0 or gen % record["rate"] == 0
+    #         fitnesses = calculate_generation_fitness(next_generation, fitness_table)
+    #         mutant_index = replace_protein(pi, tree, fitnesses, fitness_threshold)
+    #     next_generation[pi] = next_generation[mutant_index]  # swap out unfit clone for fit clone
+    #     next_generation[pi] = mutant  # update with new sequence
+    #
+    # # pprint({k: (''.join(p), fitnesses[k]) for k, p in next_generation.items()})
+    #
+    #
+    # for pi in range(len(fitnesses)):  # if there are, start loop on fitnesses
+    #     if fitnesses[pi] < fitness_threshold:  # if fitness is less than threshold clone a random sequence in its place.
+    #
+    #         mutant_index = replace_protein(pi, tree,
+    #                                        fitnesses, fitness_threshold)
+    #         # If no suitable clones are available, re-mutate the generation and start again
+    #         if mutant_index is None:
+    #             # warnings.warn("Unable to replace protein {}! Gen: {}; Count: {}".format(pi, gen, counter))
+    #             successful_mutation = False
+    #             break  # out of loop over fitnesses
+    #         else:
+    #             next_generation[pi] = next_generation[mutant_index]  # swap out unfit clone for fit clone
 
 
 def calculate_generation_fitness(population, fitness_table):
@@ -1193,8 +1220,7 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
     # create folder and subfolders
     # PWD = os.path.dirname(__file__)
     run_path = create_output_folders()
-    # record run settings
-    write_settings_file(run_path)
+    write_settings_file(run_path)  # record run settings
     # TODO: Refactor to use the same ordering as RESIDUES
     (LG_matrix, LG_residues, LG_indicies) = get_LG_matrix()  # Load LG matrix
     fitness_table = get_protein_fitness(n_amino_acids)  # make first fitness dictionary

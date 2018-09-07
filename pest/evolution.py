@@ -641,7 +641,9 @@ def plot_threshold_fitness(generation, population, variant_sites, fitness_table,
     plt.plot(fitness_table, ".", color='k')  # np.arange(n_amino_acids)+1,
     plt.plot([0, n_amino_acids-1], [mean_initial_fitness, mean_initial_fitness], 'r--', lw=3)
     plt.ylim(((-4 * sigma) - 1), ((4 * sigma) + 1))
+    plt.ylabel(r"Values in $\Delta T_m$ matrix")
     plt.xticks([])  # n_variants
+    plt.xlabel("Amino acid position")
     plt.text(0, 3.5*sigma, "\n".join([r"$\mu_1$ = {:.3}".format(mean_initial_fitness),
                                     "threshold = {}".format(fitness_threshold)]), size=6.5)
     plt.title(r"Fitness distribution of $\Delta T_m$ matrix", size=8)
@@ -651,10 +653,15 @@ def plot_threshold_fitness(generation, population, variant_sites, fitness_table,
     # TODO: Check this is the intended average value to check. Previously it was np.mean(Y2fitness) i.e. the mean of the last protein in the loop
     mean_generation_fitness = np.mean(generation_fitneses)
     plt.subplot(122)
+    # x: proteins within population
+    # y: Fitness for each locus for that protein
+    # TODO: Swap colour to a particular protein not locus or make monochrome and make dots smaller
     plt.plot(np.arange(len(population)), generation_fitneses, "o", markersize=2)  # plot y using x as index array 0..N-1
     plt.plot([0, len(population)-1], [mean_generation_fitness, mean_generation_fitness], 'r--', lw=3)
     plt.ylim(((-4 * sigma) - 1), ((4 * sigma) + 1))
+    plt.ylabel(r"$\Delta T_m$ values in protein")
     plt.xticks([])  # len(population)
+    plt.xlabel("Protein")
     plt.text(0, 3.5*sigma, "\n".join([r"$\mu_2$ = {:.3}".format(mean_generation_fitness),
                                     "threshold = {}".format(fitness_threshold)]), size=6.5)
     plt.title("\n".join(wrap("Fitness distribution of every sequence in the evolving dataset", 40)), size=8)

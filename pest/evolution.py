@@ -539,44 +539,12 @@ def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
     substitution.
     """
     # NOTE: This could be removed for speed after checking it is not used later
-    next_generation = copy.deepcopy(current_generation)  # make a deep copy of the library so changing the library in the function doesn't change the library outside the function
-    # next_generation = current_generation
-
-    # Sum gammas to make a probability distribution to randomly select from.
-    # gamma_categories = p_location
-    # cumulative_gamma = np.cumsum(gamma_categories)  # n_amino_acids long
+    next_generation = copy.deepcopy(current_generation)
 
     for q in range(n_mutations_per_gen):  # impliment gamma
         # Pick random key, clone to make a random generation
         pi, protein = random.choice(list(next_generation.items()))
-
-        # mutated_residues = []
-        # residue_index = [0]
-        # while residue_index[0] not in variant_sites:  # always initiates as residue_index set to 0 and residue zero 0 should always be disallowed (start methionine locked). Also ensures only mutates at variant sites
-        #     mutant_residue_area = np.random.uniform(0, cumulative_gamma[-1])  # [0, highest_gamma_sum)
-        #     # Find the first bin with gamma > mutant_residue_area
-        #     for gi, gamma in enumerate(cumulative_gamma):
-        #         if mutant_residue_area < gamma:
-        #             mutated_residues.append(gi)
-        #             residue_index[0] = gi
-        #             break
-        #         else:
-        #             continue
-        # # residue_index = random.choice(c) # pick a random residue in the selected mutant to mutate that isnt the start M or an anchor (old)
-        # target_residue = mutation_target[residue_index[0]]
-        # newresidue = mutate_amino_acid(target_residue, LG_matrix)  # implement LG
-        # mutation_target[residue_index[0]] = newresidue  # mutate the copy with the randomly chosen residue
-
-        # TODO: Could gamma_categories be the length of anchor_sites?
-        # location = 0
-        # # cumulative_gamma[anchor_sites] = -np.inf  # Would this work instead of while loop?
-        # # while residue_index in anchor_sites:
-        # while location not in variant_sites:
-        #     mutant_residue_area = np.random.uniform(0, cumulative_gamma[-1])  # [0, highest_gamma_sum)
-        #     location = np.searchsorted(cumulative_gamma, mutant_residue_area)  # Return index where mutant_residue_area <= cumulative_gamma[i]
-
-        # location = np.random.choice(len(mutant), p=p_location)
-        # mutant[location] = mutate_amino_acid(mutant[location], LG_matrix, LG_residues, LG_indicies)  # mutate the copy with the randomly chosen residue
+        # Mutate the copy with the randomly chosen residue
         mutant = mutate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies)
         next_generation[pi] = mutant  # update with new sequence
 

@@ -1230,7 +1230,7 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
     p_location = gamma_ray(n_amino_acids, sites, gamma)  # generate gamma categories for every site
 
     # Generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
-    initial_protein = get_fit_protein(fitness_start, n_amino_acids, sites.variant, fitness_table)
+    initial_protein = get_fit_protein(fitness_start, n_amino_acids, sites, fitness_table)
     write_initial_protein(initial_protein, run_path)  # Record initial protein
     initial_population = clone_protein(initial_protein, n_clones)  # make some clones to seed evolution
 

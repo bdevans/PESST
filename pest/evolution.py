@@ -19,13 +19,12 @@ from matplotlib import pyplot as plt
 from tqdm import trange
 
 
-# amino acids - every fitness value string references residues string
-# RESIDUES = ("R", "H", "K", "D", "E", "S", "T", "N", "Q", "C",
-#             "G", "P", "A", "V", "I", "L", "M", "F", "Y", "W")
-# TODO: Make the ordering match LG_matrix? YES!
-RESIDUES = "ARNDCQEGHILKMFPSTWYV"  # Strings are immutable
-RESIDUES_INDEX = {aa: ai for ai, aa in enumerate(RESIDUES)}  # Faster than calling .index()
-
+# TODO: Automatically extract from LG_matrix
+# Define RESIDUES matching the ordering of LG_matrix
+RESIDUES_NAME = "ARNDCQEGHILKMFPSTWYV"  # Strings are immutable
+RESIDUES_INDEX = {aa: ai for ai, aa in enumerate(RESIDUES_NAME)}  # Faster than calling .index()
+Residues = namedtuple('Residues', ['name', 'index'])
+RESIDUES = Residues(name=RESIDUES_NAME, index=RESIDUES_INDEX)
 
 def print_protein(protein):
     """Takes a list of amino acids and prints them as a string."""
@@ -50,7 +49,7 @@ def test_normal_distribution():
 
 
 # def get_protein_fitness(protein):  # x=protein;
-def get_protein_fitness(n_amino_acids, n_variants=len(RESIDUES)):
+def get_protein_fitness(n_amino_acids, n_variants=len(RESIDUES.name)):
     """Generate a dictionary describing list of fitness values at each position
     of the generated protein.
     """
@@ -83,8 +82,8 @@ def write_protein_fitness(run_path, directory, fitness_table):
     #         for r in RESIDUES:
     #             aminofile.write(',%s' % RESIDUES[r])
     # NOTE: This will not include the index column
-    header = ",".join(RESIDUES)
-    np.savetxt(fitness_file_name, fitness_table, delimiter=",", header=header)
+    # header = ",".join(RESIDUES)
+    np.savetxt(fitness_file_name, fitness_table, delimiter=",", header=RESIDUES.name)
     # fitness_table.to_csv(fitness_file_name)
 
 
@@ -315,7 +314,7 @@ def get_random_protein(n_amino_acids, start_amino_acid="M"):
     """Generate an original starting protein n_amino_acids long with a start
     amino acid set to methionine.
     """
-    protein = random.choices(RESIDUES, k=n_amino_acids-1)
+    protein = random.choices(RESIDUES.name, k=n_amino_acids-1)
     # protein = [random.choice(RESIDUES) for _ in range(n_amino_acids)]  # ver < 3.6
     protein.insert(0, start_amino_acid)  # Start with methionine
     # TODO: Convert to strings preventing in-place modification
@@ -326,7 +325,7 @@ def get_random_protein(n_amino_acids, start_amino_acid="M"):
 def twist_protein(protein, mutation_sites, fitness_table):
     mutant = protein[:]  # copy.deepcopy(start_protein)
     for ai in mutation_sites:
-        mutant[ai] = random.choice(RESIDUES)
+        mutant[ai] = random.choice(RESIDUES.name)
     fitness = calculate_fitness(mutant, fitness_table)
     return (mutant, fitness)
 
@@ -362,7 +361,7 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
                 i_sorted = np.argsort(fitness_table[ai])
                 # aminos.append([RESIDUES[fitness_table[ai, i_sorted[start]]]
                 #                for start in sequence])
-                aminos.append([RESIDUES[i_sorted[start]] for start in sequence])
+                aminos.append([RESIDUES.name[i_sorted[start]] for start in sequence])
                 # sorted_aa = sorted(fitness_table[ai], key=lambda k: fitness_table[ai][k])
                 # DataFrame
                 # sorted_aa = RESIDUES[fitness_table.loc[ai].argsort()]
@@ -625,10 +624,10 @@ def build_generation_fitness_table(population, variant_sites, fitness_table):
     for pi, protein in list(population.items()):
 
         if record["invariants"]:
-            protein_fitness = [fitness_table[ai, RESIDUES_INDEX[amino_acid]]
+            protein_fitness = [fitness_table[ai, RESIDUES.index[amino_acid]]
                                for ai, amino_acid in enumerate(protein)]
         else:
-            protein_fitness = [fitness_table[ai, RESIDUES_INDEX[amino_acid]]
+            protein_fitness = [fitness_table[ai, RESIDUES.index[amino_acid]]
                                for ai, amino_acid in enumerate(protein)
                                if ai in variant_sites]
 

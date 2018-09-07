@@ -1186,7 +1186,7 @@ def write_settings_file(run_path, **kwargs):
 def get_LG_matrix(full_file_name=None):
     """Get .csv file defining aa substitution probabilities calculated from R
     matrix multiplied by PI matrix, with diagonals forced to zero as mutation
-    has to happen then conferted to event rates p(lambda) where lambda = sum Qx
+    has to happen then converted to event rates p(lambda) where lambda = sum Qx
     and p(lambda)x=Qxy/lambda
     """
     if full_file_name is None:

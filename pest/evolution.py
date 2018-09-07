@@ -258,6 +258,7 @@ def gamma_ray(n_amino_acids, sites, gamma):  # kappa, theta, n_iterations=100, n
 
     gamma_categories = random.choices(average_medians, k=n_amino_acids)
     # Sum gammas to make a probability distribution to randomly select from.
+    # NOTE: Is cumsum necessary?
     cumulative_gamma = np.cumsum(gamma_categories)  # n_amino_acids long
     # NOTE: Before or after cumsum
     cumulative_gamma[sites.invariant] = 0

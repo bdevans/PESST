@@ -648,7 +648,7 @@ def plot_threshold_fitness(generation, population, variant_sites, fitness_table,
     plt.plot([0, n_amino_acids-1], [mean_initial_fitness, mean_initial_fitness], 'r--', lw=3)
     plt.ylim(((-4 * sigma) - 1), ((4 * sigma) + 1))
     plt.ylabel(r"Values in $\Delta T_m$ matrix")
-    plt.xticks([])  # n_variants
+    # plt.xticks([])  # n_variants
     plt.xlabel("Amino acid position")
     plt.text(0, 3.5*sigma, "\n".join([r"$\mu_1$ = {:.3}".format(mean_initial_fitness),
                                     "threshold = {}".format(fitness_threshold)]), size=6.5)
@@ -666,7 +666,7 @@ def plot_threshold_fitness(generation, population, variant_sites, fitness_table,
     plt.plot([0, len(population)-1], [mean_generation_fitness, mean_generation_fitness], 'r--', lw=3)
     plt.ylim(((-4 * sigma) - 1), ((4 * sigma) + 1))
     plt.ylabel(r"$\Delta T_m$ values in protein")
-    plt.xticks([])  # len(population)
+    # plt.xticks([])  # len(population)
     plt.xlabel("Protein")
     plt.text(0, 3.5*sigma, "\n".join([r"$\mu_2$ = {:.3}".format(mean_generation_fitness),
                                     "threshold = {}".format(fitness_threshold)]), size=6.5)

@@ -260,7 +260,7 @@ def gamma_ray(n_amino_acids, sites, gamma):  # kappa, theta, n_iterations=100, n
     return cumulative_gamma/sum(cumulative_gamma)  # p_location
 
 
-def mutatate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies):
+def mutate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies):
 # def mutate_amino_acid(amino_acid, LG_matrix, LG_residues, LG_indicies):  # b = matrix, a = current amino acid
     """Mutate a residue to another residue based on the LG matrix."""
     # Get the order of the aminos corresponding to the values in the array
@@ -562,7 +562,7 @@ def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
 
         # location = np.random.choice(len(mutant), p=p_location)
         # mutant[location] = mutate_amino_acid(mutant[location], LG_matrix, LG_residues, LG_indicies)  # mutate the copy with the randomly chosen residue
-        mutant = mutatate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies)
+        mutant = mutate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies)
         next_generation[pi] = mutant  # update with new sequence
 
     return next_generation
@@ -571,7 +571,7 @@ def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
     #     # TODO
     #     fitness = -np.inf
     #     while fitness < fitness_threshold:
-    #         mutant = mutatate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies)
+    #         mutant = mutate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies)
     #         fitness = calculate_fitness(mutant, fitness_table)
     #         # REFACTOR: Re-calculate fitness
     #         # NOTE: This only used to be computed if gen == 0 or gen % record["rate"] == 0

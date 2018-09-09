@@ -259,10 +259,12 @@ def gamma_ray(n_amino_acids, sites, gamma):  # kappa, theta, n_iterations=100, n
     gamma_categories = random.choices(average_medians, k=n_amino_acids)
     # Sum gammas to make a probability distribution to randomly select from.
     # NOTE: Is cumsum necessary?
-    cumulative_gamma = np.cumsum(gamma_categories)  # n_amino_acids long
+    # cumulative_gamma = np.cumsum(gamma_categories)  # n_amino_acids long
     # NOTE: Before or after cumsum
-    cumulative_gamma[sites.invariant] = 0
-    return cumulative_gamma/sum(cumulative_gamma)  # p_location
+    # cumulative_gamma[sites.invariant] = 0
+    # return cumulative_gamma/sum(cumulative_gamma)  # p_location
+    gamma_categories[sites.invariant] = 0
+    return gamma_categories/sum(gamma_categories)  # p_location
 
 
 def mutate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies):

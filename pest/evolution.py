@@ -26,6 +26,7 @@ RESIDUES_INDEX = {aa: ai for ai, aa in enumerate(RESIDUES_NAME)}  # Faster than 
 Residues = namedtuple('Residues', ['name', 'index'])
 RESIDUES = Residues(name=RESIDUES_NAME, index=RESIDUES_INDEX)
 
+
 def print_protein(protein):
     """Takes a list of amino acids and prints them as a string."""
     print(''.join(protein))
@@ -116,7 +117,6 @@ def get_allowed_sites(n_amino_acids, n_anchors):
 
 
 def gamma_ray(n_amino_acids, sites, gamma):  # kappa, theta, n_iterations=100, n_samples=10000):
-# def gammaray(a, b, c, d, e):  # a = iterations to run gamma sampling, b = number of gamma samples per iteration, c = gamma shape (kappa), d = gamma scale (theta), e = amount of aminos
     """Generate a set of gamma rate categories.
 
     Does so by sampling many times from a gamma distribution.

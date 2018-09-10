@@ -911,8 +911,9 @@ def write_final_fasta(population, tree, run_path):
     bifursize = bifsize/len(tree["branches"])
     n_clones_to_take = int((bifursize-1)/2)  # if 5, gives 2, if 4 gives 2, if 3 gives 1.
     generation_numbers = []
-    for i in tree["branches"]:
-        clone_selection = random.sample(set(i), n_clones_to_take)  # NOTE: Only sample from unique clones? YES
+    for branch in tree["branches"]:
+        # Sample from unique clones
+        clone_selection = random.sample(set(branch), n_clones_to_take)
         for c in clone_selection:
             generation_numbers.append(c)
 

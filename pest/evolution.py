@@ -44,7 +44,7 @@ def test_normal_distribution():
     return
 
 
-def get_protein_fitness(n_amino_acids, LG_matrix):  # n_variants=len(RESIDUES.name)):
+def get_protein_fitness(n_amino_acids, LG_matrix):
     """Generate a dictionary describing list of fitness values at each position
     of the generated protein.
     """
@@ -85,7 +85,7 @@ def get_allowed_sites(n_amino_acids, n_anchors):
     return Sites(invariant=anchored_sequences, variant=allowed_values)
 
 
-def gamma_ray(n_amino_acids, sites, gamma):  # kappa, theta, n_iterations=100, n_samples=10000):
+def gamma_ray(n_amino_acids, sites, gamma):
     """Generate a set of gamma rate categories.
 
     Does so by sampling many times from a gamma distribution.
@@ -638,7 +638,7 @@ def record_generation_fitness(generation, population, variant_sites,
 def write_fasta_alignment(population, generation, run_path):
     """Write fasta alignment from sequences provided."""
     fastafilepath = os.path.join(run_path, "fastas")
-    fastafilename = "generation_{}.fasta".format(generation)  # define dynamic filename
+    fastafilename = "generation_{}.fasta".format(generation)
     fullname = os.path.join(fastafilepath, fastafilename)
     with open(fullname, "w") as fastafile:  # open file
         # Write fasta header followed by residue in generation string

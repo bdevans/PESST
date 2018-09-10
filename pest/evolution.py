@@ -306,7 +306,7 @@ def calculate_fitness(protein, fitness_table):
     # 2d numpy array
     # protein_fitness = [fitness_table[ai, RESIDUES.index(amino_acid)]
     #                    for ai, amino_acid in enumerate(protein)]
-    protein_fitness = [fitness_table[ai, RESIDUES_INDEX[amino_acid]]
+    protein_fitness = [fitness_table[ai, RESIDUES.index[amino_acid]]
                        for ai, amino_acid in enumerate(protein)]
     # DataFrame
     # protein_fitness = [fitness_table.loc[ai, amino_acid]

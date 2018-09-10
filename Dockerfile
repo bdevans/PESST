@@ -12,12 +12,15 @@ ENTRYPOINT [ "/bin/bash", "-c" ]
 
 # Use the environment.yml to create the conda environment.
 # https://fmgdata.kinja.com/using-docker-with-conda-environments-1790901398
+COPY environment.yml /tmp/environment.yml
 RUN [ "conda", "update", "conda", "-y" ]
 RUN [ "conda", "update", "--all", "-y" ]
-COPY environment.yml /tmp/environment.yml
+
 WORKDIR /tmp
 # RUN [ "conda", "env", "create" ]
-RUN [ "/bin/bash", "-c", "conda", "env", "update", "-n root", "-f /tmp/environment.yml" ]
+# RUN conda update -n base conda
+RUN conda env update -n root -f /tmp/environment.yml
+# RUN ["conda", "env", "update", "-n" "root", "-f" "/tmp/environment.yml" ]
 
 # Use bash to source our new environment for setting up private dependencies
 # Note that /bin/bash is called in exec mode directly

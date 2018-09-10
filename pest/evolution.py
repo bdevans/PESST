@@ -232,25 +232,27 @@ def gamma_ray(n_amino_acids, sites, gamma):  # kappa, theta, n_iterations=100, n
 
 
 
-    # TODO: Replot the gamma distributuion as a check
-
-    # plot the distribution as well as the quartiles and medians
-    # xtoplot = [np.mean(bottomquartlowerbounds), np.mean(bottomquartupperbounds), np.mean(bottommidquartupperbounds),
-               # np.mean(topmidquartupperbounds), np.mean(topquartupperbounds)]
-    # x = np.linspace(0, 6, 1000)
-    # y = x ** (gamma_shape - 1) * (np.exp(-x / gamma_scale) / (sps.gamma(gamma_shape) * gamma_scale ** gamma_shape))
-    # plt.plot(x, y, linewidth=2, color='k', alpha=0)
-    # plt.fill_between(x, y, where=x > xtoplot[0], color='#4c4cff')
-    # plt.fill_between(x, y, where=x > xtoplot[1], color='#7f7fff')
-    # plt.fill_between(x, y, where=x > xtoplot[2], color='#b2b2ff')
-    # plt.fill_between(x, y, where=x > xtoplot[3], color='#e5e5ff')
-    # plt.axvline(x=finalmedians[0], color="#404040", linestyle=":")
-    # plt.axvline(x=finalmedians[1], color="#404040", linestyle=":")
-    # plt.axvline(x=finalmedians[2], color="#404040", linestyle=":")
-    # plt.axvline(x=finalmedians[3], color="#404040", linestyle=":")
-    # plt.title("\n".join(wrap('gamma rate categories calculated as the the average of %s median values of 4 equally likely quartiles of %s randomly sampled vaules' % (gamma_iterations, gamma_samples), 60)), fontweight='bold', fontsize=10)
-    # plt.text(5, 0.6, "$\kappa$ = %s\n$\\theta$ = $\\frac{1}{\kappa}$" % (gamma_shape))
-    # plt.show()
+    # Replot the gamma distributuion as a check
+    if False:
+        from scipy.stats import gamma
+        # plot the distribution as well as the quartiles and medians
+        # xtoplot = [np.mean(bottomquartlowerbounds), np.mean(bottomquartupperbounds), np.mean(bottommidquartupperbounds),
+        #            np.mean(topmidquartupperbounds), np.mean(topquartupperbounds)]
+        x = np.linspace(0, 6, 1000)
+        y = x ** (kappa - 1) * (np.exp(-x / theta) / (gamma(kappa).pdf(x) * theta ** kappa))
+        plt.plot(x, y, linewidth=2, color='k', alpha=0)
+        plt.fill_between(x, y, where=x > quartiles[0], color='#4c4cff')
+        plt.fill_between(x, y, where=x > quartiles[1], color='#7f7fff')
+        plt.fill_between(x, y, where=x > quartiles[2], color='#b2b2ff')
+        plt.fill_between(x, y, where=x > quartiles[3], color='#e5e5ff')
+        plt.axvline(x=average_medians[0], color="#404040", linestyle=":")
+        plt.axvline(x=average_medians[1], color="#404040", linestyle=":")
+        plt.axvline(x=average_medians[2], color="#404040", linestyle=":")
+        plt.axvline(x=average_medians[3], color="#404040", linestyle=":")
+        plt.title("\n".join(wrap('gamma rate categories calculated as the the average of %s median values of 4 equally likely quartiles of %s randomly sampled vaules' % (n_iterations, n_samples), 60)), fontweight='bold', fontsize=10)
+        plt.text(5, 0.6, "$\kappa$ = %s\n$\\theta$ = $\\frac{1}{\kappa}$" % (kappa))
+        plt.show()
+        plt.savefig(os.path.join(".", "gamma.png"))
 
     # gammaaminos = [random.choice(average_medians) for aa in range(n_amino_acids)]
 

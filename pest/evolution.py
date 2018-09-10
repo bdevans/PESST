@@ -779,7 +779,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
         counter = 0
         successful_mutation = False
         # next_generation = copy.deepcopy(population)
-        # TODO: Add a counter to exit warning that the mutation rate is too high or mu is too low or sigma is too small
+
         while not successful_mutation:  # mutant_index is None or mortal_index is None:
 
             successful_mutation = True
@@ -808,6 +808,14 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
                     else:
                         next_generation[pi] = next_generation[mutant_index]  # swap out unfit clone for fit clone
 
+            counter += 1
+            if counter == 100:
+                raise Exception("Unable to mutate population: "
+                                "maximum tries exceeded!\n"
+                                "The mutation rate is too high, mu is too low "
+                                "or sigma is too small.")
+
+        counter = 0
         # Allow sequences to die and be replacecd at a predefined rate
         if deaths_per_generation > 0 and gen % deaths_per_generation == 0:
             mortals = random.sample(range(n_clones), int(n_clones * death_ratio))

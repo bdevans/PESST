@@ -9,7 +9,7 @@ dependencies:
   - scipy
   - matplotlib
   - tqdm
-  - pandas
+  # - pandas
   # - seaborn
   # - dill
   # - joblib

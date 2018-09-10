@@ -10,6 +10,7 @@ import random
 # from random import sample, choice, shuffle  # TODO: Consolidate with numpy
 import numpy as np
 # from numpy.random import normal, uniform, gamma
+import pandas as pd
 import scipy as sp
 from scipy.stats import binned_statistic
 # from scipy.stats import anderson, normaltest, skew, skewtest, kurtosistest, shapiro, kurtosis, ks_2samp
@@ -268,7 +269,7 @@ def gamma_ray(n_amino_acids, sites, gamma):  # kappa, theta, n_iterations=100, n
     return gamma_categories/sum(gamma_categories)  # p_location
 
 
-def mutate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies):
+def mutate_protein(protein, p_location, LG_matrix):  #, LG_residues, LG_indicies):
 # def mutate_amino_acid(amino_acid, LG_matrix, LG_residues, LG_indicies):  # b = matrix, a = current amino acid
     """Mutate a residue to another residue based on the LG matrix."""
     # Get the order of the aminos corresponding to the values in the array
@@ -284,7 +285,9 @@ def mutate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies):
     mutant = copy.deepcopy(protein)  # Necessary!
     location = np.random.choice(len(mutant), p=p_location)
     amino_acid = mutant[location]
-    p_transition = np.asarray(LG_matrix[LG_indicies[amino_acid], 1:], dtype=float)
+    # p_transition = np.asarray(LG_matrix[LG_indicies[amino_acid], 1:], dtype=float)
+    p_transition = LG_matrix.loc[amino_acid]
+    LG_residues = LG_matrix.columns.values  #.tolist()
     mutant[location] = np.random.choice(LG_residues, p=p_transition)
     return mutant
 
@@ -537,7 +540,7 @@ def plot_fitness_histogram(n_proteins, n_amino_acids, fitness_table):
 
 
 def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
-                      p_location, LG_matrix, LG_residues, LG_indicies):
+                      p_location, LG_matrix):  # , LG_residues, LG_indicies):
     """Mutate a set of sequences based on the LG+I+G model of amino acid
     substitution.
     """
@@ -548,7 +551,7 @@ def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
         # Pick random key, clone to make a random generation
         pi, protein = random.choice(list(next_generation.items()))
         # Mutate the copy with the randomly chosen residue
-        mutant = mutate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies)
+        mutant = mutate_protein(protein, p_location, LG_matrix)  # , LG_residues, LG_indicies)
         next_generation[pi] = mutant  # update with new sequence
 
     return next_generation
@@ -963,7 +966,7 @@ def replace_protein(protein_index, tree, fitnesses, fitness_threshold):
 
 def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
            variant_sites, p_location, n_mutations_per_gen, fasta_rate,
-           LG_matrix, LG_residues, LG_indicies, run_path):
+           LG_matrix, run_path):  # , LG_residues, LG_indicies
     """Generation generator - mutate a protein for a defined number of
     generations according to an LG matrix and gamma distribution.
     """
@@ -1045,7 +1048,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
             # Mutate population
             next_generation = mutate_population(population, n_mutations_per_gen,
                                                 variant_sites, p_location,
-                                                LG_matrix, LG_residues, LG_indicies)
+                                                LG_matrix)  # , LG_residues, LG_indicies)
             # Re-calculate fitness
             # NOTE: This only used to be computed if gen == 0 or gen % record["rate"] == 0
             # NOTE: These should be computed after mutation but before replacement to show sub-threshold proteins in fitnessgraph
@@ -1186,6 +1189,14 @@ def write_settings_file(run_path, **kwargs):
         sf.write("\nTracking state: Fitness dot matrix = %s; Fitness histogram = %s; Fitness normality statistics = %s" % (record["dot_fitness"], record["hist_fitness"], record["hist_fitness_stats"]))
 
 
+def load_LG_matrix(full_file_name=None):
+    if full_file_name is None:
+        full_file_name = os.path.join("data", "LGaa.csv")
+    LG_matrix = pd.read_csv(full_file_name, index_col="Original")
+    print(LG_matrix)
+    return LG_matrix
+
+
 def get_LG_matrix(full_file_name=None):
     """Get .csv file defining aa substitution probabilities calculated from R
     matrix multiplied by PI matrix, with diagonals forced to zero as mutation
@@ -1231,7 +1242,8 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
     run_path = create_output_folders()
     write_settings_file(run_path)  # record run settings
     # TODO: Refactor to use the same ordering as RESIDUES - YES
-    (LG_matrix, LG_residues, LG_indicies) = get_LG_matrix()  # Load LG matrix
+    # (LG_matrix, LG_residues, LG_indicies) = get_LG_matrix()  # Load LG matrix
+    LG_matrix = load_LG_matrix()  # Load LG matrix
     fitness_table = get_protein_fitness(n_amino_acids)  # make first fitness dictionary
 
     sites = get_allowed_sites(n_amino_acids, n_anchors)  # generate invariant sites
@@ -1246,7 +1258,7 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
     history = evolve(n_generations, initial_population, fitness_table,
                      fitness_threshold, sites.variant, p_location,
                      n_mutations_per_gen, record["fasta_rate"],
-                     LG_matrix, LG_residues, LG_indicies, run_path)
+                     LG_matrix, run_path)  # , LG_residues, LG_indicies
     plot_evolution(history, n_clones, initial_protein, fitness_table, run_path)
     return history
 

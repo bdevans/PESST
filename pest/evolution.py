@@ -10,7 +10,8 @@ import random
 import numpy as np
 # from numpy.random import normal, uniform, gamma
 import scipy as sp
-from scipy.stats import binned_statistic
+from scipy import stats
+# from scipy.stats import binned_statistic
 # from scipy.stats import anderson, normaltest, skew, skewtest, kurtosistest, shapiro, kurtosis, ks_2samp
 import pandas as pd
 import matplotlib as mpl
@@ -110,9 +111,9 @@ def gamma_ray(n_amino_acids, sites, gamma):  # kappa, theta, n_iterations=100, n
         quartiles = np.percentile(samples, (0, 25, 50, 75, 100),
                                   interpolation='midpoint')
         # Find the median of each quartile
-        medians[i, :], _, _ = binned_statistic(samples, samples,
-                                               statistic='median',
-                                               bins=quartiles)
+        medians[i, :], _, _ = sp.stats.binned_statistic(samples, samples,
+                                                        statistic='median',
+                                                        bins=quartiles)
     # Calculate average of medians across iterations
     average_medians = np.mean(medians, axis=0)
 

@@ -33,7 +33,7 @@ RUN echo "backend : Agg" > /root/.config/matplotlib/matplotlibrc
 
 COPY data /usr/pest/data/
 # COPY *.py /usr/pest/pest/
-VOLUME /usr/pest/results
+# VOLUME /usr/pest/results
 
 # We set ENTRYPOINT, so while we still use exec mode, we don’t
 # explicitly call /bin/bash

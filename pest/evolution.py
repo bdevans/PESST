@@ -702,8 +702,7 @@ def append_ks_statistics(stats_full_name, distribution_fitness, initial_fitness)
 
 
 def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
-    """record["hist_fitness_stats"] == True"""
-    # This section writes a file describing 5 statistical tests on the global fitness space.
+    """Write the results of 5 statistical tests on the global fitness space."""
 
     stats_file = open(stats_full_name, "w")  # open file
 

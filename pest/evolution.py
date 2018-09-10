@@ -97,20 +97,10 @@ def gamma_ray(n_amino_acids, sites, gamma):  # kappa, theta, n_iterations=100, n
     Tests of the tradeoff between computing time and variance led me to set
     this to 100 independent runs (1 million total samples from distribution).
     """
-    # medians = []
-    # medianlower = []
-    # medianlowermid = []
-    # medianuppermid = []
-    # medianupper = []
-    # bottomquarts = []
-    # bottommidquarts = []
-    # topmidquarts = []
-    # topquarts = []
 
-    # quartiles = [[] * 4]
-    kappa, theta, n_iterations, n_samples = gamma["shape"], gamma["scale"], gamma["iterations"], gamma["samples"]
-    # TODO:
-    # kappa, theta, n_iterations, n_samples = shape, scale, iterations, samples
+    kappa, theta, n_iterations, n_samples = (gamma["shape"], gamma["scale"],
+                                             gamma["iterations"], gamma["samples"])
+
     medians = np.zeros(shape=(n_iterations, 4))
 
     for i in range(n_iterations):
@@ -123,81 +113,8 @@ def gamma_ray(n_amino_acids, sites, gamma):  # kappa, theta, n_iterations=100, n
         medians[i, :], _, _ = binned_statistic(samples, samples,
                                                statistic='median',
                                                bins=quartiles)
-
     # Calculate average of medians across iterations
     average_medians = np.mean(medians, axis=0)
-
-    #     # define quartiles in that data with equal probability
-    #     for q in range(4):
-    #         quartiles[q].append(np.percentile(samples, [q*25, (q+1)*25],
-    #                                           interpolation='midpoint'))
-    #
-    #     quartiles = np.percentile(samples, [0, 25, 50, 75, 100], interpolation='midpoint')
-    #     bin_medians, bin_edges, binnumber = sp.stats.binned_statistic(samples, samples, statistic='median', bins=quartiles)
-    #     # samples[np.where(quartiles[q][0] <= samples < quartiles[q][-1])]
-    #
-    #     # bottomquart = np.percentile(samples, [0, 25], interpolation='midpoint')
-    #     # bottomquarts.append(bottomquart)
-    #     # bottommidquart = np.percentile(samples, [25, 50], interpolation='midpoint')
-    #     # bottommidquarts.append(bottommidquart)
-    #     # topmidquart = np.percentile(samples, [50, 75], interpolation='midpoint')
-    #     # topmidquarts.append(topmidquart)
-    #     # topquart = np.percentile(samples, [75, 100], interpolation='midpoint')
-    #     # topquarts.append(topquart)
-    #
-    #     # generate space for the values within each quartile, sort them, find the median, record the median.
-    #     bottomlist = []
-    #     bottommidlist = []
-    #     topmidlist = []
-    #     toplist = []
-    #     for s in samples:
-    #         if bottomquart[0] <= s < bottomquart[-1]:
-    #             bottomlist.append(s)
-    #         elif bottommidquart[0] <= s < bottommidquart[-1]:
-    #             bottommidlist.append(s)
-    #         elif topmidquart[0] <= s < topmidquart[-1]:
-    #             topmidlist.append(s)
-    #         else:
-    #             toplist.append(s)
-    #     bottomlist.sort()
-    #     bottommidlist.sort()
-    #     topmidlist.sort()
-    #     toplist.sort()
-    #     ratecategoriesquartile = [np.median(bottomlist), np.median(bottommidlist), np.median(topmidlist), np.median(toplist)]
-    #     medians.append(ratecategoriesquartile)
-    #
-    #     # print ratecategoriesquartile
-    #
-    # # calculate average of medians from each iteration
-    # for k in medians:
-    #     medianlower.append(k[0])
-    #     medianlowermid.append(k[1])
-    #     medianuppermid.append(k[2])
-    #     medianupper.append(k[3])
-    #
-    # finalmedians = [np.mean(medianlower), np.mean(medianlowermid), np.mean(medianuppermid), np.mean(medianupper)]
-
-    # This section will display the gamma distribution if desired.
-    # bottomquartlowerbounds = []
-    # bottomquartupperbounds = []
-    # bottommidquartupperbounds = []
-    # topmidquartupperbounds = []
-    # topquartupperbounds = []
-
-    # for i in bottomquarts:
-        # bottomquartlowerbounds.append(i[0])
-        # bottomquartupperbounds.append(i[-1])
-
-    # for i in bottommidquarts:
-        # bottommidquartupperbounds.append(i[-1])
-
-    # for i in topmidquarts:
-        # topmidquartupperbounds.append(i[-1])
-
-    # for i in topquarts:
-        # topquartupperbounds.append(i[-1])
-
-
 
     # Replot the gamma distributuion as a check
     if False:
@@ -221,19 +138,7 @@ def gamma_ray(n_amino_acids, sites, gamma):  # kappa, theta, n_iterations=100, n
         plt.show()
         plt.savefig(os.path.join(".", "gamma.png"))
 
-    # gammaaminos = [random.choice(average_medians) for aa in range(n_amino_acids)]
-
-    # return [random.choice(average_medians) for aa in range(n_amino_acids)]
-    # return random.choices(average_medians, k=n_amino_acids)
-
-    # gamma_categories = random.choices(average_medians, k=n_amino_acids)
     gamma_categories = np.random.choice(average_medians, size=n_amino_acids)
-    # Sum gammas to make a probability distribution to randomly select from.
-    # NOTE: Is cumsum necessary?
-    # cumulative_gamma = np.cumsum(gamma_categories)  # n_amino_acids long
-    # NOTE: Before or after cumsum
-    # cumulative_gamma[sites.invariant] = 0
-    # return cumulative_gamma/sum(cumulative_gamma)  # p_location
     gamma_categories[sites.invariant] = 0
     return gamma_categories/sum(gamma_categories)  # p_location
 

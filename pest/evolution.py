@@ -44,26 +44,12 @@ def test_normal_distribution():
     return
 
 
-# def fit_module(mu, sigma):
-#     """Generates an array of fitness values for each amino acid in residues."""
-#     return np.random.normal(mu, sigma, len(RESIDUES))
-
-
 # def get_protein_fitness(protein):  # x=protein;
 def get_protein_fitness(n_amino_acids, n_variants=len(RESIDUES.name)):
     """Generate a dictionary describing list of fitness values at each position
     of the generated protein.
     """
-    # Create dictionary containing position in the protein as keys and the array of fitness values for each amino acid as values
-    # fitnesslib = {i: fit_module(mu, sigma) for i in range(len(protein))}
     fitness_table = np.random.normal(mu, sigma, size=(n_amino_acids, n_variants))
-    # fitness_table = [{aa: np.random.normal(mu, sigma, size=(len(RESIDUES)))
-    #                   for aa in RESIDUES}
-    #                  for ai in range(n_amino_acids)]
-    # print(mu, sigma, n_amino_acids, len(RESIDUES))
-    # TODO:
-    # data = np.random.normal(mu, sigma, size=(n_amino_acids, len(RESIDUES)))
-    # fitness_table = pd.DataFrame(data=data, columns=RESIDUES)
     return fitness_table
 
 
@@ -271,7 +257,6 @@ def gamma_ray(n_amino_acids, sites, gamma):  # kappa, theta, n_iterations=100, n
 
 
 def mutate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies):
-# def mutate_amino_acid(amino_acid, LG_matrix, LG_residues, LG_indicies):  # b = matrix, a = current amino acid
     """Mutate a residue to another residue based on the LG matrix."""
     # Get the order of the aminos corresponding to the values in the array
     # aminolist = LG_matrix[:, 0].ravel().tolist()

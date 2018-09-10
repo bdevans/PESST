@@ -1,6 +1,5 @@
 import copy
-import os  # .path
-# import csv
+import os
 import datetime
 from textwrap import wrap
 # from pprint import pprint
@@ -57,21 +56,6 @@ def get_protein_fitness(n_amino_acids, LG_matrix):  # n_variants=len(RESIDUES.na
 def write_protein_fitness(run_path, directory, fitness_table):
 
     fitness_file_name = os.path.join(run_path, directory, "fitnesslibrary.csv")
-    # with open(fitness_file_name, "w") as aminofile:  # open file
-    #     # Write header
-    #     aminofile.write("aminoposition"),
-    #     for aa in RESIDUES:
-    #         aminofile.write(",%s" % aa)
-    #     # Write fitness values
-    #     for ai in range(n_amino_acids):
-    #         aminofile.write('\n%s' % ai),
-    #         # for f in fitness_table[i]:
-    #         #     aminofile.write(',%s' % f)
-    #         for r in RESIDUES:
-    #             aminofile.write(',%s' % RESIDUES[r])
-    # NOTE: This will not include the index column
-    # header = ",".join(RESIDUES)
-    # np.savetxt(fitness_file_name, fitness_table, delimiter=",", header=RESIDUES.name)
     fitness_table.to_csv(fitness_file_name)
 
 
@@ -95,12 +79,9 @@ def get_allowed_sites(n_amino_acids, n_anchors):
     for a in anchored_sequences[1:]:
         allowed_values.remove(a)
     # anchored_sequences = [allowed_values.pop(random.randrange(len(allowed_values))) for r in range(n_anchors)]
-    # NOTE: Should this be appended (as it may mean indexing out of range)?
-    # allowed_values.append(n_amino_acids)
     Sites = namedtuple('Sites', ['invariant', 'variant'])
     # Return a namedtuple with anchors and available sites
     return Sites(invariant=anchored_sequences, variant=allowed_values)
-    # return allowed_values
 
 
 def gamma_ray(n_amino_acids, sites, gamma):  # kappa, theta, n_iterations=100, n_samples=10000):
@@ -259,46 +240,17 @@ def gamma_ray(n_amino_acids, sites, gamma):  # kappa, theta, n_iterations=100, n
 
 def mutate_protein(protein, p_location, LG_matrix):
     """Mutate a residue to another residue based on the LG matrix."""
-    # Get the order of the aminos corresponding to the values in the array
-    # aminolist = LG_matrix[:, 0].ravel().tolist()
-    # Build cumulative sum of row of probabilities corresponding to amino_acid
-    # old_aa_index = aminolist.index(amino_acid)
-    # old_aa_index = LG_indicies[amino_acid]
-    # aa_cumsum = np.cumsum(np.asarray(LG_matrix[old_aa_index, 1:], dtype=float))
-    # # Return new_aa_index where random variable <= aa_cumsum[new_aa_index]
-    # new_aa_index = np.searchsorted(aa_cumsum, np.random.uniform(0, 1))
-    # # return aminolist[new_aa_index]
-    # return LG_residues[new_aa_index]
     mutant = copy.deepcopy(protein)  # Necessary!
     location = np.random.choice(len(mutant), p=p_location)
     amino_acid = mutant[location]
-    # p_transition = np.asarray(LG_matrix[LG_indicies[amino_acid], 1:], dtype=float)
     p_transition = LG_matrix.loc[amino_acid]
-    LG_residues = LG_matrix.columns.values  #.tolist()
+    LG_residues = LG_matrix.columns.values  # .tolist()
     mutant[location] = np.random.choice(LG_residues, p=p_transition)
     return mutant
-
-    # p_location = np.asarray(LG_matrix[LG_indicies[amino_acid], 1:], dtype=float)
-    # location = np.random.choice(len(p_location), p=p_location)
-    # return LG_residues[location]
 
 
 def calculate_fitness(protein, fitness_table):
     """Calculate fitness of a protein given the sequence and fitness values."""
-    # protein_fitness = []  # where fitness values will be added
-    # for ai, amino_acid in enumerate(protein):
-    #     # Append fitness values corresponding to amino_acid at position ai
-    #     protein_fitness.append(fitness_table[ai][RESIDUES.index(amino_acid)])
-    # protein_fitness = [fitness_table[ai][RESIDUES.index(amino_acid)]
-    #                    for ai, amino_acid in enumerate(protein)]
-    # protein_fitness = [fitness_table[ai][amino_acid]
-    #                    for ai, amino_acid in enumerate(protein)]
-    # 2d numpy array
-    # protein_fitness = [fitness_table[ai, RESIDUES.index(amino_acid)]
-    #                    for ai, amino_acid in enumerate(protein)]
-    # protein_fitness = [fitness_table[ai, RESIDUES.index[amino_acid]]
-    #                    for ai, amino_acid in enumerate(protein)]
-    # DataFrame
     protein_fitness = [fitness_table.loc[ai, amino_acid]
                        for ai, amino_acid in enumerate(protein)]
     return sum(protein_fitness)
@@ -414,111 +366,6 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
     return protein
 
 
-    # if fitness_level == 'low':  # generate unfit protein
-    #     unfittestaminos = []
-    #     for i in range(len(fitness_table)):
-    #         if i == 0:
-    #             unfittestaminos.append(["M"] * 3)
-    #         elif i not in variant_aminos and not 0:
-    #             toappend = initial_protein[i]
-    #             unfittestaminos.append([toappend] * 3)  # add invariant sites if an anchor position is defined
-    #         else:  # find the indexes of the 3 least fit amino acids in RESIDUES and record then as lists for each position
-    #             # unfitaminos = []
-    #             # amin = fitness_table[i]
-    #             # aminsort = sorted(amin)
-    #             # unfittestaminoposition = amin.index(aminsort[0])
-    #             # secondunfittestaminoposition = amin.index(aminsort[1])
-    #             # thirdunfittestaminoposition = amin.index(aminsort[2])
-    #             # unfittestamino = RESIDUES[unfittestaminoposition]
-    #             # secondunfittestamino = RESIDUES[secondunfittestaminoposition]
-    #             # thirdunfittestamino = RESIDUES[thirdunfittestaminoposition]
-    #             # unfitaminos.append(unfittestamino)
-    #             # unfitaminos.append(secondunfittestamino)
-    #             # unfitaminos.append(thirdunfittestamino)
-    #             # unfittestaminos.append(unfitaminos)
-    #
-    #             i_sorted = np.argsort(fitness_table[i])
-    #             unfittestaminos.append([RESIDUES[fitness_table[i][i_sorted[start]]] for start in [0, 1, 2]])
-    #
-    #     afitprotein = []
-    #     # for j in range(len(unfittestaminos)):  # generate a superunffit protein by randomly picking one of the 3 most fit amino acids at each position
-    #     #     randombin = random.randint(0, 2)
-    #     #     possibleaminos = unfittestaminos[j]
-    #     #     afitprotein.append(possibleaminos[randombin])
-    #
-    #     # Generate a superunffit protein by randomly picking one of the 3 most fit amino acids at each position
-    #     for candidates in unfittestaminos:
-    #         afitprotein.append(random.choice(candidates))
-    #
-    # if fitness_level == 'high':  # generate superfit protein
-    #     fittestaminos = []
-    #     for i in range(len(fitness_table)):
-    #         if i == 0:
-    #             fittestaminos.append(["M", "M", "M"])
-    #         elif i not in variant_aminos and not 0:
-    #             toappend = initial_protein[i]
-    #             fittestaminos.append([toappend, toappend, toappend])  # add invariant sites if an anchor position is defined
-    #         else:  # find the indexes of the 3 fittest amino acids in RESIDUES and record then as lists for each position
-    #             fitaminos = []
-    #             amin = fitness_table[i]
-    #             aminsort = sorted(amin)
-    #             fittestaminoposition = amin.index(max(amin))
-    #             secondfittestaminoposition = amin.index(aminsort[-2])
-    #             thirdfittestaminoposition = amin.index(aminsort[-3])
-    #             fittestamino = RESIDUES[fittestaminoposition]
-    #             secondfittestamino = RESIDUES[secondfittestaminoposition]
-    #             thirdfittestamino = RESIDUES[thirdfittestaminoposition]
-    #             fitaminos.append(fittestamino)
-    #             fitaminos.append(secondfittestamino)
-    #             fitaminos.append(thirdfittestamino)
-    #             fittestaminos.append(fitaminos)
-    #     afitprotein = []
-    #
-    #     for j in range(len(fittestaminos)):  # generate a superfit protein by randomly picking one of the 3 most fit amino acids at each position
-    #         randombin = random.randint(0, 2)
-    #         possibleaminos = fittestaminos[j]
-    #         afitprotein.append(possibleaminos[randombin])
-    # # generate medium fitness protein. This module is a little buggy. It takes the starting protein sequence, mutates 5 residues until the protein is fitter, then chooses 5 new residues and continues.
-    # # If it cannot make a fitter protein with the 5 residues its mutating it reverts back to the previous state and picks 5 new residues.
-    # if fitness_level == 'medium':
-    #     startprotein = initial_protein
-    #     startproteinfitness = calculate_fitness(startprotein, fitness_table)
-    #     variantstochoosefrom = variant_aminos
-    #     secondprotein = startprotein
-    #
-    #     while startproteinfitness < fitness_threshold+30:
-    #         choiceofvariants = random.sample(variantstochoosefrom, 5)
-    #         secondprotein[choiceofvariants[0]] = random.choice(RESIDUES)
-    #         secondprotein[choiceofvariants[1]] = random.choice(RESIDUES)
-    #         secondprotein[choiceofvariants[2]] = random.choice(RESIDUES)
-    #         secondprotein[choiceofvariants[3]] = random.choice(RESIDUES)
-    #         secondprotein[choiceofvariants[4]] = random.choice(RESIDUES)
-    #         secondproteinfitness = calculate_fitness(secondprotein, fitness_table)
-    #         counting = 0
-    #
-    #         while secondproteinfitness < startproteinfitness:
-    #             secondprotein = startprotein
-    #             secondproteinfitness = calculate_fitness(secondprotein, fitness_table)
-    #             secondprotein[choiceofvariants[0]] = random.choice(RESIDUES)
-    #             secondprotein[choiceofvariants[1]] = random.choice(RESIDUES)
-    #             secondprotein[choiceofvariants[2]] = random.choice(RESIDUES)
-    #             secondprotein[choiceofvariants[3]] = random.choice(RESIDUES)
-    #             secondprotein[choiceofvariants[4]] = random.choice(RESIDUES)
-    #             secondproteinfitness = calculate_fitness(secondprotein, fitness_table)
-    #             counting += 1
-    #
-    #             if counting > 99:
-    #                 choiceofvariants = random.sample(variantstochoosefrom, 5)
-    #                 counting -= 100
-    #                 break
-    #
-    #         startprotein = secondprotein
-    #         startproteinfitness = calculate_fitness(startprotein, fitness_table)
-    #     afitprotein = startprotein
-    #
-    # return afitprotein
-
-
 # NOTE: Not used
 def plot_fitness_histogram(n_proteins, n_amino_acids, fitness_table):
     """Generate and plot fitness values for f proteins."""
@@ -621,14 +468,9 @@ def build_generation_fitness_table(population, variant_sites, fitness_table):
     for pi, protein in list(population.items()):
 
         if record["invariants"]:
-            # protein_fitness = [fitness_table[ai, RESIDUES.index[amino_acid]]
-            #                    for ai, amino_acid in enumerate(protein)]
             protein_fitness = [fitness_table.loc[ai, amino_acid]
                                for ai, amino_acid in enumerate(protein)]
         else:
-            # protein_fitness = [fitness_table[ai, RESIDUES.index[amino_acid]]
-            #                    for ai, amino_acid in enumerate(protein)
-            #                    if ai in variant_sites]
             protein_fitness = [fitness_table.loc[ai, amino_acid]
                                for ai, amino_acid in enumerate(protein)
                                if ai in variant_sites]
@@ -740,14 +582,12 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
                      "test is inaccurate. This test uses {} datapoints.\n\n"
                      .format(len(fitnesses)))
     passpercentcalc = []
-    # for i in distshapirolist:
     for aa in aa_variant_fitnesses:
         (_, p_value) = sp.stats.shapiro(aa)
         if p_value >= 0.05:
             passpercentcalc.append(1)
         else:
             passpercentcalc.append(0)
-    # passpercent = (sum(passpercentcalc) / len(passpercentcalc)) * 100
     stats_file.write("According to Shapiro-Wilk test, the proportion of "
                      "individual positions that are not confidently "
                      "non-normal is: {:.2%}\n\n\n"
@@ -777,9 +617,7 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
                          .format(significance_levels[level_index]))
 
     # Set up output for significance levels - final bin represents "reject"
-    # hypothesis_tally = [0 for result in range(len(significance_levels) + 1)]
     hypothesis_tally = np.zeros(len(significance_levels) + 1)
-    # for result in distandersonlist:
     for aa in aa_variant_fitnesses:
         result = sp.stats.anderson(aa)
         level_index = np.searchsorted(anderson_results.critical_values,
@@ -810,7 +648,6 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
                          "a normal distribution.\n\n")
 
     skewkurtpass = []
-    # for i in distskewkurtalllist:
     for aa in aa_variant_fitnesses:
         distskewkurt = sp.stats.normaltest(aa)
         if distskewkurt.pvalue >= 0.05:
@@ -829,11 +666,13 @@ def plot_histogram_of_fitness(disthistfullname, distributions, initial):
     plt.figure()
     plt.axis([-10, 8, 0, 0.5])  # generate attractive figure
 
-    mu1distspace = sum(initial) / len(initial)  # plot normal distribution of the original fitness space
+    # Plot normal distribution of the original fitness space
+    mu1distspace = sum(initial) / len(initial)
     plt.hist(initial, 50, density=True, color='k', alpha=0.4)
     plt.title("\n".join(wrap('Fitness distribution of the total fitness space', 60)), fontweight='bold')
     plt.axvline(x=mu1distspace, color="#404040", linestyle=":")
 
+    # Plot normal distribution of the current generation's fitness space
     mu2distspace = sum(distributions) / len(distributions)
     plt.hist(distributions, 50, density=True, color='r', alpha=0.4)
     plt.title("\n".join(wrap('Fitness distribution of the total fitness space vs. changing fitness distribution across every evolving clone', 60)), fontweight='bold')
@@ -846,7 +685,6 @@ def plot_histogram_of_fitness(disthistfullname, distributions, initial):
     plt.close()
 
 
-# NOTE: variant_sites is passed in as invariant_sites!
 def record_generation_fitness(generation, population, variant_sites,
                               fitness_table, fitness_threshold, record, run_path):
     """Record the fitness of every protein in the generation and store them in
@@ -857,7 +695,6 @@ def record_generation_fitness(generation, population, variant_sites,
         return
 
     if record["dot_fitness"]:
-        # # TODO: There will be a bug in plotting the mean fitness at the wrong x point (as before)
         fitfilename = "generation_{}.png".format(generation)  # define dynamic filename
         fitfullname = os.path.join(run_path, "fitnessdotmatrix", fitfilename)
         plot_threshold_fitness(generation, population, variant_sites, fitness_table, fitfullname)
@@ -890,7 +727,7 @@ def record_generation_fitness(generation, population, variant_sites,
                                   fitness_table.values.ravel())
 
 
-def write_fasta_alignment(population, generation, run_path):  # x = current generation of sequence, y = generation number
+def write_fasta_alignment(population, generation, run_path):
     """Write fasta alignment from sequences provided."""
     fastafilepath = os.path.join(run_path, "fastas")
     fastafilename = "generation_{}.fasta".format(generation)  # define dynamic filename
@@ -1002,7 +839,6 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
         n_bifurcations += 1
     n_gens_per_bifurcation = int(n_generations/n_bifurcations)  # number of generations per bifurcation.
 
-    # bifurcations = [proteins]  # lists of protein keys intialised with non-roots
     tree["branches"] = [protein_keys]  # lists of protein keys intialised with non-roots
     population = copy.deepcopy(initial_population)  # current generation
     fitnesses = calculate_generation_fitness(population, fitness_table)
@@ -1045,7 +881,6 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
                                                 variant_sites, p_location,
                                                 LG_matrix)
             # Re-calculate fitness
-            # NOTE: This only used to be computed if gen == 0 or gen % record["rate"] == 0
             # NOTE: These should be computed after mutation but before replacement to show sub-threshold proteins in fitnessgraph
             # TODO: Save fitnesses pre and post replacement to plot an accurate mean on the fitnessgraph
             fitnesses = calculate_generation_fitness(next_generation, fitness_table)
@@ -1104,10 +939,8 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
 def plot_evolution(history, n_clones, initial_protein, fitness_table, run_path):
     """Plot fitness against generation for all clones."""
     # NOTE: This plots after mutation but before their replacements so that it shows subthreshold proteins briefly existing
-    # NOTE: Final element previously excluded - for i in range(len(evolution)-1):  FIXED
+
     # Create array of fitness values with shape (n_generations, n_clones)
-    # fitnesses = np.array([[evolution[g][-1][c] for c in range(n_clones)]
-    #                       for g in range(n_generations)])
     n_generations = len(history) - 1  # First entry is the initial state
     fitnesses = np.array([[history[g].fitness[c] for c in range(n_clones)]
                           for g in range(n_generations+1)])
@@ -1120,7 +953,6 @@ def plot_evolution(history, n_clones, initial_protein, fitness_table, run_path):
     plt.figure()
     plt.plot(generation_numbers, fitnesses)
     plt.plot([0, n_generations], [fitness_threshold, fitness_threshold], 'k-', lw=2)
-    # NOTE: Final element previously excluded - for c in range(n_clones-1):
     plt.plot(generation_numbers, np.mean(fitnesses, axis=1), "k--", lw=2)  # Average across clones
     # plt.ylim([fitness_threshold-25, initial_fitness+10])  # not suitable for "low or med" graphs
     # plt.ylim([fitness_threshold-5, ((n_amino_acids+1)*mu)+80]) # for low graphs
@@ -1196,23 +1028,6 @@ def load_LG_matrix(full_file_name=None):
     return LG_matrix
 
 
-# def get_LG_matrix(full_file_name=None):
-#     """Get .csv file defining aa substitution probabilities calculated from R
-#     matrix multiplied by PI matrix, with diagonals forced to zero as mutation
-#     has to happen then converted to event rates p(lambda) where lambda = sum Qx
-#     and p(lambda)x=Qxy/lambda
-#     """
-#     if full_file_name is None:
-#         full_file_name = os.path.join("data", "LGaa.csv")
-#     with open(full_file_name) as matrix_file:  # Open in read-only mode
-#         LG_matrix_list = list(csv.reader(matrix_file, delimiter=","))
-#     LG_matrix = np.array(LG_matrix_list)  # load matrix into a numpy array
-#     LG_residues = LG_matrix[0, 1:]  # Get first row skipping first element ('0')
-#     LG_indicies = {aa: ai for ai, aa in enumerate(LG_residues)}
-#     LG_matrix = np.delete(LG_matrix, 0, axis=0)  # trim first line of the array as it's not useful
-#     return (LG_matrix, LG_residues, LG_indicies)
-
-
 def write_initial_protein(initial_protein, run_path):
     protein_full_name = os.path.join(run_path, "start", "firstprotein.fas")
     with open(protein_full_name, "w") as ipf:  # open file
@@ -1243,9 +1058,8 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
     LG_matrix = load_LG_matrix()  # Load LG matrix
     fitness_table = get_protein_fitness(n_amino_acids, LG_matrix)  # make first fitness dictionary
 
-    sites = get_allowed_sites(n_amino_acids, n_anchors)  # generate invariant sites
-    # NOTE: Should this change throughout the generations and even proteins?
-    p_location = gamma_ray(n_amino_acids, sites, gamma)  # generate gamma categories for every site
+    sites = get_allowed_sites(n_amino_acids, n_anchors)  # generate variant/invariant sites
+    p_location = gamma_ray(n_amino_acids, sites, gamma)  # generate mutation probabilities for every site
 
     # Generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
     initial_protein = get_fit_protein(fitness_start, n_amino_acids, sites, fitness_table)
@@ -1279,12 +1093,11 @@ if __name__ == '__main__':
     mu = -1.2
     sigma = 2.5
 
-    # TODO: These could possibly gi into their own dictionary too
-    n_clones = 52  # amount of clones that will be generated in the first generation #5 10 20 40 80
-    # TODO: Change to the more logical n+1!
-    n_amino_acids = 80  # number of amino acids in the protein after the start methionine
+    # TODO: These could possibly go into their own dictionary too
+    n_clones = 52  # amount of clones that will be generated in the first generation
+    n_amino_acids = 80  # number of amino acids in the protein including the start methionine
     mutation_rate = 0.001  # should be small!
-    # TODO: Allow user to pass a number but defau;t to None and calculate as follows
+    # TODO: Allow user to pass a number but default to None and calculate as follows
     n_mutations_per_gen = int(n_clones*(n_amino_acids)*mutation_rate)  # number of mutations per generation
     n_anchors = int((n_amino_acids)/10)  # amount of invariant sites in a generation (not including root)
     deaths_per_generation = 5  # Set to 0 to turn off protein deaths
@@ -1300,10 +1113,6 @@ if __name__ == '__main__':
              "scale": 1/1.9,  # NOTE: 1/gamma_shape. Set as default in func?
              "iterations": 50,
              "samples": 10000}
-    # gamma_iterations = 100
-    # gamma_samples = 10000
-    # gamma_shape = 1.9  # Most phylogenetic systems that use gamma only let you set kappa (often called shape alpha) and calculate theta as 1/kappa giving mean of 1
-    # gamma_scale = 1/gamma_shape
 
     # Set what to record
     record = {"rate": 50,           # write a new fasta file every x generations

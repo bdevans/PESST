@@ -526,7 +526,9 @@ def append_ks_statistics(stats_full_name, distribution_fitness, initial_fitness)
         # Kolmogorov-Smirnov test of similarity to original distributuion
         ksdata = sp.stats.ks_2samp(distribution_fitness, initial_fitness)
         stats_file.write("\n\n\n2-sided Kolmogorov-Smirnov test of similarity "
-                         "between the fitness space and evolving protein:\n\n")
+                         "between the fitness space and evolving protein\n"
+                         "----------------------------------------------"
+                         "----------------------------------------------\n\n")
         stats_file.write("The Kolmogorov-Smirnov test between the fitness "
                          "space and the evolving protein gives a p-value of: "
                          "{}\n".format(ksdata.pvalue))
@@ -607,7 +609,7 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
     if anderson_results.statistic > anderson_results.critical_values[-1]:
         stats_file.write("Therefore according to the Anderson-Darling test, "
                          "the hypothesis of normality is rejected for the "
-                         "entire dataset.")
+                         "entire dataset.\n\n")
     else:
         level_index = np.searchsorted(anderson_results.critical_values,
                                       anderson_results.statistic, side="left")

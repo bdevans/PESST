@@ -106,3 +106,5 @@ venv.bak/
 *.bak
 NOTES.md
 results/
+*.png
+benchmark.py

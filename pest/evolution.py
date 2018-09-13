@@ -852,7 +852,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
     return evolution
 
 
-def plot_evolution(history, n_clones, initial_protein, fitness_table, run_path):
+def plot_evolution(history, n_clones, initial_protein, fitness_table, plot_omega, plot_epsilon, run_path):
     """Plot fitness against generation for all clones."""
     # NOTE: This plots after mutation but before their replacements so that it shows subthreshold proteins briefly existing
 
@@ -868,7 +868,11 @@ def plot_evolution(history, n_clones, initial_protein, fitness_table, run_path):
 
     plt.figure()
     plt.plot(generation_numbers, fitnesses)
-    plt.plot([0, n_generations], [fitness_threshold, fitness_threshold], 'k-', lw=2)
+    if plot_omega:  # Add fitness threshold
+        plt.plot([0, n_generations], [fitness_threshold, fitness_threshold], 'k-', lw=2)
+    if plot_epsilon:  # Add theoretical convergence line
+        epsilon = len(initial_protein) * np.mean(fitness_table)
+        plt.plot([0, n_generations], [epsilon, epsilon], 'k-', lw=2)
     plt.plot(generation_numbers, np.mean(fitnesses, axis=1), "k--", lw=2)  # Average across clones
     # plt.ylim([fitness_threshold-25, initial_fitness+10])  # not suitable for "low or med" graphs
     # plt.ylim([fitness_threshold-5, ((n_amino_acids+1)*mu)+80]) # for low graphs
@@ -992,7 +996,9 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
                      fitness_threshold, sites.variant, p_location,
                      n_mutations_per_gen, record["fasta_rate"],
                      LG_matrix, run_path)
-    plot_evolution(history, n_clones, initial_protein, fitness_table, run_path)
+    # TODO: Set lines automatically
+    plot_omega, plot_epsilon = True, False
+    plot_evolution(history, n_clones, initial_protein, fitness_table, plot_omega, plot_epsilon, run_path)
     return history
 
 

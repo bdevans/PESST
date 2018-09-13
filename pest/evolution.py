@@ -400,7 +400,7 @@ def plot_threshold_fitness(generation, population, variant_sites, fitness_table,
     # plt.xticks([])  # n_variants
     plt.xlabel("Amino acid position")
     plt.text(0, 3.5*sigma, "\n".join([r"$\mu_1$ = {:.3}".format(mean_initial_fitness),
-                                    "threshold = {}".format(fitness_threshold)]), size=6.5)
+                                      "threshold = {}".format(fitness_threshold)]), size=6.5)
     plt.title(r"Fitness distribution of $\Delta T_m$ matrix", size=8)
 
     # Find and plot all fitness values in the current generation
@@ -418,7 +418,7 @@ def plot_threshold_fitness(generation, population, variant_sites, fitness_table,
     # plt.xticks([])  # len(population)
     plt.xlabel("Protein")
     plt.text(0, 3.5*sigma, "\n".join([r"$\mu_2$ = {:.3}".format(mean_generation_fitness),
-                                    "threshold = {}".format(fitness_threshold)]), size=6.5)
+                                      "threshold = {}".format(fitness_threshold)]), size=6.5)
     plt.title("\n".join(wrap("Fitness distribution of every sequence in the evolving dataset", 40)), size=8)
 
     plt.subplots_adjust(top=0.85)

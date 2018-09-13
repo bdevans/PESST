@@ -57,7 +57,7 @@ def get_protein_fitness(n_amino_acids, LG_matrix):
 def write_protein_fitness(run_path, directory, fitness_table):
 
     fitness_file_name = os.path.join(run_path, directory, "fitnesslibrary.csv")
-    fitness_table.to_csv(fitness_file_name)
+    fitness_table.to_csv(fitness_file_name, index_label="Position")
 
 
 def clone_protein(protein, n_clones):

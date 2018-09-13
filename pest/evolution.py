@@ -966,6 +966,11 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
         np.random.seed(seed)
         random.seed(seed)
 
+    if fitness_start == "low":
+        warnings.warn("You have selected low starting fitness. "
+                      "If the run fails, please check your fitness threshold"
+                      "is low enough: {}".format(fitness_threshold))
+
     # TODO: Put run_path (and subdirs) in record dict
     # create folder and subfolders
     # PWD = os.path.dirname(__file__)

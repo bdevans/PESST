@@ -973,6 +973,7 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
     write_settings_file(run_path)  # record run settings
     LG_matrix = load_LG_matrix()  # Load LG matrix
     fitness_table = get_protein_fitness(n_amino_acids, LG_matrix)  # make first fitness dictionary
+    write_protein_fitness(run_path, "start", fitness_table)
 
     sites = get_allowed_sites(n_amino_acids, n_anchors)  # generate variant/invariant sites
     p_location = gamma_ray(n_amino_acids, sites, gamma)  # generate mutation probabilities for every site

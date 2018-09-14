@@ -1,4 +1,5 @@
 import os
+import json
 import datetime
 import warnings
 import random
@@ -251,21 +252,6 @@ def create_output_folders(output_directory=""):
 
 
 def write_settings_file(run_path, settings):
-    settingsfullname = os.path.join(run_path, "runsettings", "runsettings.txt")
-    # TODO: Change to JSON
-    # for setting, value in settings.items():
-    #     print(setting, value)
-    gamma = settings["gamma"]
-    record = settings["record"]
+    settingsfullname = os.path.join(run_path, "runsettings", "settings.json")
     with open(settingsfullname, "w") as sf:  # open file
-        sf.write("Random number generator seed: {}\n".format(settings["seed"]))
-        sf.write("Protein length: %s" % (settings["n_amino_acids"]))
-        sf.write("\nNumber of mutations per generation: %s" % settings["n_mutations_per_gen"])
-        sf.write("\nNumber of clones in the population: %s" % settings["n_clones"])
-        sf.write("\nNumber of generations simulation is run for: %s" % settings["n_generations"])
-        sf.write("\nFitness threshold: %s" % settings["fitness_threshold"])
-        sf.write("\n\nNormal distribution properties: mu = %s, sigma = %s" % (settings["mu"], settings["sigma"]))
-        sf.write("\nGamma distribution properties: kappa = %s, theta = %s" % (gamma["shape"], gamma["scale"]))
-        sf.write("\n\nWrite rate for FASTA: every %s generations" % record["fasta_rate"])
-        sf.write("\n\nTrack rate for graphing and statistics: every %s generations" % record["rate"])
-        sf.write("\nTracking state: Fitness dot matrix = %s; Fitness histogram = %s; Fitness normality statistics = %s" % (record["dot_fitness"], record["hist_fitness"], record["hist_fitness_stats"]))
+        json.dump(settings, sf, indent=4)

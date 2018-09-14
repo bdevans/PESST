@@ -35,7 +35,9 @@ COPY data /usr/pest/data/
 # COPY *.py /usr/pest/pest/
 # VOLUME /usr/pest/results
 
+ENV PYTHONPATH "${PYTONPATH}:/usr/pest"
 # We set ENTRYPOINT, so while we still use exec mode, we don’t
 # explicitly call /bin/bash
 # CMD [ "source activate pest && exec python pest/evolution.py" ]
-CMD [ "exec python pest/evolution.py" ]
+# CMD [ "exec python pest/evolution.py" ]
+CMD [ "exec python pest" ]

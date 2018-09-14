@@ -1,23 +1,26 @@
 import copy
 import os
-import datetime
-from textwrap import wrap
 # from pprint import pprint
 from collections import namedtuple
 import warnings
 import random
 # from random import sample, choice, shuffle  # TODO: Consolidate with numpy
+
 import numpy as np
 # from numpy.random import normal, uniform, gamma
 import scipy as sp
 from scipy import stats
-# from scipy.stats import binned_statistic
-# from scipy.stats import anderson, normaltest, skew, skewtest, kurtosistest, shapiro, kurtosis, ks_2samp
 import pandas as pd
 import matplotlib as mpl
-from matplotlib import pyplot as plt
 from tqdm import trange
 
+from .dataio import (create_output_folders, write_settings_file, load_LG_matrix,
+                     write_initial_protein, write_protein_fitness,
+                     write_fasta_alignment, write_final_fasta,
+                     write_histogram_statistics, append_ks_statistics)
+from .plotting import (plot_evolution, plot_gamma_distribution,
+                       plot_threshold_fitness, plot_histogram_of_fitness)
+from .utilities import print_protein
 
 # TODO: Automatically extract from LG_matrix - DONE
 # Define RESIDUES matching the ordering of LG_matrix
@@ -27,24 +30,7 @@ from tqdm import trange
 # RESIDUES = Residues(name=RESIDUES_NAME, index=RESIDUES_INDEX)
 
 
-def print_protein(protein):
-    """Takes a list of amino acids and prints them as a string."""
-    print(''.join(protein))
-
-
-# NOTE: unused
-def test_normal_distribution():
-    """Plot a distribution to test normalality."""
-    s = np.random.normal(mu, sigma, 2000)  # generate distribution
-    count, bins, ignored = plt.hist(s, 30, density=True)  # plot distribuiton
-    plt.plot(bins, 1/(sigma * np.sqrt(2 * np.pi)) *
-                   np.exp(- (bins - mu)**2 / (2 * sigma**2)),
-             linewidth=2, color='r')
-    plt.show()
-    return
-
-
-def get_protein_fitness(n_amino_acids, LG_matrix):
+def get_protein_fitness(n_amino_acids, mu, sigma, LG_matrix):
     """Generate a dictionary describing list of fitness values at each position
     of the generated protein.
     """
@@ -52,12 +38,6 @@ def get_protein_fitness(n_amino_acids, LG_matrix):
     values = np.random.normal(mu, sigma, size=(n_amino_acids, n_variants))
     fitness_table = pd.DataFrame(values, columns=LG_matrix.columns)
     return fitness_table
-
-
-def write_protein_fitness(run_path, directory, fitness_table):
-
-    fitness_file_name = os.path.join(run_path, directory, "fitnesslibrary.csv")
-    fitness_table.to_csv(fitness_file_name, index_label="Position")
 
 
 def clone_protein(protein, n_clones):
@@ -119,25 +99,7 @@ def gamma_ray(n_amino_acids, sites, gamma):
 
     # Replot the gamma distributuion as a check
     if False:
-        from scipy.stats import gamma
-        # plot the distribution as well as the quartiles and medians
-        # xtoplot = [np.mean(bottomquartlowerbounds), np.mean(bottomquartupperbounds), np.mean(bottommidquartupperbounds),
-        #            np.mean(topmidquartupperbounds), np.mean(topquartupperbounds)]
-        x = np.linspace(0, 6, 1000)
-        y = x ** (kappa - 1) * (np.exp(-x / theta) / (gamma(kappa).pdf(x) * theta ** kappa))
-        plt.plot(x, y, linewidth=2, color='k', alpha=0)
-        plt.fill_between(x, y, where=x > quartiles[0], color='#4c4cff')
-        plt.fill_between(x, y, where=x > quartiles[1], color='#7f7fff')
-        plt.fill_between(x, y, where=x > quartiles[2], color='#b2b2ff')
-        plt.fill_between(x, y, where=x > quartiles[3], color='#e5e5ff')
-        plt.axvline(x=average_medians[0], color="#404040", linestyle=":")
-        plt.axvline(x=average_medians[1], color="#404040", linestyle=":")
-        plt.axvline(x=average_medians[2], color="#404040", linestyle=":")
-        plt.axvline(x=average_medians[3], color="#404040", linestyle=":")
-        plt.title("\n".join(wrap('gamma rate categories calculated as the the average of %s median values of 4 equally likely quartiles of %s randomly sampled vaules' % (n_iterations, n_samples), 60)), fontweight='bold', fontsize=10)
-        plt.text(5, 0.6, "$\kappa$ = %s\n$\\theta$ = $\\frac{1}{\kappa}$" % (kappa))
-        plt.show()
-        plt.savefig(os.path.join(".", "gamma.png"))
+        plot_gamma_distribution(gamma, quartiles, average_medians)
 
     gamma_categories = np.random.choice(average_medians, size=n_amino_acids)
     gamma_categories[sites.invariant] = 0
@@ -157,7 +119,7 @@ def mutate_protein(protein, p_location, LG_matrix):
 
 def calculate_fitness(protein, fitness_table):
     """Calculate fitness of a protein given the sequence and fitness values."""
-    protein_fitness = [fitness_table.loc[ai, amino_acid]
+    protein_fitness = [fitness_table.loc[ai, amino_acid]  # TODO: Indexing
                        for ai, amino_acid in enumerate(protein)]
     return sum(protein_fitness)
 
@@ -183,7 +145,7 @@ def twist_protein(protein, mutation_sites, fitness_table):
     return (mutant, fitness)
 
 
-def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
+def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table, fitness_threshold):
     """Generate a protein of a specified fitness.
 
     Make either a superfit protein, a superunfit protein or a 'medium
@@ -272,16 +234,6 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
     return protein
 
 
-# NOTE: Not used
-def plot_fitness_histogram(n_proteins, n_amino_acids, fitness_table):
-    """Generate and plot fitness values for f proteins."""
-    fitnesses = [calculate_fitness(get_random_protein(n_amino_acids, fitness_table), fitness_table)
-                 for p in range(n_proteins)]
-    plt.hist(fitnesses, density=True)  # plot fitnesses as histogram
-    plt.show()
-    return
-
-
 def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
                       p_location, LG_matrix):
     """Mutate a set of sequences based on the LG+I+G model of amino acid
@@ -363,7 +315,48 @@ def calculate_generation_fitness(population, fitness_table):
     #                for pi, protein in list(population.items())]
 
 
-def build_generation_fitness_table(population, variant_sites, fitness_table):
+def record_generation_fitness(generation, population, variant_sites,
+                              fitness_table, fitness_threshold, record, run_path):
+    """Record the fitness of every protein in the generation and store them in
+    dictionary. Optionally generate data and figures about fitness.
+    """
+
+    if not (generation == 0 or generation % record["rate"] == 0):
+        return
+    # Build distribution of fitness values existing in evolving protein
+    fitnesses = build_generation_fitness_table(population, variant_sites, fitness_table, record)
+
+    if record["dot_fitness"]:
+        fitfilename = "generation_{}.png".format(generation)  # define dynamic filename
+        fitfullname = os.path.join(run_path, "fitnessdotmatrix", fitfilename)
+        plot_threshold_fitness(generation, population, fitnesses, fitness_table, fitness_threshold, fitfullname)
+
+    if record["hist_fitness_stats"]:
+        # Write a file describing 5 statistical tests on the protein fitness space
+        if generation == 0:
+            stats_file_name = "normal_distribution_statistics_fitness_space.txt"
+            distributions = fitness_table.values
+        else:
+            stats_file_name = "normal_distribution_statistics_generation{}.txt".format(generation)
+            distributions = fitnesses
+        stats_full_name = os.path.join(run_path, "fitnessdistribution",
+                                       "statistics", stats_file_name)
+        write_histogram_statistics(stats_full_name, distributions, record)
+        if generation > 0:
+            append_ks_statistics(stats_full_name, distributions.ravel(),
+                                 fitness_table.values.ravel())
+
+    if record["hist_fitness"]:
+
+        disthistfilename = "generation_{}.png".format(generation)  # define dynamic filename
+        disthistfullname = os.path.join(run_path, "fitnessdistribution",
+                                        "histograms", disthistfilename)
+
+        plot_histogram_of_fitness(disthistfullname, fitnesses.ravel(),
+                                  fitness_table.values.ravel(), fitness_threshold)
+
+
+def build_generation_fitness_table(population, variant_sites, fitness_table, record):
     """Build a fitness table for given generation's population.
 
     The array has one row for each protein in the population and the fitness
@@ -383,297 +376,6 @@ def build_generation_fitness_table(population, variant_sites, fitness_table):
 
         dist_clone_fitness.append(protein_fitness)  # Becomes a new row
     return np.asarray(dist_clone_fitness)
-
-
-def plot_threshold_fitness(generation, population, variant_sites, fitness_table, fitfullname):
-    # Store fitness values for each amino in the dataset for the left side of the figure
-    # (n_amino_acids, n_variants) = fitness_table.shape
-    mean_initial_fitness = np.mean(fitness_table.values)  # Average across flattened array
-
-    plt.figure()
-    plt.subplot(121)
-    # Plot each column of fitness_table as a separate dataseries against 0..N-1
-    plt.plot(fitness_table, ".", color='k')  # np.arange(n_amino_acids)+1,
-    plt.plot([0, n_amino_acids-1], [mean_initial_fitness, mean_initial_fitness], 'r--', lw=3)
-    plt.ylim(((-4 * sigma) - 1), ((4 * sigma) + 1))
-    plt.ylabel(r"Values in $\Delta T_m$ matrix")
-    # plt.xticks([])  # n_variants
-    plt.xlabel("Amino acid position")
-    plt.text(0, 3.5*sigma, "\n".join([r"$\mu_1$ = {:.3}".format(mean_initial_fitness),
-                                      "threshold = {}".format(fitness_threshold)]), size=6.5)
-    plt.title(r"Fitness distribution of $\Delta T_m$ matrix", size=8)
-
-    # Find and plot all fitness values in the current generation
-    generation_fitneses = build_generation_fitness_table(population, variant_sites, fitness_table)
-    # TODO: Check this is the intended average value to check. Previously it was np.mean(Y2fitness) i.e. the mean of the last protein in the loop
-    mean_generation_fitness = np.mean(generation_fitneses)
-    plt.subplot(122)
-    # x: proteins within population
-    # y: Fitness for each locus for that protein
-    # TODO: Swap colour to a particular protein not locus or make monochrome and make dots smaller
-    plt.plot(np.arange(len(population)), generation_fitneses, "o", markersize=2)  # plot y using x as index array 0..N-1
-    plt.plot([0, len(population)-1], [mean_generation_fitness, mean_generation_fitness], 'r--', lw=3)
-    plt.ylim(((-4 * sigma) - 1), ((4 * sigma) + 1))
-    plt.ylabel(r"$\Delta T_m$ values in protein")
-    # plt.xticks([])  # len(population)
-    plt.xlabel("Protein")
-    plt.text(0, 3.5*sigma, "\n".join([r"$\mu_2$ = {:.3}".format(mean_generation_fitness),
-                                      "threshold = {}".format(fitness_threshold)]), size=6.5)
-    plt.title("\n".join(wrap("Fitness distribution of every sequence in the evolving dataset", 40)), size=8)
-
-    plt.subplots_adjust(top=0.85)
-    plt.suptitle(('Generation %s' % generation), fontweight='bold')
-    plt.savefig(fitfullname)
-    plt.close()
-
-
-def append_ks_statistics(stats_full_name, distribution_fitness, initial_fitness):
-    with open(stats_full_name, "a") as stats_file:  # Append to file
-        # Kolmogorov-Smirnov test of similarity to original distributuion
-        ksdata = sp.stats.ks_2samp(distribution_fitness, initial_fitness)
-        stats_file.write("\n\n\n2-sided Kolmogorov-Smirnov test of similarity "
-                         "between the fitness space and evolving protein\n"
-                         "----------------------------------------------"
-                         "----------------------------------------------\n\n")
-        stats_file.write("The Kolmogorov-Smirnov test between the fitness "
-                         "space and the evolving protein gives a p-value of: "
-                         "{}\n".format(ksdata.pvalue))
-
-        if ksdata.pvalue < 0.05:
-            stats_file.write("Therefore, as the p-value is smaller than 0.05 "
-                             "we can reject the hypothesis that the fitness "
-                             "space distribution and the evolving sequence "
-                             "distribution are the same.")
-        else:
-            stats_file.write("Therefore, as the p-value is larger than 0.05 "
-                             "we cannot reject the hypothesis that the fitness "
-                             "space distribution and the evolving sequence "
-                             "distribution are the same.")
-
-
-def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
-    """Write the results of 5 statistical tests on the global fitness space."""
-
-    stats_file = open(stats_full_name, "w")  # open file
-
-    stats_file.write("Tests for normality on the amino acid fitnesses\n"
-                     "===============================================\n\n\n")
-
-    # TODO: Check that the ordering is correct (default: row major)
-    fitnesses = aa_variant_fitnesses.ravel()
-
-    # Skewness
-    stats_file.write("Skewness\n"
-                     "--------\n\n"
-                     "The skewness of the data is: "
-                     "{}\n\n\n".format(sp.stats.skew(fitnesses)))
-
-    # Kurtosis
-    stats_file.write("Kurtosis\n"
-                     "--------\n\n"
-                     "The kurtosis of the data is: "
-                     "{}\n\n\n".format(sp.stats.kurtosis(fitnesses)))
-
-    # Normality (Shapiro-Wilk)
-    stats_file.write("Shapiro-Wilk test of non-normality\n"
-                     "----------------------------------\n\n")
-    W_shapiro, p_shapiro = sp.stats.shapiro(fitnesses)
-    stats_file.write("The Shapiro-Wilk test of non-normality for the entire "
-                     "dataset gives p = {}\n".format(p_shapiro))
-    if p_shapiro >= 0.05:
-        shapiro = 'not '
-    else:
-        shapiro = ''
-    stats_file.write("Therefore the Shapiro-Wilk test suggests that the whole "
-                     "dataset is {}confidently non-normal\n".format(shapiro))
-    stats_file.write("However if there are more than 5000 datapoints this "
-                     "test is inaccurate. This test uses {} datapoints.\n\n"
-                     .format(len(fitnesses)))
-    passpercentcalc = []
-    for aa in aa_variant_fitnesses:
-        (_, p_value) = sp.stats.shapiro(aa)
-        if p_value >= 0.05:
-            passpercentcalc.append(1)
-        else:
-            passpercentcalc.append(0)
-    stats_file.write("According to Shapiro-Wilk test, the proportion of "
-                     "individual positions that are not confidently "
-                     "non-normal is: {:.2%}\n\n\n"
-                     .format(sum(passpercentcalc) / len(passpercentcalc)))
-
-    # Normality (Anderson-Darling)
-    # Significance levels (percentages) for normal distributions
-    significance_levels = (15, 10, 5, 2.5, 1)
-    stats_file.write("Anderson-Darling test of normality\n"
-                     "----------------------------------\n\n")
-    anderson_results = sp.stats.anderson(fitnesses)
-    stats_file.write("The Anderson-Darling test of normality for the entire "
-                     "dataset gives a test statistic of {} "
-                     "and critical values of {}\n"
-                     .format(anderson_results.statistic,
-                             anderson_results.critical_values))
-    if anderson_results.statistic > anderson_results.critical_values[-1]:
-        stats_file.write("Therefore according to the Anderson-Darling test, "
-                         "the hypothesis of normality is rejected for the "
-                         "entire dataset.\n\n")
-    else:
-        level_index = np.searchsorted(anderson_results.critical_values,
-                                      anderson_results.statistic, side="left")
-        stats_file.write("Therefore according to the Anderson-Darling test, "
-                         "the hypothesis of normality is not rejected at the "
-                         "{}% significance level for the entire dataset.\n\n"
-                         .format(significance_levels[level_index]))
-
-    # Set up output for significance levels - final bin represents "reject"
-    hypothesis_tally = np.zeros(len(significance_levels) + 1)
-    for aa in aa_variant_fitnesses:
-        result = sp.stats.anderson(aa)
-        level_index = np.searchsorted(anderson_results.critical_values,
-                                      result.statistic, side="left")
-        hypothesis_tally[level_index] += 1
-    hypothesis_tally /= aa_variant_fitnesses.shape[0]  # Normalise
-    stats_file.write("According to the Anderson-Darling test, "
-                     "the hypothesis of normality is not rejected for each "
-                     "position in the dataset for: \n")
-    for proportion, level in zip(hypothesis_tally, significance_levels):
-        stats_file.write("{:.2%} of positions at the "
-                         "{}% significance level\n".format(proportion, level))
-    stats_file.write("and {:.2%} of positions are rejected.\n\n\n"
-                     .format(hypothesis_tally[-1]))
-
-    # Normality (Skewness-Kurtosis)
-    stats_file.write("Skewness-kurtosis all test of difference from normality\n"
-                     "-------------------------------------------------------\n\n")
-    skewkurtall = sp.stats.normaltest(fitnesses)
-
-    stats_file.write("According to the skewness-kurtosis all test, the whole "
-                     "dataset gives p = {}.".format(skewkurtall.pvalue))
-    if skewkurtall.pvalue >= 0.05:
-        stats_file.write("\nTherefore the dataset does not differ significantly "
-                         "from a normal distribution.\n\n")
-    else:
-        stats_file.write("\nTherefore the dataset differs significantly from "
-                         "a normal distribution.\n\n")
-
-    skewkurtpass = []
-    for aa in aa_variant_fitnesses:
-        distskewkurt = sp.stats.normaltest(aa)
-        if distskewkurt.pvalue >= 0.05:
-            skewkurtpass.append(1)
-        else:
-            skewkurtpass.append(0)
-    stats_file.write("According to the skewness-kurtosis all test, "
-                     "{:.2%} of sites do not differ significantly from a "
-                     "normal distribution."
-                     .format(sum(skewkurtpass) / len(skewkurtpass)))
-
-    stats_file.close()
-
-
-def plot_histogram_of_fitness(disthistfullname, distributions, initial):
-    plt.figure()
-    plt.axis([-10, 8, 0, 0.5])  # generate attractive figure
-
-    # Plot normal distribution of the original fitness space
-    mu1distspace = sum(initial) / len(initial)
-    plt.hist(initial, 50, density=True, color='k', alpha=0.4)
-    plt.title("\n".join(wrap('Fitness distribution of the total fitness space', 60)), fontweight='bold')
-    plt.axvline(x=mu1distspace, color="#404040", linestyle=":")
-
-    # Plot normal distribution of the current generation's fitness space
-    mu2distspace = sum(distributions) / len(distributions)
-    plt.hist(distributions, 50, density=True, color='r', alpha=0.4)
-    plt.title("\n".join(wrap('Fitness distribution of the total fitness space vs. changing fitness distribution across every evolving clone', 60)), fontweight='bold')
-    plt.axvline(x=mu2distspace, color="#404040", linestyle=":")
-    plt.text(4.1, 0.42, "\n".join([r"$\mu_1$ = {:.3}".format(mu1distspace),
-                                   r"$\mu_2$ = {:.3}".format(mu2distspace),
-                                   "threshold = {}".format(fitness_threshold)]))
-
-    plt.savefig(disthistfullname)
-    plt.close()
-
-
-def record_generation_fitness(generation, population, variant_sites,
-                              fitness_table, fitness_threshold, record, run_path):
-    """Record the fitness of every protein in the generation and store them in
-    dictionary. Optionally generate data and figures about fitness.
-    """
-
-    if not (generation == 0 or generation % record["rate"] == 0):
-        return
-
-    if record["dot_fitness"]:
-        fitfilename = "generation_{}.png".format(generation)  # define dynamic filename
-        fitfullname = os.path.join(run_path, "fitnessdotmatrix", fitfilename)
-        plot_threshold_fitness(generation, population, variant_sites, fitness_table, fitfullname)
-
-    # Build distribution of fitness values existing in evolving protein
-    generation_fitneses = build_generation_fitness_table(population, variant_sites, fitness_table)
-
-    if record["hist_fitness_stats"]:
-        # Write a file describing 5 statistical tests on the protein fitness space
-        if generation == 0:
-            stats_file_name = "normal_distribution_statistics_fitness_space.txt"
-            distributions = fitness_table.values
-        else:
-            stats_file_name = "normal_distribution_statistics_generation{}.txt".format(generation)
-            distributions = generation_fitneses
-        stats_full_name = os.path.join(run_path, "fitnessdistribution",
-                                       "statistics", stats_file_name)
-        write_histogram_statistics(stats_full_name, distributions)
-        if generation > 0:
-            append_ks_statistics(stats_full_name, distributions.ravel(),
-                                 fitness_table.values.ravel())
-
-    if record["hist_fitness"]:
-
-        disthistfilename = "generation_{}.png".format(generation)  # define dynamic filename
-        disthistfullname = os.path.join(run_path, "fitnessdistribution",
-                                        "histograms", disthistfilename)
-
-        plot_histogram_of_fitness(disthistfullname, generation_fitneses.ravel(),
-                                  fitness_table.values.ravel())
-
-
-def write_fasta_alignment(population, generation, run_path):
-    """Write fasta alignment from sequences provided."""
-    fastafilepath = os.path.join(run_path, "fastas")
-    fastafilename = "generation_{}.fasta".format(generation)
-    fullname = os.path.join(fastafilepath, fastafilename)
-    with open(fullname, "w") as fastafile:  # open file
-        # Write fasta header followed by residue in generation string
-        # TODO: This should be an ordered dict or list to preserve the order...
-        for p, protein in list(population.items()):
-            fastafile.write("\n>clone_%s\n" % (p+1))
-            fastafile.write(''.join(protein))
-
-
-def write_final_fasta(population, tree, run_path):
-    bifsize = 0
-    for bifs in tree["branches"]:
-        bifsize += len(bifs)
-    bifursize = bifsize/len(tree["branches"])
-    n_clones_to_take = int((bifursize-1)/2)  # if 5, gives 2, if 4 gives 2, if 3 gives 1.
-    generation_numbers = []
-    for branch in tree["branches"]:
-        # Sample from unique clones
-        clone_selection = random.sample(set(branch), n_clones_to_take)
-        for c in clone_selection:
-            generation_numbers.append(c)
-
-    full_name = os.path.join(run_path, "treefastas", "selected_fastas.fasta")
-    with open(full_name, "w") as treefastafile:  # open file
-        # Write fasta header followed by residue in generation string
-        for p in generation_numbers:
-            treefastafile.write(">clone_%s\n" % (p+1))
-            treefastafile.write(''.join(population[p]))
-            treefastafile.write('\n')
-        # Choose a random root to write
-        # BUG: This was originally choosing from n_roots
-        # root = population[random.choice(n_roots)]
-        root = population[random.choice(tree["roots"])]
-        treefastafile.write(">root\n")
-        treefastafile.write(''.join(root))
 
 
 def select_from_pool(protein_index, candidates, fitnesses, fitness_threshold):
@@ -705,8 +407,9 @@ def replace_protein(protein_index, tree, fitnesses, fitness_threshold):
 
 
 def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
-           variant_sites, p_location, n_mutations_per_gen, fasta_rate,
-           LG_matrix, run_path):
+           variant_sites, p_location, n_mutations_per_gen,
+           deaths_per_generation, death_ratio,
+           n_roots, LG_matrix, record, run_path):
     """Generation generator - mutate a protein for a defined number of
     generations according to an LG matrix and gamma distribution.
     """
@@ -839,7 +542,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
         population = next_generation
 
         evolution.append(Generation(population=population, fitness=fitnesses))
-        if ((gen+1) % fasta_rate) == 0:  # write fasta every record["fasta_rate"] generations
+        if ((gen+1) % record["fasta_rate"]) == 0:  # write fasta every record["fasta_rate"] generations
             write_fasta_alignment(population, gen+1, run_path)
         # Record population details at the end of processing
         # if gen == 0 or gen % record["rate"] == 0:  # TODO: (gen+1) see write_fasta_alignment
@@ -850,109 +553,6 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
     write_final_fasta(population, tree, run_path)
 
     return evolution
-
-
-def plot_evolution(history, n_clones, initial_protein, fitness_table, plot_omega, plot_epsilon, run_path):
-    """Plot fitness against generation for all clones."""
-    # NOTE: This plots after mutation but before their replacements so that it shows subthreshold proteins briefly existing
-
-    # Create array of fitness values with shape (n_generations, n_clones)
-    n_generations = len(history) - 1  # First entry is the initial state
-    fitnesses = np.array([[history[g].fitness[c] for c in range(n_clones)]
-                          for g in range(n_generations+1)])
-
-    initial_fitness = calculate_fitness(initial_protein, fitness_table)
-    generation_numbers = np.arange(n_generations+1)  # Skip initial generation
-
-    # TODO: Make threshold plotting optional so they can add convergence value instead i.e. epsillon len(protein) * mean(fitness_table)
-
-    plt.figure()
-    plt.plot(generation_numbers, fitnesses)
-    if plot_omega:  # Add fitness threshold
-        plt.plot([0, n_generations], [fitness_threshold, fitness_threshold], 'k-', lw=2)
-    if plot_epsilon:  # Add theoretical convergence line
-        epsilon = len(initial_protein) * np.mean(fitness_table)
-        plt.plot([0, n_generations], [epsilon, epsilon], 'k-', lw=2)
-    plt.plot(generation_numbers, np.mean(fitnesses, axis=1), "k--", lw=2)  # Average across clones
-    # plt.ylim([fitness_threshold-25, initial_fitness+10])  # not suitable for "low or med" graphs
-    # plt.ylim([fitness_threshold-5, ((n_amino_acids+1)*mu)+80]) # for low graphs
-    plt.ylim([fitness_threshold-25, initial_fitness+100])  # suitable for med graphs
-    plt.xlim([0, n_generations])
-    plt.xlabel("Generations", fontweight='bold')
-    plt.ylabel("$T_m$", fontweight='bold')
-    plt.title("\n".join(wrap('Fitness change for %s randomly generated "superfit" clones of %s amino acids, mutated over %s generations' % (n_clones, (n_amino_acids), n_generations), 60)), fontweight='bold')
-    plt.text(n_generations+15, fitness_threshold-3, r"$\Omega$")
-    plt.text(n_generations-1000, initial_fitness+50,
-             "\n".join([r"$\mu$ = {}".format(mu),
-                        r"$\sigma$ = {}".format(sigma),
-                        r"$\delta$ = {}".format(mutation_rate)]))
-
-    # Define dynamic filename
-    fitgraphfilename = "fitness_change_over{}generations.png".format(n_generations)
-    fitgraphfullname = os.path.join(run_path, "fitnessgraph", fitgraphfilename)
-    plt.savefig(fitgraphfullname)
-    return
-
-
-def create_output_folders(output_directory=""):
-    """Create output directory structure.
-
-    Each run will be saved in a time-stamped folder within the run path.
-    """
-    paths = ['runsettings', 'start', 'fastas', 'fitnessgraph',
-             'fitnessdotmatrix', 'fitnessdistribution', 'treefastas']
-
-    date_time = "run{}".format(datetime.datetime.now().strftime("%y-%m-%d-%H-%M"))
-    run_path = os.path.join(output_directory, "results", date_time)
-    os.makedirs(run_path)
-    if os.path.isdir(run_path):
-        print("Results directory successfully created: {}".format(os.path.join(os.getcwd(), run_path)))
-    else:
-        warnings.warn("Results directory not created: {}".format(os.path.join(os.getcwd(), run_path)))
-
-    for path in paths:
-        os.makedirs(os.path.join(run_path, path))
-
-    innerpaths = ['statistics', 'histograms']
-    for innerpath in innerpaths:
-        os.makedirs(os.path.join(run_path, "fitnessdistribution", innerpath))
-    return run_path
-
-
-def write_settings_file(run_path, **kwargs):
-    settingsfullname = os.path.join(run_path, "runsettings", "runsettings.txt")
-    # TODO: Change to logger
-    with open(settingsfullname, "w") as sf:  # open file
-        sf.write("Random number generator seed: {}\n".format(seed))
-        sf.write("Protein length: %s" % (n_amino_acids))
-        sf.write("\nNumber of mutations per generation: %s" % n_mutations_per_gen)
-        sf.write("\nNumber of clones in the population: %s" % n_clones)
-        sf.write("\nNumber of generations simulation is run for: %s" % n_generations)
-        sf.write("\nFitness threshold: %s" % fitness_threshold)
-        sf.write("\n\nNormal distribution properties: mu = %s, sigma = %s" % (mu, sigma))
-        sf.write("\nGamma distribution properties: kappa = %s, theta = %s" % (gamma["shape"], gamma["scale"]))
-        sf.write("\n\nWrite rate for FASTA: every %s generations" % record["fasta_rate"])
-        sf.write("\n\nTrack rate for graphing and statistics: every %s generations" % record["rate"])
-        sf.write("\nTracking state: Fitness dot matrix = %s; Fitness histogram = %s; Fitness normality statistics = %s" % (record["dot_fitness"], record["hist_fitness"], record["hist_fitness_stats"]))
-
-
-def load_LG_matrix(full_file_name=None):
-    """Load .csv file defining aa substitution probabilities calculated from R
-    matrix multiplied by PI matrix, with diagonals forced to zero as mutation
-    has to happen then converted to event rates p(lambda) where lambda = sum Qx
-    and p(lambda)x=Qxy/lambda
-    """
-    if full_file_name is None:
-        full_file_name = os.path.join("data", "LGaa.csv")
-    LG_matrix = pd.read_csv(full_file_name, index_col="Original")
-    return LG_matrix
-
-
-def write_initial_protein(initial_protein, run_path):
-    protein_full_name = os.path.join(run_path, "start", "firstprotein.fas")
-    with open(protein_full_name, "w") as ipf:  # open file
-        ipf.write('>firstprotein\n')
-        ipf.write(''.join(initial_protein))
 
 
 def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
@@ -979,24 +579,42 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
     # create folder and subfolders
     # PWD = os.path.dirname(__file__)
     run_path = create_output_folders()
-    write_settings_file(run_path)  # record run settings
+    settings_kwargs = {"n_generations": n_generations,
+                       "fitness_start": fitness_start,
+                       "fitness_threshold": fitness_threshold,
+                       "mu": mu,
+                       "sigma": sigma,
+                       "n_clones": n_clones,
+                       "n_amino_acids": n_amino_acids,
+                       "mutation_rate": mutation_rate,
+                       "n_mutations_per_gen": n_mutations_per_gen,
+                       "n_anchors": n_anchors,
+                       "deaths_per_generation": deaths_per_generation,
+                       "death_ratio": death_ratio,
+                       "n_roots": n_roots,
+                       "seed": seed,
+                       "gamma": gamma,
+                       "record": record}
+    write_settings_file(run_path, settings_kwargs)  # record run settings
     LG_matrix = load_LG_matrix()  # Load LG matrix
-    fitness_table = get_protein_fitness(n_amino_acids, LG_matrix)  # make first fitness dictionary
+    fitness_table = get_protein_fitness(n_amino_acids, mu, sigma, LG_matrix)  # make first fitness dictionary
     write_protein_fitness(run_path, "start", fitness_table)
 
     sites = get_allowed_sites(n_amino_acids, n_anchors)  # generate variant/invariant sites
     p_location = gamma_ray(n_amino_acids, sites, gamma)  # generate mutation probabilities for every site
 
     # Generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
-    initial_protein = get_fit_protein(fitness_start, n_amino_acids, sites, fitness_table)
+    initial_protein = get_fit_protein(fitness_start, n_amino_acids, sites, fitness_table, fitness_threshold)
+    # print_protein(initial_protein)
     write_initial_protein(initial_protein, run_path)  # Record initial protein
     initial_population = clone_protein(initial_protein, n_clones)  # make some clones to seed evolution
 
     history = evolve(n_generations, initial_population, fitness_table,
                      fitness_threshold, sites.variant, p_location,
-                     n_mutations_per_gen, record["fasta_rate"],
-                     LG_matrix, run_path)
+                     n_mutations_per_gen, deaths_per_generation, death_ratio,
+                     n_roots, LG_matrix, record, run_path)
     # TODO: Set lines automatically
     plot_omega, plot_epsilon = True, False
-    plot_evolution(history, n_clones, initial_protein, fitness_table, plot_omega, plot_epsilon, run_path)
+    initial_fitness = calculate_fitness(initial_protein, fitness_table)
+    plot_evolution(history, n_clones, n_amino_acids, initial_fitness, fitness_table, fitness_threshold, plot_omega, plot_epsilon, mu, sigma, mutation_rate, run_path)
     return history

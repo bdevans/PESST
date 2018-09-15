@@ -6,7 +6,8 @@ import random
 
 import numpy as np
 import scipy as sp
-from scipy import stats
+# from scipy import stats
+import scipy.stats
 # from scipy.stats import binned_statistic
 # from scipy.stats import anderson, normaltest, skew, skewtest, kurtosistest, shapiro, kurtosis, ks_2samp
 import pandas as pd

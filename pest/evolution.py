@@ -187,8 +187,8 @@ def get_fit_protein(fitness_level, n_amino_acids, sites,
         n_variants = 5
         # start_protein = initial_protein  # Copies the external initial_protein
         initial_fitness = calculate_fitness(initial_protein, fitness_table)
-        protein = initial_protein[:]  # copy.deepcopy(initial_protein)
         # TODO: This is slightly different to the original algorithm (below) but should give similar results
+        # protein = initial_protein[:]  # copy.deepcopy(initial_protein)
         # fitness = initial_fitness
         # counter = 0
         # while (fitness < fitness_threshold+10 or fitness > fitness_threshold+20) and counter <= 100:

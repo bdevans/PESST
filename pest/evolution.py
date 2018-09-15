@@ -416,6 +416,16 @@ def create_tree(n_proteins, n_roots):
     return tree
 
 
+def calc_gens_per_bifurcation(n_generations, n_clones, n_roots):
+    pool = n_clones - n_roots
+    n_phases = 1  # n_bifurations + 1
+    # NOTE: Originally this also claimed to stop with 6 leaves per branch
+    while pool >= 6:  # stop when there are 3, 4 or 5 leaves per branch
+        pool //= 2  # Floor division
+        n_phases += 1
+    return int(n_generations/n_phases)  # number of generations per bifurcation
+
+
 def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
            variant_sites, p_location, n_mutations_per_gen,
            n_gens_per_death, death_ratio,
@@ -432,23 +442,8 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
     write_roots(rootsfullname, tree["roots"])
 
     # Calculate number of bifurications per generation.
-    # bifuraction_start = n_clones - n_roots
-    # bifurlist = [1]
-    # for m in bifurlist:
-    #     bifurlist.append(1)
-    #     bifuraction_start /= 2
-    #     if bifuraction_start < 6:  # stop when there are 3, 4, 5 or 6 leaves per branch.
-    #         break
-    # print(len(bifurlist))
-    # n_gens_per_bifurcation = int(n_generations/len(bifurlist))  # number of generations per bifurcation.
-
-    # Calculate number of bifurications per generation.
-    pool = n_clones - n_roots
-    n_bifurcations = 1
-    while pool >= 6:  # stop when there are 3, 4, 5 or 6 leaves per branch.
-        pool //= 2  # Floor division
-        n_bifurcations += 1
-    n_gens_per_bifurcation = int(n_generations/n_bifurcations)  # number of generations per bifurcation.
+    n_gens_per_bifurcation = calc_gens_per_bifurcation(n_generations, n_clones,
+                                                       n_roots)
 
     population = copy.deepcopy(initial_population)  # current generation
     fitnesses = calculate_generation_fitness(population, fitness_table)

@@ -455,17 +455,18 @@ def bifurcate_branches(branches):
     return new_bifurcations[:]
 
 
-def kill_proteins(population, tree, death_ratio, fitnesses, fitness_threshold):
+def kill_proteins(population, tree, death_ratio, fitness_table, fitness_threshold):
     n_clones = len(population)
     mortals = random.sample(range(n_clones), int(n_clones*death_ratio))
+    # Recalculate fitnesses after all mutations
+    fitnesses = calculate_population_fitness(population, fitness_table)
     for pi in mortals:
-        mortal_index = replace_protein(pi, tree,
-                                       fitnesses, fitness_threshold)
-        if mortal_index is None:  # Should never happen
+        new_index = replace_protein(pi, tree, fitnesses, fitness_threshold)
+        if new_index is None:  # Should never happen
             warnings.warn("Unable to kill protein {}!".format(pi))
             raise Exception("No suitable candidates on branch!")
         else:
-            population[pi] = population[mortal_index]  # Replace dead protein
+            population[pi] = population[new_index]  # Replace dead protein
     return population
 
 
@@ -518,9 +519,8 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
 
         # Allow sequences to die and be replacecd at a predefined rate
         if n_gens_per_death > 0 and (gen+1) % n_gens_per_death == 0:
-            post_mutation_fitnesses = calculate_population_fitness(next_generation, fitness_table)
             next_generation = kill_proteins(next_generation, tree, death_ratio,
-                                            post_mutation_fitnesses, fitness_threshold)
+                                            fitness_table, fitness_threshold)
 
         final_fitnesses = calculate_population_fitness(next_generation, fitness_table)
         # The population becomes next_generation only if bifurcations (and deaths) were successful

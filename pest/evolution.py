@@ -411,6 +411,20 @@ def bifurcate_branches(branches):
     return new_bifurcations[:]
 
 
+def kill_proteins(population, tree, death_ratio, fitnesses, fitness_threshold):
+    n_clones = len(population)
+    mortals = random.sample(range(n_clones), int(n_clones*death_ratio))
+    for pi in mortals:
+        mortal_index = replace_protein(pi, tree,
+                                       fitnesses, fitness_threshold)
+        if mortal_index is None:  # Should never happen
+            warnings.warn("Unable to kill protein {}!".format(pi))
+            raise Exception("No suitable candidates on branch!")
+        else:
+            population[pi] = population[mortal_index]  # Replace dead protein
+    return population
+
+
 def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
            variant_sites, p_location, n_mutations_per_gen,
            n_gens_per_death, death_ratio,
@@ -457,25 +471,13 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
                                                          tree, variant_sites, p_location,
                                                          LG_matrix, fitness_table, fitness_threshold)
 
-        counter = 0
         # Allow sequences to die and be replacecd at a predefined rate
         if n_gens_per_death > 0 and (gen+1) % n_gens_per_death == 0:
-            mortals = random.sample(range(n_clones), int(n_clones*death_ratio))
-            for pi in mortals:
-                mortal_index = replace_protein(pi, tree,
-                                               fitnesses, fitness_threshold)
-                if mortal_index is None:
-                    warnings.warn("Unable to kill protein {}! Gen: {}; Count: {}".format(pi, gen, counter))
-                    raise Exception("No suitable candidates on branch!")
-                else:
-                    next_generation[pi] = next_generation[mortal_index]  # Replace dead protein
+            final_fitnesses = calculate_population_fitness(population, fitness_table)
+            next_generation = kill_proteins(next_generation, tree, death_ratio,
+                                            final_fitnesses, fitness_threshold)
 
-            counter += 1
-            if counter == 1000:
-                warnings.warn("mortal_index: {}".format(mortal_index))
-                raise Exception("Maximum tries exceeded!")
-
-        # The population becomes next_generation only if bifurcations and deaths were successful
+        # The population becomes next_generation only if bifurcations (and deaths) were successful
         population = next_generation
 
         evolution.append(Generation(population=population, fitness=fitnesses))

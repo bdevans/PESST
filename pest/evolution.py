@@ -561,6 +561,8 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
          deaths_per_generation=5, death_ratio=0.05, seed=None,
          n_roots=4, gamma=None, record=None):
 
+    # TODO: Add rerun flag to load settings (and seed)
+    # settings = json.load(sf)
     if n_mutations_per_gen is None:
         n_mutations_per_gen = int(n_clones*(n_amino_acids)*mutation_rate)
     if n_anchors is None:

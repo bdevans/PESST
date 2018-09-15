@@ -132,6 +132,7 @@ def get_random_protein(n_amino_acids, fitness_table, start_amino_acid="M"):
 
 
 def twist_protein(protein, mutation_sites, fitness_table):
+    """Randomly change one variant site and calculate new fitness."""
     mutant = protein[:]
     amino_acids = fitness_table.columns.values.tolist()
     for ai in mutation_sites:

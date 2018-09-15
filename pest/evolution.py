@@ -255,7 +255,7 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
             mutant = mutate_protein(protein, p_location, LG_matrix)
             next_generation[pi] = mutant  # update with new sequence
 
-        fitnesses = calculate_generation_fitness(next_generation, fitness_table)
+        fitnesses = calculate_population_fitness(next_generation, fitness_table)
 
         for pi in range(len(fitnesses)):  # if there are, start loop on fitnesses
             if fitnesses[pi] < fitness_threshold:  # if fitness is less than threshold clone a random sequence in its place.
@@ -279,7 +279,7 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
     return next_generation, fitnesses
 
 
-def calculate_generation_fitness(population, fitness_table):
+def calculate_population_fitness(population, fitness_table):
     """Calculate the fitness of every protein in a population."""
     # Record calculated fitness for each protein in dictionary
     return {pi: calculate_fitness(protein, fitness_table)
@@ -431,7 +431,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
                                                        n_roots)
 
     population = copy.deepcopy(initial_population)  # current generation
-    fitnesses = calculate_generation_fitness(population, fitness_table)
+    fitnesses = calculate_population_fitness(population, fitness_table)
     # Record initial population
     record_generation_fitness(0, population, variant_sites,
                               fitness_table, fitness_threshold,

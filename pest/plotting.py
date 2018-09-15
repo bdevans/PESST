@@ -30,47 +30,44 @@ def test_normal_distribution(mu, sigma):
 #     return
 
 
-def plot_threshold_fitness(generation, population, fitnesses, fitness_table, fitness_threshold, fitfullname):
+def plot_threshold_fitness(generation, population, fitnesses, fitness_table, fitness_threshold, save_dir):
     # Store fitness values for each amino in the dataset for the left side of the figure
     (n_amino_acids, n_variants) = fitness_table.shape
     mean_initial_fitness = np.mean(fitness_table.values)  # Average across flattened array
     sigma = np.std(fitness_table.values)
     scale = round((4 * sigma) + 1)
 
-    plt.figure()
-    plt.subplot(121)
+    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
     # Plot each column of fitness_table as a separate dataseries against 0..N-1
-    plt.plot(fitness_table, ".", color='k')  # np.arange(n_amino_acids)+1,
-    plt.plot([0, n_amino_acids-1], [mean_initial_fitness, mean_initial_fitness], 'r--', lw=3)
-    plt.ylim(-scale, scale)
-    plt.ylabel(r"Values in $\Delta T_m$ matrix")
-    # plt.xticks([])  # n_variants
-    plt.xlabel("Amino acid position")
-    plt.text(0, 0.7*scale, "\n".join([r"$\mu_1$ = {:.3}".format(mean_initial_fitness),
-                                      "threshold = {}".format(fitness_threshold)]), size=6.5)
-    plt.title(r"Fitness distribution of $\Delta T_m$ matrix", size=8)
+    ax1.plot(fitness_table, "o", color='k', markersize=2)  # np.arange(n_amino_acids)+1,
+    ax1.plot([0, n_amino_acids-1], [mean_initial_fitness, mean_initial_fitness],
+             'r--', lw=2,
+             label="\n".join([r"$\mu_1$ = {:.2f}".format(mean_initial_fitness),
+                              "threshold = {}".format(fitness_threshold)]))
+    ax1.set_ylim(-scale, scale)
+    ax1.set_ylabel(r"$\Delta T_m$")
+    ax1.set_xlabel("Amino acid position")
+    ax1.legend(loc="upper right", fontsize=6.5)
+    ax1.set_title(r"Fitness distribution of $\Delta T_m$ matrix", size=8)
 
     # Find and plot all fitness values in the current generation
-    # fitnesses = build_generation_fitness_table(population, variant_sites, fitness_table)
-    # TODO: Check this is the intended average value to check. Previously it was np.mean(Y2fitness) i.e. the mean of the last protein in the loop
     mean_generation_fitness = np.mean(fitnesses)
-    plt.subplot(122)
-    # x: proteins within population
-    # y: Fitness for each locus for that protein
-    # TODO: Swap colour to a particular protein not locus or make monochrome and make dots smaller
-    plt.plot(np.arange(len(population)), fitnesses, "o", markersize=2)  # plot y using x as index array 0..N-1
-    plt.plot([0, len(population)-1], [mean_generation_fitness, mean_generation_fitness], 'r--', lw=3)
-    plt.ylim(-scale, scale)
-    plt.ylabel(r"$\Delta T_m$ values in protein")
-    # plt.xticks([])  # len(population)
-    plt.xlabel("Protein")
-    plt.text(0, 0.7*scale, "\n".join([r"$\mu_2$ = {:.3}".format(mean_generation_fitness),
-                                      "threshold = {}".format(fitness_threshold)]), size=6.5)
-    plt.title("\n".join(wrap("Fitness distribution of every sequence in the evolving dataset", 40)), size=8)
+    # x: proteins within population; y: Fitness for each locus for that protein
+    # TODO: Swap colour to a particular protein not locus or make monochrome
+    ax2.plot(np.arange(len(population)), fitnesses, "o", markersize=1)  # plot y using x as index array 0..N-1
+    ax2.plot([0, len(population)-1], [mean_generation_fitness, mean_generation_fitness],
+             'r--', lw=2,
+             label="\n".join([r"$\mu_2$ = {:.2f}".format(mean_generation_fitness),
+                              "threshold = {}".format(fitness_threshold)]))
+    ax2.set_ylim(-scale, scale)
+    ax2.set_xlabel("Protein")
+    ax2.legend(loc="upper right", fontsize=6.5)
+    ax2.set_title("\n".join(wrap("Fitness distribution of every sequence in the evolving dataset", 40)), size=8)
 
-    plt.subplots_adjust(top=0.85)
-    plt.suptitle(('Generation %s' % generation), fontweight='bold')
-    plt.savefig(fitfullname)
+    # plt.subplots_adjust(top=0.85)
+    fig.suptitle(("Generation {}".format(generation)), fontweight='bold')
+    filename = os.path.join(save_dir, "generation_{}.png".format(generation))
+    fig.savefig(filename)
     plt.close()
 
 

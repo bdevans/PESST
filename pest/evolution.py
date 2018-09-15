@@ -327,9 +327,8 @@ def record_generation_fitness(generation, population, variant_sites,
     fitnesses = build_generation_fitness_table(population, variant_sites, fitness_table, record)
 
     if record["dot_fitness"]:
-        fitfilename = "generation_{}.png".format(generation)  # define dynamic filename
-        fitfullname = os.path.join(run_path, "fitnessdotmatrix", fitfilename)
-        plot_threshold_fitness(generation, population, fitnesses, fitness_table, fitness_threshold, fitfullname)
+        save_dir = os.path.join(run_path, "fitnessdotmatrix")
+        plot_threshold_fitness(generation, population, fitnesses, fitness_table, fitness_threshold, save_dir)
 
     if record["hist_fitness_stats"]:
         # Write a file describing 5 statistical tests on the protein fitness space

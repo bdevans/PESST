@@ -205,13 +205,13 @@ def get_fit_protein(fitness_level, n_amino_acids, sites,
 
             if initial_fitness < fitness_threshold+10:  # setting lower bounds of medium fitness
                 while fitness < initial_fitness and counter <= 100:
-                    # Continue to mutate until it is better than the initial_protein
+                    # Continue to mutate until better than initial_protein
                     (protein, fitness) = twist_protein(initial_protein, chosen_sites, fitness_table)
                     counter += 1
 
             elif initial_fitness > fitness_threshold+20:  # set upper bounds of medium fitness
                 while fitness > initial_fitness and counter <= 100:
-                    # Continue to mutate until it is better than the initial_protein
+                    # Continue to mutate until better than initial_protein
                     (protein, fitness) = twist_protein(initial_protein, chosen_sites, fitness_table)
                     counter += 1
 
@@ -509,10 +509,11 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
             next_generation = kill_proteins(next_generation, tree, death_ratio,
                                             fitness_table, fitness_threshold)
 
-        final_fitnesses = calculate_population_fitness(next_generation, fitness_table)
+        final_fitnesses = calculate_population_fitness(next_generation,
+                                                       fitness_table)
         # The population becomes next_generation only if bifurcations (and deaths) were successful
         population = next_generation
-        # Record intermediate fitnesses to show brief existence of unfit proteins
+        # Record intermediate fitnesses to show existence of unfit proteins
         evolution.append(Generation(population=population, fitness=fitnesses,
                                     final_fitness=final_fitnesses))
         # Write fasta every record["fasta_rate"] generations

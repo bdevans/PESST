@@ -426,7 +426,7 @@ def kill_proteins(population, tree, death_ratio, fitnesses, fitness_threshold):
 
 
 def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
-           variant_sites, p_location, n_mutations_per_gen,
+           sites, p_location, n_mutations_per_gen,
            n_gens_per_death, death_ratio,
            n_roots, LG_matrix, record, run_path):
     """Generation generator - mutate a protein for a defined number of
@@ -447,7 +447,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
     population = copy.deepcopy(initial_population)  # current generation
     fitnesses = calculate_population_fitness(population, fitness_table)
     # Record initial population
-    record_generation_fitness(0, population, variant_sites,
+    record_generation_fitness(0, population, sites.variant,
                               fitness_table, fitness_threshold,
                               record, run_path)
     write_fasta_alignment(population, 0, run_path)
@@ -469,7 +469,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
         # TODO: Store population with fitnesses in Generation namedtuple and move checks to within mutate_population
         # Mutate population
         (next_generation, fitnesses) = mutate_population(population, n_mutations_per_gen,
-                                                         tree, variant_sites, p_location,
+                                                         tree, sites.variant, p_location,
                                                          LG_matrix, fitness_table, fitness_threshold)
 
         # Allow sequences to die and be replacecd at a predefined rate
@@ -489,7 +489,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
             write_fasta_alignment(population, gen+1, run_path)
         # Record population details at the end of processing
         if (gen+1) % record["rate"] == 0:
-            record_generation_fitness(gen+1, population, variant_sites,
+            record_generation_fitness(gen+1, population, sites.variant,
                                       fitness_table, fitness_threshold,
                                       record, run_path)
 
@@ -548,17 +548,20 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
     p_location = gamma_ray(n_amino_acids, sites, gamma)  # generate mutation probabilities for every site
 
     # Generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
-    initial_protein = get_fit_protein(fitness_start, n_amino_acids, sites, fitness_table, fitness_threshold)
+    initial_protein = get_fit_protein(fitness_start, n_amino_acids, sites,
+                                      fitness_table, fitness_threshold)
     # print_protein(initial_protein)
     write_initial_protein(initial_protein, run_path)  # Record initial protein
     initial_population = clone_protein(initial_protein, n_clones)  # make some clones to seed evolution
 
     history = evolve(n_generations, initial_population, fitness_table,
-                     fitness_threshold, sites.variant, p_location,
+                     fitness_threshold, sites, p_location,
                      n_mutations_per_gen, n_gens_per_death, death_ratio,
                      n_roots, LG_matrix, record, run_path)
     # TODO: Set lines automatically
     plot_omega, plot_epsilon = True, False
     initial_fitness = calculate_fitness(initial_protein, fitness_table)
-    plot_evolution(history, n_clones, n_amino_acids, initial_fitness, fitness_table, fitness_threshold, plot_omega, plot_epsilon, mu, sigma, mutation_rate, run_path)
+    plot_evolution(history, n_clones, n_amino_acids, initial_fitness,
+                   fitness_table, fitness_threshold, plot_omega, plot_epsilon,
+                   mu, sigma, mutation_rate, run_path)
     return history

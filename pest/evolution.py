@@ -453,9 +453,10 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
     write_fasta_alignment(population, 0, run_path)
 
     # Store each generation along with its fitness
-    Generation = namedtuple('Generation', ['population', 'fitness'])
+    Generation = namedtuple('Generation', ['population', 'fitness', 'final_fitness'])
     # Create a list of generations and add initial population and fitness
-    evolution = [Generation(population=population, fitness=fitnesses)]
+    evolution = [Generation(population=population, fitness=fitnesses,
+                            final_fitness=fitnesses)]
 
     for gen in trange(n_generations):  # run evolution for n_generations
 
@@ -473,14 +474,16 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
 
         # Allow sequences to die and be replacecd at a predefined rate
         if n_gens_per_death > 0 and (gen+1) % n_gens_per_death == 0:
-            final_fitnesses = calculate_population_fitness(population, fitness_table)
+            post_mutation_fitnesses = calculate_population_fitness(next_generation, fitness_table)
             next_generation = kill_proteins(next_generation, tree, death_ratio,
-                                            final_fitnesses, fitness_threshold)
+                                            post_mutation_fitnesses, fitness_threshold)
 
+        final_fitnesses = calculate_population_fitness(next_generation, fitness_table)
         # The population becomes next_generation only if bifurcations (and deaths) were successful
         population = next_generation
-
-        evolution.append(Generation(population=population, fitness=fitnesses))
+        # Record intermediate fitnesses to show brief existence of unfit proteins
+        evolution.append(Generation(population=population, fitness=fitnesses,
+                                    final_fitness=final_fitnesses))
         # Write fasta every record["fasta_rate"] generations
         if (gen+1) % record["fasta_rate"] == 0:
             write_fasta_alignment(population, gen+1, run_path)

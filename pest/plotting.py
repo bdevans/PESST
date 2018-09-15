@@ -107,6 +107,10 @@ def plot_evolution(history, n_clones, n_amino_acids, initial_fitness, fitness_ta
     fitnesses = np.array([[history[g].fitness[c] for c in range(n_clones)]
                           for g in range(n_generations+1)])
 
+    final_fitnesses = np.array([[history[g].final_fitness[c]
+                                 for c in range(n_clones)]
+                                for g in range(n_generations+1)])
+
     # initial_fitness = calculate_fitness(initial_protein, fitness_table)
     generation_numbers = np.arange(n_generations+1)  # Skip initial generation
 
@@ -115,11 +119,13 @@ def plot_evolution(history, n_clones, n_amino_acids, initial_fitness, fitness_ta
     plt.figure()
     plt.plot(generation_numbers, fitnesses)
     if plot_omega:  # Add fitness threshold
-        plt.plot([0, n_generations], [fitness_threshold, fitness_threshold], 'k-', lw=2, label=r"\Omega")
+        plt.plot([0, n_generations], [fitness_threshold, fitness_threshold],
+                 'k-', lw=2, label=r"$\Omega$")
     if plot_epsilon:  # Add theoretical convergence line
         epsilon = n_amino_acids * np.mean(fitness_table)
-        plt.plot([0, n_generations], [epsilon, epsilon], 'k-', lw=2, label=r"\epsilon")
-    plt.plot(generation_numbers, np.mean(fitnesses, axis=1), "k--", lw=2)  # Average across clones
+        plt.plot([0, n_generations], [epsilon, epsilon],
+                 'k-', lw=2, label=r"$\epsilon$")
+    plt.plot(generation_numbers, np.mean(final_fitnesses, axis=1), "k--", lw=2)  # Average across clones
     # plt.ylim([fitness_threshold-25, initial_fitness+10])  # not suitable for "low or med" graphs
     # plt.ylim([fitness_threshold-5, ((n_amino_acids+1)*mu)+80]) # for low graphs
     plt.ylim([fitness_threshold-25, initial_fitness+100])  # suitable for med graphs

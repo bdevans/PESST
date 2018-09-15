@@ -321,8 +321,6 @@ def record_generation_fitness(generation, population, variant_sites,
     dictionary. Optionally generate data and figures about fitness.
     """
 
-    if not (generation == 0 or generation % record["rate"] == 0):
-        return
     # Build distribution of fitness values existing in evolving protein
     fitnesses = build_generation_fitness_table(population, variant_sites, fitness_table, record)
 
@@ -346,11 +344,9 @@ def record_generation_fitness(generation, population, variant_sites,
                                  fitness_table.values.ravel())
 
     if record["hist_fitness"]:
-
-        disthistfilename = "generation_{}.png".format(generation)  # define dynamic filename
+        disthistfilename = "generation_{}.png".format(generation)
         disthistfullname = os.path.join(run_path, "fitnessdistribution",
                                         "histograms", disthistfilename)
-
         plot_histogram_of_fitness(disthistfullname, fitnesses.ravel(),
                                   fitness_table.values.ravel(), fitness_threshold)
 
@@ -407,7 +403,7 @@ def replace_protein(protein_index, tree, fitnesses, fitness_threshold):
 
 def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
            variant_sites, p_location, n_mutations_per_gen,
-           deaths_per_generation, death_ratio,
+           n_gens_per_death, death_ratio,
            n_roots, LG_matrix, record, run_path):
     """Generation generator - mutate a protein for a defined number of
     generations according to an LG matrix and gamma distribution.
@@ -469,7 +465,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
 
         # Bifuricate in even generation numbers so every branch on tree has
         # 3 leaves that have been evolving by the last generation
-        if gen > 0 and gen % n_gens_per_bifurcation == 0 and len(tree["branches"][0]) > 3:
+        if gen > 0 and (gen+1) % n_gens_per_bifurcation == 0 and len(tree["branches"][0]) > 3:
             new_bifurcations = []  # temporary store for new bifurcations
             for branch in tree["branches"]:  # bifuricate each set of leaves
                 random.shuffle(branch)
@@ -519,7 +515,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
 
         counter = 0
         # Allow sequences to die and be replacecd at a predefined rate
-        if deaths_per_generation > 0 and gen % deaths_per_generation == 0:
+        if n_gens_per_death > 0 and (gen+1) % n_gens_per_death == 0:
             mortals = random.sample(range(n_clones), int(n_clones * death_ratio))
             for pi in mortals:
                 mortal_index = replace_protein(pi, tree,
@@ -541,13 +537,13 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
         population = next_generation
 
         evolution.append(Generation(population=population, fitness=fitnesses))
-        if ((gen+1) % record["fasta_rate"]) == 0:  # write fasta every record["fasta_rate"] generations
+        if (gen+1) % record["fasta_rate"] == 0:  # write fasta every record["fasta_rate"] generations
             write_fasta_alignment(population, gen+1, run_path)
         # Record population details at the end of processing
-        # if gen == 0 or gen % record["rate"] == 0:  # TODO: (gen+1) see write_fasta_alignment
-        record_generation_fitness(gen, population, variant_sites,
-                                  fitness_table, fitness_threshold,
-                                  record, run_path)
+        if (gen+1) % record["rate"] == 0:
+            record_generation_fitness(gen+1, population, variant_sites,
+                                      fitness_table, fitness_threshold,
+                                      record, run_path)
 
     write_final_fasta(population, tree, run_path)
 
@@ -557,7 +553,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
 def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
          n_clones=52, n_amino_acids=80, mutation_rate=0.001,
          n_mutations_per_gen=None, n_anchors=None,
-         deaths_per_generation=5, death_ratio=0.05, seed=None,
+         n_gens_per_death=5, death_ratio=0.05, seed=None,
          n_roots=4, gamma=None, record=None):
 
     # TODO: Add rerun flag to load settings (and seed)
@@ -590,7 +586,7 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
                        "mutation_rate": mutation_rate,
                        "n_mutations_per_gen": n_mutations_per_gen,
                        "n_anchors": n_anchors,
-                       "deaths_per_generation": deaths_per_generation,
+                       "n_gens_per_death": n_gens_per_death,
                        "death_ratio": death_ratio,
                        "n_roots": n_roots,
                        "seed": seed,
@@ -612,7 +608,7 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
 
     history = evolve(n_generations, initial_population, fitness_table,
                      fitness_threshold, sites.variant, p_location,
-                     n_mutations_per_gen, deaths_per_generation, death_ratio,
+                     n_mutations_per_gen, n_gens_per_death, death_ratio,
                      n_roots, LG_matrix, record, run_path)
     # TODO: Set lines automatically
     plot_omega, plot_epsilon = True, False

@@ -527,7 +527,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
 
             counter += 1
             if counter == 1000:
-                warnings.warn("mutant_index: {}; mortal_index: {}".format(mutant_index, mortal_index))
+                warnings.warn("mortal_index: {}".format(mortal_index))
                 raise Exception("Maximum tries exceeded!")
 
         # The population becomes next_generation only if bifurcations and deaths were successful

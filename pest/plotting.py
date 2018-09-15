@@ -43,7 +43,7 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table, fit
     ax1.plot([0, n_amino_acids-1], [mean_initial_fitness, mean_initial_fitness],
              'r--', lw=2,
              label="\n".join([r"$\mu_1$ = {:.2f}".format(mean_initial_fitness),
-                              "threshold = {}".format(fitness_threshold)]))
+                              r"$\Omega$ = {}".format(fitness_threshold)]))
     ax1.set_ylim(-scale, scale)
     ax1.set_ylabel(r"$\Delta T_m$")
     ax1.set_xlabel("Amino acid position")
@@ -58,7 +58,7 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table, fit
     ax2.plot([0, len(population)-1], [mean_generation_fitness, mean_generation_fitness],
              'r--', lw=2,
              label="\n".join([r"$\mu_2$ = {:.2f}".format(mean_generation_fitness),
-                              "threshold = {}".format(fitness_threshold)]))
+                              r"$\Omega$ = {}".format(fitness_threshold)]))
     ax2.set_ylim(-scale, scale)
     ax2.set_xlabel("Protein")
     ax2.legend(loc="upper right", fontsize=6.5)
@@ -88,7 +88,7 @@ def plot_histogram_of_fitness(disthistfullname, distributions, initial, fitness_
     plt.axvline(x=mu2distspace, color="#404040", linestyle=":")
     plt.text(4.1, 0.42, "\n".join([r"$\mu_1$ = {:.3}".format(mu1distspace),
                                    r"$\mu_2$ = {:.3}".format(mu2distspace),
-                                   "threshold = {}".format(fitness_threshold)]))
+                                   r"$\Omega$ = {}".format(fitness_threshold)]))
 
     plt.savefig(disthistfullname)
     plt.close()

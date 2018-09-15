@@ -30,7 +30,7 @@ from .plotting import (plot_evolution, plot_gamma_distribution,
 # RESIDUES = Residues(name=RESIDUES_NAME, index=RESIDUES_INDEX)
 
 
-def get_protein_fitness(n_amino_acids, mu, sigma, LG_matrix):
+def get_fitness_table(n_amino_acids, mu, sigma, LG_matrix):
     """Generate a dictionary describing list of fitness values at each position
     of the generated protein.
     """
@@ -541,7 +541,7 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
                        "record": record}
     write_settings_file(run_path, settings_kwargs)  # record run settings
     LG_matrix = load_LG_matrix()  # Load LG matrix
-    fitness_table = get_protein_fitness(n_amino_acids, mu, sigma, LG_matrix)  # make first fitness dictionary
+    fitness_table = get_fitness_table(n_amino_acids, mu, sigma, LG_matrix)  # make first fitness dictionary
     write_protein_fitness(run_path, "start", fitness_table)
 
     sites = get_allowed_sites(n_amino_acids, n_anchors)  # generate variant/invariant sites

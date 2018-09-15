@@ -13,9 +13,9 @@ mpl.rc('savefig', dpi=300)
 
 # parameters of protein evolution
 n_generations = 2000  # amount of generations the protein evolves for
-fitness_start = 'medium'  # high, medium or low; must be lower case. If selecting low, fitness threshold needs to be significantly smaller (i.e. 4x) than #positions*mu
 # TODO: Create parameters for the numeric literals which define the medium boundaries
 fitness_threshold = 0  # arbitrary number for fitness threshold
+fitness_start = (fitness_threshold + 10, fitness_threshold + 20)  # 'medium'  # high, medium or low; must be lower case. If selecting low, fitness threshold needs to be significantly smaller (i.e. 4x) than #positions*mu
 # parameters for normal distribution used to select fitness values
 mu = -1.2
 sigma = 2.5

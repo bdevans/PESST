@@ -157,7 +157,8 @@ def get_fit_protein(fitness_level, n_amino_acids, sites,
     """
     initial_protein = get_random_protein(n_amino_acids, fitness_table)
 
-    if fitness_level != 'medium':
+    # if fitness_level != 'medium':
+    if isinstance(fitness_level, str):
         if fitness_level == 'low':  # generate unfit protein
             # TODO: Adjust threshold or allow building proteins above threshold
             sequence = [0, 1, 2]  # Three lowest
@@ -182,34 +183,40 @@ def get_fit_protein(fitness_level, n_amino_acids, sites,
     # fitter, then choose 5 new residues and continue.
     # If it cannot make a fitter protein with the 5 residues it's mutating it
     # reverts back to the previous state and picks 5 new residues.
-    elif fitness_level == 'medium':
-        # TODO: Parameterise medium fitness bounds as arguments
+    else:  # elif fitness_level == 'medium':
         n_variants = 5
         initial_fitness = calculate_fitness(initial_protein, fitness_table)
 
+        lower_bound, upper_bound = fitness_level
+        # upper_bound = fitness_threshold + 20
+        # lower_bound = fitness_threshold + 10
         # TODO: This is slightly different to the original algorithm (below)
         # fitness = initial_fitness
         # counter = 0
-        # while (fitness < fitness_threshold+10 or fitness > fitness_threshold+20) and counter <= 100:
+        # while not lower_bound < fitness < upper_bound and counter <= 100:
         #     # Mutate the new protein (sample without replacement)
         #     chosen_sites = random.sample(sites.variant, n_variants)
         #     (protein, fitness) = twist_protein(initial_protein, chosen_sites,
         #                                        fitness_table)
         #     counter += 1
 
-        while initial_fitness < fitness_threshold+10 or initial_fitness > fitness_threshold+20:
+        while not lower_bound < initial_fitness < upper_bound:
             # Mutate the new protein (sample without replacement)
             chosen_sites = random.sample(sites.variant, n_variants)
             (protein, fitness) = twist_protein(initial_protein, chosen_sites, fitness_table)
             counter = 0
+            # while not lower_bound < fitness < upper_bound and counter <= 100:
+            #     # Continue to mutate until better than initial_protein
+            #     (protein, fitness) = twist_protein(initial_protein, chosen_sites, fitness_table)
+            #     counter += 1
 
-            if initial_fitness < fitness_threshold+10:  # setting lower bounds of medium fitness
+            if initial_fitness < lower_bound:  # setting lower bounds of medium fitness
                 while fitness < initial_fitness and counter <= 100:
                     # Continue to mutate until better than initial_protein
                     (protein, fitness) = twist_protein(initial_protein, chosen_sites, fitness_table)
                     counter += 1
 
-            elif initial_fitness > fitness_threshold+20:  # set upper bounds of medium fitness
+            elif initial_fitness > upper_bound:  # set upper bounds of medium fitness
                 while fitness > initial_fitness and counter <= 100:
                     # Continue to mutate until better than initial_protein
                     (protein, fitness) = twist_protein(initial_protein, chosen_sites, fitness_table)

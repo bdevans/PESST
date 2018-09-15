@@ -234,74 +234,49 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table, fitness_
     return protein
 
 
-def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
-                      p_location, LG_matrix):
+def mutate_population(current_generation, n_mutations_per_gen, tree,
+                      variant_sites, p_location, LG_matrix,
+                      fitness_table, fitness_threshold):
     """Mutate a set of sequences based on the LG+I+G model of amino acid
     substitution.
     """
-    # NOTE: This could be removed for speed after checking it is not used later
-    next_generation = copy.deepcopy(current_generation)
+    counter = 0
+    successful_mutation = False
 
-    for q in range(n_mutations_per_gen):  # impliment gamma
-        # Pick random key, clone to make a random generation
-        pi, protein = random.choice(list(next_generation.items()))
-        # Mutate the copy with the randomly chosen residue
-        mutant = mutate_protein(protein, p_location, LG_matrix)
-        next_generation[pi] = mutant  # update with new sequence
+    while not successful_mutation:  # Mutate until all branches have fit proteins
+        successful_mutation = True
 
-    return next_generation
+        # NOTE: This could be removed for speed after checking it is not used later
+        next_generation = copy.deepcopy(current_generation)
+        for q in range(n_mutations_per_gen):  # impliment gamma
+            # Pick random key, clone to make a random generation
+            pi, protein = random.choice(list(next_generation.items()))
+            # Mutate the copy with the randomly chosen residue
+            mutant = mutate_protein(protein, p_location, LG_matrix)
+            next_generation[pi] = mutant  # update with new sequence
 
+        fitnesses = calculate_generation_fitness(next_generation, fitness_table)
 
-# def mutate_population(current_generation, n_mutations_per_gen, variant_sites,
-#                       p_location, LG_matrix, LG_residues, LG_indicies, tree, fitness_threshold, fitness_table):
-#     # NOTE: This could be removed for speed after checking it is not used later
-#     next_generation = copy.deepcopy(current_generation)  # make a deep copy of the library so changing the library in the function doesn't change the library outside the function
-#
-#     for q in range(n_mutations_per_gen):  # impliment gamma
-#         # Pick random key, clone to make a random generation
-#         pi, protein = random.choice(list(next_generation.items()))
-#         successful_mutation = False
-#         while not successful_mutation:
-#             mutant = mutate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies)
-#             if calculate_fitness(protein, fitness_table) < fitness_threshold:
-#                 mutant_index = replace_protein(pi, tree,
-#                                                fitnesses, fitness_threshold)
-#                 # If no suitable clones are available, re-mutate the generation and start again
-#                 if mutant_index is None:
-#                     # warnings.warn("Unable to replace protein {}! Gen: {}; Count: {}".format(pi, gen, counter))
-#                     successful_mutation = False
-#                     break  # out of loop over fitnesses
-#                 else:
-#                     next_generation[pi] = next_generation[mutant_index]  # swap out unfit clone for fit clone
-#                     successful_mutation = True
-#     return next_generation
-    #     # TODO
-    #     fitness = -np.inf
-    #     while fitness < fitness_threshold:
-    #         mutant = mutate_protein(protein, p_location, LG_matrix, LG_residues, LG_indicies)
-    #         fitness = calculate_fitness(mutant, fitness_table)
-    #         # REFACTOR: Re-calculate fitness
-    #         # NOTE: This only used to be computed if gen == 0 or gen % record["rate"] == 0
-    #         fitnesses = calculate_generation_fitness(next_generation, fitness_table)
-    #         mutant_index = replace_protein(pi, tree, fitnesses, fitness_threshold)
-    #     next_generation[pi] = next_generation[mutant_index]  # swap out unfit clone for fit clone
-    #     next_generation[pi] = mutant  # update with new sequence
-    #
-    # # pprint({k: (''.join(p), fitnesses[k]) for k, p in next_generation.items()})
-    #
-    #
-    # for pi in range(len(fitnesses)):  # if there are, start loop on fitnesses
-    #     if fitnesses[pi] < fitness_threshold:  # if fitness is less than threshold clone a random sequence in its place.
-    #
-    #         mutant_index = replace_protein(pi, tree,
-    #                                        fitnesses, fitness_threshold)
-    #         # If no suitable clones are available, re-mutate the generation and start again
-    #         if mutant_index is None:
-    #             # warnings.warn("Unable to replace protein {}! Gen: {}; Count: {}".format(pi, gen, counter))
-    #             successful_mutation = False
-    #             break  # out of loop over fitnesses
-    #         else:
-    #             next_generation[pi] = next_generation[mutant_index]  # swap out unfit clone for fit clone
+        for pi in range(len(fitnesses)):  # if there are, start loop on fitnesses
+            if fitnesses[pi] < fitness_threshold:  # if fitness is less than threshold clone a random sequence in its place.
+
+                mutant_index = replace_protein(pi, tree, fitnesses,
+                                               fitness_threshold)
+                # If no suitable clones are available, re-mutate the generation and start again
+                if mutant_index is None:
+                    successful_mutation = False
+                    break  # out of loop over fitnesses
+                else:
+                    next_generation[pi] = next_generation[mutant_index]  # swap out unfit clone for fit clone
+
+        counter += 1
+        if counter == 100:
+            raise Exception("Unable to mutate population: "
+                            "maximum tries exceeded!\n"
+                            "The mutation rate is too high, mu is too low "
+                            "or sigma is too small.")
+
+    return next_generation, fitnesses
 
 
 def calculate_generation_fitness(population, fitness_table):
@@ -476,41 +451,11 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
                    and len(tree["branches"][0]) > 3:
             tree["branches"] = bifurcate_branches(tree["branches"])
 
-        counter = 0
-        successful_mutation = False
-
-        while not successful_mutation:  # mutant_index is None or mortal_index is None:
-
-            successful_mutation = True
-            # TODO: Store population with fitnesses in Generation namedtuple and move checks to within mutate_population
-            # Mutate population
-            next_generation = mutate_population(population, n_mutations_per_gen,
-                                                variant_sites, p_location,
-                                                LG_matrix)
-            # Re-calculate fitness
-            # NOTE: These should be computed after mutation but before replacement to show sub-threshold proteins in fitnessgraph
-            # TODO: Save fitnesses pre and post replacement to plot an accurate mean on the fitnessgraph
-            fitnesses = calculate_generation_fitness(next_generation, fitness_table)
-
-            for pi in range(len(fitnesses)):  # if there are, start loop on fitnesses
-                if fitnesses[pi] < fitness_threshold:  # if fitness is less than threshold clone a random sequence in its place.
-
-                    mutant_index = replace_protein(pi, tree,
-                                                   fitnesses, fitness_threshold)
-                    # If no suitable clones are available, re-mutate the generation and start again
-                    if mutant_index is None:
-                        # warnings.warn("Unable to replace protein {}! Gen: {}; Count: {}".format(pi, gen, counter))
-                        successful_mutation = False
-                        break  # out of loop over fitnesses
-                    else:
-                        next_generation[pi] = next_generation[mutant_index]  # swap out unfit clone for fit clone
-
-            counter += 1
-            if counter == 100:
-                raise Exception("Unable to mutate population: "
-                                "maximum tries exceeded!\n"
-                                "The mutation rate is too high, mu is too low "
-                                "or sigma is too small.")
+        # TODO: Store population with fitnesses in Generation namedtuple and move checks to within mutate_population
+        # Mutate population
+        (next_generation, fitnesses) = mutate_population(population, n_mutations_per_gen,
+                                                         tree, variant_sites, p_location,
+                                                         LG_matrix, fitness_table, fitness_threshold)
 
         counter = 0
         # Allow sequences to die and be replacecd at a predefined rate

@@ -492,8 +492,6 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
             # TODO: Save fitnesses pre and post replacement to plot an accurate mean on the fitnessgraph
             fitnesses = calculate_generation_fitness(next_generation, fitness_table)
 
-            # pprint({k: (''.join(p), fitnesses[k]) for k, p in next_generation.items()})
-
             for pi in range(len(fitnesses)):  # if there are, start loop on fitnesses
                 if fitnesses[pi] < fitness_threshold:  # if fitness is less than threshold clone a random sequence in its place.
 
@@ -517,14 +515,12 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
         counter = 0
         # Allow sequences to die and be replacecd at a predefined rate
         if n_gens_per_death > 0 and (gen+1) % n_gens_per_death == 0:
-            mortals = random.sample(range(n_clones), int(n_clones * death_ratio))
+            mortals = random.sample(range(n_clones), int(n_clones*death_ratio))
             for pi in mortals:
                 mortal_index = replace_protein(pi, tree,
                                                fitnesses, fitness_threshold)
                 if mortal_index is None:
                     warnings.warn("Unable to kill protein {}! Gen: {}; Count: {}".format(pi, gen, counter))
-                    # retry_mutation = True
-                    # break  # out of loop over fitnesses
                     raise Exception("No suitable candidates on branch!")
                 else:
                     next_generation[pi] = next_generation[mortal_index]  # Replace dead protein
@@ -538,7 +534,8 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
         population = next_generation
 
         evolution.append(Generation(population=population, fitness=fitnesses))
-        if (gen+1) % record["fasta_rate"] == 0:  # write fasta every record["fasta_rate"] generations
+        # Write fasta every record["fasta_rate"] generations
+        if (gen+1) % record["fasta_rate"] == 0:
             write_fasta_alignment(population, gen+1, run_path)
         # Record population details at the end of processing
         if (gen+1) % record["rate"] == 0:
@@ -547,7 +544,6 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
                                       record, run_path)
 
     write_final_fasta(population, tree, run_path)
-
     return evolution
 
 

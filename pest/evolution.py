@@ -468,8 +468,6 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
     # Create a list of generations and add initial population and fitness
     evolution = [Generation(population=population, fitness=fitnesses)]
 
-    # pprint({k: (''.join(p), calculate_fitness(p, fitness_table)) for k, p in population.items()})
-
     for gen in trange(n_generations):  # run evolution for n_generations
 
         # Bifuricate in even generation numbers so every branch on tree has
@@ -480,7 +478,6 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
 
         counter = 0
         successful_mutation = False
-        # next_generation = copy.deepcopy(population)
 
         while not successful_mutation:  # mutant_index is None or mortal_index is None:
 

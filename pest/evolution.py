@@ -401,6 +401,21 @@ def replace_protein(protein_index, tree, fitnesses, fitness_threshold):
     return new_index
 
 
+def create_tree(n_proteins, n_roots):
+    """Create a dictionary of lists of indicies for roots and branches."""
+    protein_keys = list(range(n_proteins))
+    tree = {}  # Dictionary of keys for roots and branches in the population
+    # Randomly sample without replacement n_roots items from clonelist
+    root_keys = random.sample(protein_keys, n_roots)
+    for r in root_keys:
+        protein_keys.remove(r)
+    # root_keys = [protein_keys.pop(random.randrange(len(protein_keys)))
+    #              for r in range(n_roots)]
+    tree["roots"] = root_keys
+    tree["branches"] = [protein_keys]  # lists of protein keys intialised with non-roots
+    return tree
+
+
 def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
            variant_sites, p_location, n_mutations_per_gen,
            n_gens_per_death, death_ratio,
@@ -411,18 +426,11 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
 
     n_clones = len(initial_population)
     # Generate list of clone keys for bifurication
-    protein_keys = list(range(n_clones))
-    tree = {}  # Dictionary of keys for roots and branches in the population
-    # Randomly sample without replacement n_roots items from clonelist
-    root_keys = random.sample(protein_keys, n_roots)
-    for r in root_keys:
-        protein_keys.remove(r)
-    # root_keys = [clonelist.pop(random.randrange(len(clonelist))) for r in range(n_roots)]
+    tree = create_tree(n_clones, n_roots)
 
     rootsfullname = os.path.join(run_path, "start", "Roots.txt")
     write_roots(rootsfullname, tree["roots"])
 
-    tree["roots"] = root_keys
     # Calculate number of bifurications per generation.
     # bifuraction_start = n_clones - n_roots
     # bifurlist = [1]
@@ -442,7 +450,6 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
         n_bifurcations += 1
     n_gens_per_bifurcation = int(n_generations/n_bifurcations)  # number of generations per bifurcation.
 
-    tree["branches"] = [protein_keys]  # lists of protein keys intialised with non-roots
     population = copy.deepcopy(initial_population)  # current generation
     fitnesses = calculate_generation_fitness(population, fitness_table)
     # Record initial population

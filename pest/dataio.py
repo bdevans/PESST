@@ -200,28 +200,26 @@ def write_fasta_alignment(population, generation, run_path):
 
 
 def write_final_fasta(population, tree, run_path):
-    bifsize = 0
-    for bifs in tree["branches"]:
-        bifsize += len(bifs)
-    bifursize = bifsize/len(tree["branches"])
-    n_clones_to_take = int((bifursize-1)/2)  # if 5, gives 2, if 4 gives 2, if 3 gives 1.
-    generation_numbers = []
+    """Write a random selection of proteins from each branch with a random
+    root.
+    """
+    tree_size = sum([len(branch) for branch in tree["branches"]])
+    average_branch_size = tree_size / len(tree["branches"])
+    # NOTE: Originally claimed 4 --> 2
+    n_clones_to_take = int((average_branch_size-1)/2)  # if 5, gives 2, if 4 gives 1, if 3 gives 1.
+    # Choose a random selection of proteins from each branch
+    selection = []
     for branch in tree["branches"]:
-        # Sample from unique clones
-        clone_selection = random.sample(set(branch), n_clones_to_take)
-        for c in clone_selection:
-            generation_numbers.append(c)
+        selection.extend(random.sample(set(branch), n_clones_to_take))
 
     full_name = os.path.join(run_path, "treefastas", "selected_fastas.fasta")
     with open(full_name, "w") as treefastafile:  # open file
         # Write fasta header followed by residue in generation string
-        for p in generation_numbers:
-            treefastafile.write(">clone_%s\n" % (p+1))
-            treefastafile.write(''.join(population[p]))
+        for pi in selection:
+            treefastafile.write(">clone_{}\n".format(pi+1))
+            treefastafile.write(''.join(population[pi]))
             treefastafile.write('\n')
         # Choose a random root to write
-        # BUG: This was originally choosing from n_roots
-        # root = population[random.choice(n_roots)]
         root = population[random.choice(tree["roots"])]
         treefastafile.write(">root\n")
         treefastafile.write(''.join(root))

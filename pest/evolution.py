@@ -426,6 +426,16 @@ def calc_gens_per_bifurcation(n_generations, n_clones, n_roots):
     return int(n_generations/n_phases)  # number of generations per bifurcation
 
 
+def bifurcate_branches(branches):
+    new_bifurcations = []  # temporary store for new bifurcations
+    for branch in branches:  # bifuricate each set of leaves
+        random.shuffle(branch)
+        midpoint = int(len(branch)/2)
+        new_bifurcations.append(branch[:midpoint])
+        new_bifurcations.append(branch[midpoint:])
+    return new_bifurcations[:]
+
+
 def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
            variant_sites, p_location, n_mutations_per_gen,
            n_gens_per_death, death_ratio,
@@ -464,14 +474,9 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
 
         # Bifuricate in even generation numbers so every branch on tree has
         # 3 leaves that have been evolving by the last generation
-        if gen > 0 and (gen+1) % n_gens_per_bifurcation == 0 and len(tree["branches"][0]) > 3:
-            new_bifurcations = []  # temporary store for new bifurcations
-            for branch in tree["branches"]:  # bifuricate each set of leaves
-                random.shuffle(branch)
-                midpoint = int(len(branch)/2)
-                new_bifurcations.append(branch[:midpoint])
-                new_bifurcations.append(branch[midpoint:])
-            tree["branches"] = new_bifurcations[:]
+        if gen > 0 and (gen+1) % n_gens_per_bifurcation == 0 \
+                   and len(tree["branches"][0]) > 3:
+            tree["branches"] = bifurcate_branches(tree["branches"])
 
         counter = 0
         successful_mutation = False

@@ -45,8 +45,8 @@ gamma = {"shape": 1.9,  # Most phylogenetic systems that use gamma only let you 
 record = {"rate": 50,           # write a new fasta file every x generations
           "fasta_rate": 50,     # write a new fasta file every x generations
           "dot_fitness": True,
-          "hist_fitness_stats": False,
-          "hist_fitness": False,
+          "hist_fitness_stats": True,
+          "hist_fitness": True,
           "invariants": False}
 
 history = pest(n_generations, fitness_start, fitness_threshold, mu, sigma,

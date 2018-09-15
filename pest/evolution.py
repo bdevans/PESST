@@ -185,16 +185,16 @@ def get_fit_protein(fitness_level, n_amino_acids, sites,
     elif fitness_level == 'medium':
         # TODO: Parameterise medium fitness bounds as arguments
         n_variants = 5
-        # start_protein = initial_protein  # Copies the external initial_protein
         initial_fitness = calculate_fitness(initial_protein, fitness_table)
-        # TODO: This is slightly different to the original algorithm (below) but should give similar results
-        # protein = initial_protein[:]  # copy.deepcopy(initial_protein)
+
+        # TODO: This is slightly different to the original algorithm (below)
         # fitness = initial_fitness
         # counter = 0
         # while (fitness < fitness_threshold+10 or fitness > fitness_threshold+20) and counter <= 100:
         #     # Mutate the new protein (sample without replacement)
-        #     chosen_variants = random.sample(sites.variant, n_variants)
-        #     (protein, fitness) = twist_protein(initial_protein, chosen_variants, fitness_table)
+        #     chosen_sites = random.sample(sites.variant, n_variants)
+        #     (protein, fitness) = twist_protein(initial_protein, chosen_sites,
+        #                                        fitness_table)
         #     counter += 1
 
         while initial_fitness < fitness_threshold+10 or initial_fitness > fitness_threshold+20:

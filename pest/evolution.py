@@ -350,10 +350,10 @@ def record_generation_fitness(generation, population, variant_sites,
     if record["hist_fitness_stats"]:
         # Write a file describing 5 statistical tests on the protein fitness space
         if generation == 0:
-            stats_file_name = "normal_distribution_statistics_fitness_space.txt"
+            stats_file_name = "normal_distribution_statistics_fitness_space.md"
             distributions = fitness_table.values
         else:
-            stats_file_name = "normal_distribution_statistics_generation{}.txt".format(generation)
+            stats_file_name = "normal_distribution_statistics_generation{}.md".format(generation)
             distributions = fitnesses
         stats_full_name = os.path.join(run_path, "fitnessdistribution",
                                        "statistics", stats_file_name)

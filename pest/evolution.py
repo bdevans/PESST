@@ -11,7 +11,7 @@ import numpy as np
 import scipy as sp
 from scipy import stats
 import pandas as pd
-import matplotlib as mpl
+# import matplotlib as mpl
 from tqdm import trange
 
 from .dataio import (create_output_folders, write_settings_file, load_LG_matrix,
@@ -20,7 +20,7 @@ from .dataio import (create_output_folders, write_settings_file, load_LG_matrix,
                      write_histogram_statistics, append_ks_statistics)
 from .plotting import (plot_evolution, plot_gamma_distribution,
                        plot_threshold_fitness, plot_histogram_of_fitness)
-from .utilities import print_protein
+# from .utilities import print_protein
 
 # TODO: Automatically extract from LG_matrix - DONE
 # Define RESIDUES matching the ordering of LG_matrix

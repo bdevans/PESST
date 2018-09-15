@@ -15,7 +15,7 @@ import matplotlib as mpl
 from tqdm import trange
 
 from .dataio import (create_output_folders, write_settings_file, load_LG_matrix,
-                     write_initial_protein, write_protein_fitness,
+                     write_roots, write_initial_protein, write_protein_fitness,
                      write_fasta_alignment, write_final_fasta,
                      write_histogram_statistics, append_ks_statistics)
 from .plotting import (plot_evolution, plot_gamma_distribution,
@@ -420,10 +420,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
     # root_keys = [clonelist.pop(random.randrange(len(clonelist))) for r in range(n_roots)]
 
     rootsfullname = os.path.join(run_path, "start", "Roots.txt")
-    with open(rootsfullname, "w") as rootsfile:  # open file
-        rootsfile.write('Roots:')
-        for k in root_keys:
-            rootsfile.write('\nClone %s' % str(k+1))
+    write_roots(rootsfullname, tree["roots"])
 
     tree["roots"] = root_keys
     # Calculate number of bifurications per generation.

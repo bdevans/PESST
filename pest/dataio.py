@@ -43,6 +43,14 @@ def write_initial_protein(initial_protein, run_path):
         ipf.write(''.join(initial_protein))
 
 
+def write_roots(rootsfullname, root_keys):
+    """Write the list of roots indicies."""
+    with open(rootsfullname, "w") as rootsfile:  # open file
+        rootsfile.write("Roots:")
+        for k in root_keys:
+            rootsfile.write("\nClone {}".format(str(k+1)))
+
+
 def append_ks_statistics(stats_full_name, distribution_fitness, initial_fitness):
     with open(stats_full_name, "a") as stats_file:  # Append to file
         # Kolmogorov-Smirnov test of similarity to original distributuion

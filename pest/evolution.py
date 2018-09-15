@@ -14,20 +14,12 @@ import pandas as pd
 # import matplotlib as mpl
 from tqdm import trange
 
-from .dataio import (create_output_folders, write_settings_file, load_LG_matrix,
+from .dataio import (create_output_folders, write_settings_file,
                      write_roots, write_initial_protein, write_protein_fitness,
-                     write_fasta_alignment, write_final_fasta,
+                     write_fasta_alignment, write_final_fasta, load_LG_matrix,
                      write_histogram_statistics, append_ks_statistics)
 from .plotting import (plot_evolution, plot_gamma_distribution,
                        plot_threshold_fitness, plot_histogram_of_fitness)
-# from .utilities import print_protein
-
-# TODO: Automatically extract from LG_matrix - DONE
-# Define RESIDUES matching the ordering of LG_matrix
-# RESIDUES_NAME = "ARNDCQEGHILKMFPSTWYV"  # Strings are immutable
-# RESIDUES_INDEX = {aa: ai for ai, aa in enumerate(RESIDUES_NAME)}  # Faster than calling .index()
-# Residues = namedtuple('Residues', ['name', 'index'])
-# RESIDUES = Residues(name=RESIDUES_NAME, index=RESIDUES_INDEX)
 
 
 def get_fitness_table(n_amino_acids, mu, sigma, LG_matrix):
@@ -51,7 +43,6 @@ def get_allowed_sites(n_amino_acids, n_anchors):
     """Select invariant sites in the initially generated protein and return
     allowed values.
     """
-    # TODO: Methionine is always the first anchor, so change to range(n_amino_acids) and add one to n_anchors definition
     allowed_values = list(range(1, n_amino_acids))  # keys for mutable sites
     # Randomly define invariant sites (without replacement)
     anchored_sequences = random.sample(allowed_values, n_anchors)
@@ -59,7 +50,8 @@ def get_allowed_sites(n_amino_acids, n_anchors):
     # Remove the invariant sites from allowed values
     for a in anchored_sequences[1:]:
         allowed_values.remove(a)
-    # anchored_sequences = [allowed_values.pop(random.randrange(len(allowed_values))) for r in range(n_anchors)]
+    # invariant = [allowed_values.pop(random.randrange(len(allowed_values)))
+    #              for r in range(n_anchors)]
     Sites = namedtuple('Sites', ['invariant', 'variant'])
     # Return a namedtuple with anchors and available sites
     return Sites(invariant=anchored_sequences, variant=allowed_values)
@@ -79,8 +71,10 @@ def gamma_ray(n_amino_acids, sites, gamma):
     this to 100 independent runs (1 million total samples from distribution).
     """
 
-    kappa, theta, n_iterations, n_samples = (gamma["shape"], gamma["scale"],
-                                             gamma["iterations"], gamma["samples"])
+    kappa, theta, n_iterations, n_samples = (gamma["shape"],
+                                             gamma["scale"],
+                                             gamma["iterations"],
+                                             gamma["samples"])
 
     medians = np.zeros(shape=(n_iterations, 4))
 
@@ -128,8 +122,9 @@ def get_random_protein(n_amino_acids, fitness_table, start_amino_acid="M"):
     """Generate an original starting protein n_amino_acids long with a start
     amino acid set to methionine.
     """
-    protein = random.choices(fitness_table.columns.values.tolist(), k=n_amino_acids-1)  # RESIDUES.name
-    # protein = [random.choice(RESIDUES) for _ in range(n_amino_acids)]  # ver < 3.6
+    protein = random.choices(fitness_table.columns.values.tolist(),
+                             k=n_amino_acids-1)
+    # protein = [random.choice(RESIDUES) for _ in range(n_amino_acids)] # < 3.6
     protein.insert(0, start_amino_acid)  # Start with methionine
     # TODO: Convert to strings preventing in-place modification
     # return ''.join(protein)
@@ -137,15 +132,16 @@ def get_random_protein(n_amino_acids, fitness_table, start_amino_acid="M"):
 
 
 def twist_protein(protein, mutation_sites, fitness_table):
-    mutant = protein[:]  # copy.deepcopy(start_protein)
+    mutant = protein[:]
     amino_acids = fitness_table.columns.values.tolist()
     for ai in mutation_sites:
-        mutant[ai] = random.choice(amino_acids)  # RESIDUES.name
+        mutant[ai] = random.choice(amino_acids)
     fitness = calculate_fitness(mutant, fitness_table)
     return (mutant, fitness)
 
 
-def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table, fitness_threshold):
+def get_fit_protein(fitness_level, n_amino_acids, sites,
+                    fitness_table, fitness_threshold):
     """Generate a protein of a specified fitness.
 
     Make either a superfit protein, a superunfit protein or a 'medium
@@ -162,7 +158,7 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table, fitness_
 
     if fitness_level != 'medium':
         if fitness_level == 'low':  # generate unfit protein
-            # TODO: Adjust threshold in this case or unable to build proteins above threshold
+            # TODO: Adjust threshold or allow building proteins above threshold
             sequence = [0, 1, 2]  # Three lowest
 
         elif fitness_level == 'high':  # generate superfit protein
@@ -173,32 +169,23 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table, fitness_
             if ai in sites.invariant:
                 aminos.append([initial_protein[ai]] * 3)
             else:
-                # i_sorted = np.argsort(fitness_table.loc[ai])
-                # # aminos.append([RESIDUES[fitness_table[ai, i_sorted[start]]]
-                # #                for start in sequence])
-                # aminos.append([RESIDUES.name[i_sorted[start]] for start in sequence])
-                # sorted_aa = sorted(fitness_table[ai], key=lambda k: fitness_table[ai][k])
-                # DataFrame
-                # sorted_aa = RESIDUES.name[fitness_table.loc[ai].argsort()]
                 sorted_aa = fitness_table.columns.values[fitness_table.loc[ai].argsort()]
                 # sorted_aa = fitness_table.sort_values(fitness_table.loc[ai], axis=1).columns.tolist()
                 aminos.append([sorted_aa[rank] for rank in sequence])
         protein = []
-        # Generate a superunfit protein by randomly picking one of the 3 most fit amino acids at each position
         for candidates in aminos:
             protein.append(random.choice(candidates))
 
-    # Generate medium fitness protein. This module is a little buggy. It takes
-    # the starting protein sequence, mutates 5 residues until the protein is
-    # fitter, then chooses 5 new residues and continues.
-    # If it cannot make a fitter protein with the 5 residues its mutating it
+    # Generate medium fitness protein.
+    # Take starting protein sequence, mutate 5 residues until the protein is
+    # fitter, then choose 5 new residues and continue.
+    # If it cannot make a fitter protein with the 5 residues it's mutating it
     # reverts back to the previous state and picks 5 new residues.
     elif fitness_level == 'medium':
         # TODO: Parameterise medium fitness bounds as arguments
         n_variants = 5
         # start_protein = initial_protein  # Copies the external initial_protein
         initial_fitness = calculate_fitness(initial_protein, fitness_table)
-        # NOTE: This chooses from anchored_sequences whereas the other conditions exclude them FIXED
         protein = initial_protein[:]  # copy.deepcopy(initial_protein)
         # TODO: This is slightly different to the original algorithm (below) but should give similar results
         # fitness = initial_fitness
@@ -211,20 +198,20 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table, fitness_
 
         while initial_fitness < fitness_threshold+10 or initial_fitness > fitness_threshold+20:
             # Mutate the new protein (sample without replacement)
-            chosen_variants = random.sample(sites.variant, n_variants)
-            (protein, fitness) = twist_protein(initial_protein, chosen_variants, fitness_table)
+            chosen_sites = random.sample(sites.variant, n_variants)
+            (protein, fitness) = twist_protein(initial_protein, chosen_sites, fitness_table)
             counter = 0
 
             if initial_fitness < fitness_threshold+10:  # setting lower bounds of medium fitness
                 while fitness < initial_fitness and counter <= 100:
                     # Continue to mutate until it is better than the initial_protein
-                    (protein, fitness) = twist_protein(initial_protein, chosen_variants, fitness_table)
+                    (protein, fitness) = twist_protein(initial_protein, chosen_sites, fitness_table)
                     counter += 1
 
             elif initial_fitness > fitness_threshold+20:  # set upper bounds of medium fitness
                 while fitness > initial_fitness and counter <= 100:
                     # Continue to mutate until it is better than the initial_protein
-                    (protein, fitness) = twist_protein(initial_protein, chosen_variants, fitness_table)
+                    (protein, fitness) = twist_protein(initial_protein, chosen_sites, fitness_table)
                     counter += 1
 
             initial_protein = protein
@@ -287,10 +274,8 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
     counter = 0
     successful_mutation = False
 
-    while not successful_mutation:  # Mutate until all branches have fit proteins
+    while not successful_mutation:  # Mutate until all branches are fit
         successful_mutation = True
-
-        # NOTE: This could be removed for speed after checking it is not used later
         next_generation = copy.deepcopy(current_generation)
         for q in range(n_mutations_per_gen):  # impliment gamma
             # Pick random key, clone to make a random generation
@@ -301,17 +286,17 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
 
         fitnesses = calculate_population_fitness(next_generation, fitness_table)
 
-        for pi in range(len(fitnesses)):  # if there are, start loop on fitnesses
-            if fitnesses[pi] < fitness_threshold:  # if fitness is less than threshold clone a random sequence in its place.
+        for pi in range(len(fitnesses)):
+            if fitnesses[pi] < fitness_threshold:  # clone a random sequence
 
                 mutant_index = replace_protein(pi, tree, fitnesses,
                                                fitness_threshold)
-                # If no suitable clones are available, re-mutate the generation and start again
+                # If no suitable clones are available, re-mutate and try again
                 if mutant_index is None:
                     successful_mutation = False
                     break  # out of loop over fitnesses
-                else:
-                    next_generation[pi] = next_generation[mutant_index]  # swap out unfit clone for fit clone
+                else:  # swap out unfit clone for fit clone
+                    next_generation[pi] = next_generation[mutant_index]
 
         counter += 1
         if counter == 100:
@@ -325,13 +310,11 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
 
 def calculate_population_fitness(population, fitness_table):
     """Calculate the fitness of every protein in a population."""
-    # Record calculated fitness for each protein in dictionary
-    return {pi: calculate_fitness(protein, fitness_table)
-            for pi, protein in list(population.items())}
-            # for pi, protein in enumerate(population)}
     # TODO: Replace with list once population is a list (or OrderedDict)
     # fitnesslist = [calculate_fitness(protein, fitness_table)
-    #                for pi, protein in list(population.items())]
+    #                for pi, protein in enumerate(population)}
+    return {pi: calculate_fitness(protein, fitness_table)
+            for pi, protein in list(population.items())}
 
 
 def record_generation_fitness(generation, population, variant_sites,
@@ -341,14 +324,16 @@ def record_generation_fitness(generation, population, variant_sites,
     """
 
     # Build distribution of fitness values existing in evolving protein
-    fitnesses = build_generation_fitness_table(population, variant_sites, fitness_table, record)
+    fitnesses = build_generation_fitness_table(population, variant_sites,
+                                               fitness_table, record)
 
     if record["dot_fitness"]:
         save_dir = os.path.join(run_path, "fitnessdotmatrix")
-        plot_threshold_fitness(generation, population, fitnesses, fitness_table, fitness_threshold, save_dir)
+        plot_threshold_fitness(generation, population, fitnesses,
+                               fitness_table, fitness_threshold, save_dir)
 
     if record["hist_fitness_stats"]:
-        # Write a file describing 5 statistical tests on the protein fitness space
+        # Record 5 statistical tests on the protein fitness space
         if generation == 0:
             stats_file_name = "normal_distribution_statistics_fitness_space.md"
             distributions = fitness_table.values
@@ -367,7 +352,8 @@ def record_generation_fitness(generation, population, variant_sites,
         disthistfullname = os.path.join(run_path, "fitnessdistribution",
                                         "histograms", disthistfilename)
         plot_histogram_of_fitness(disthistfullname, fitnesses.ravel(),
-                                  fitness_table.values.ravel(), fitness_threshold)
+                                  fitness_table.values.ravel(),
+                                  fitness_threshold)
 
 
 def build_generation_fitness_table(population, variant_sites, fitness_table, record):
@@ -431,7 +417,7 @@ def create_tree(n_proteins, n_roots):
     # root_keys = [protein_keys.pop(random.randrange(len(protein_keys)))
     #              for r in range(n_roots)]
     tree["roots"] = root_keys
-    tree["branches"] = [protein_keys]  # lists of protein keys intialised with non-roots
+    tree["branches"] = [protein_keys]  # lists of non-roots
     return tree
 
 
@@ -498,7 +484,8 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
     write_fasta_alignment(population, 0, run_path)
 
     # Store each generation along with its fitness
-    Generation = namedtuple('Generation', ['population', 'fitness', 'final_fitness'])
+    Generation = namedtuple('Generation',
+                            ['population', 'fitness', 'final_fitness'])
     # Create a list of generations and add initial population and fitness
     evolution = [Generation(population=population, fitness=fitnesses,
                             final_fitness=fitnesses)]
@@ -511,7 +498,6 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
                    and len(tree["branches"][0]) > 3:
             tree["branches"] = bifurcate_branches(tree["branches"])
 
-        # TODO: Store population with fitnesses in Generation namedtuple and move checks to within mutate_population
         # Mutate population
         (next_generation, fitnesses) = mutate_population(population, n_mutations_per_gen,
                                                          tree, sites.variant, p_location,
@@ -585,18 +571,23 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
                        "record": record}
     write_settings_file(run_path, settings_kwargs)  # record run settings
     LG_matrix = load_LG_matrix()  # Load LG matrix
-    fitness_table = get_fitness_table(n_amino_acids, mu, sigma, LG_matrix)  # make first fitness dictionary
+    # Make first fitness dictionary
+    fitness_table = get_fitness_table(n_amino_acids, mu, sigma, LG_matrix)
     write_protein_fitness(run_path, "start", fitness_table)
 
-    sites = get_allowed_sites(n_amino_acids, n_anchors)  # generate variant/invariant sites
-    p_location = gamma_ray(n_amino_acids, sites, gamma)  # generate mutation probabilities for every site
+    # Generate variant/invariant sites
+    sites = get_allowed_sites(n_amino_acids, n_anchors)
+    # Generate mutation probabilities for every site
+    p_location = gamma_ray(n_amino_acids, sites, gamma)
 
-    # Generate a superfit protein taking into account the invariant sites created (calling variables in this order stops the evolutionary process being biased by superfit invariant sites.)
+    # Generate a protein of specified fitness taking into account the invariant
+    # sites created (calling variables in this order stops the evolutionary
+    # process being biased by superfit invariant sites.)
     initial_protein = get_fit_protein(fitness_start, n_amino_acids, sites,
                                       fitness_table, fitness_threshold)
     # print_protein(initial_protein)
     write_initial_protein(initial_protein, run_path)  # Record initial protein
-    initial_population = clone_protein(initial_protein, n_clones)  # make some clones to seed evolution
+    initial_population = clone_protein(initial_protein, n_clones)  # copy
 
     history = evolve(n_generations, initial_population, fitness_table,
                      fitness_threshold, sites, p_location,

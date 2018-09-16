@@ -36,8 +36,7 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
     (n_amino_acids, n_variants) = fitness_table.shape
     # Average across flattened array
     mean_initial_fitness = np.mean(fitness_table.values)
-    sigma = np.std(fitness_table.values)
-    scale = round((4 * sigma) + 1)
+    scale = round((4 * np.std(fitness_table.values)) + 1)
 
     fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
     # Plot each column of fitness_table as a separate dataseries against 0..N-1

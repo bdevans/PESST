@@ -41,8 +41,6 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
     fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
     # Plot each column of fitness_table as a separate dataseries against 0..N-1
     ax1.plot(fitness_table, "o", color='k', markersize=2)
-    # ax1.plot([0, n_amino_acids-1], [mean_initial_fitness, mean_initial_fitness],
-    #          'r--', lw=2,
     ax1.hlines(mean_initial_fitness, 0, n_amino_acids-1,
                colors="r", linestyles="--", lw=2,
                label=r"$\mu_1$ = {:.2f}".format(mean_initial_fitness))
@@ -55,11 +53,9 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
 
     # Find and plot all fitness values in the current generation
     mean_fitness = np.mean(fitnesses)
-    # plot y using x as index array 0..N-1
     # x: proteins within population; y: Fitness for each locus for that protein
     # TODO: Swap colour to a particular protein not locus or make monochrome
     ax2.plot(np.arange(len(population)), fitnesses, "o", markersize=1)
-    # ax2.plot([0, len(population)-1], [mean_fitness, mean_fitness], 'r--', lw=2,
     ax2.hlines(mean_fitness, 0, len(population)-1,
                colors="r", linestyles="--", lw=2,
                label=r"$\mu_2$ = {:.2f}".format(mean_fitness))

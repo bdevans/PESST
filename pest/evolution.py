@@ -604,8 +604,9 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
                      n_roots, LG_matrix, record, run_path)
     # TODO: Set lines automatically
     plot_omega, plot_epsilon = True, False
-    initial_fitness = calculate_fitness(initial_protein, fitness_table)
-    plot_evolution(history, n_clones, n_amino_acids, initial_fitness,
-                   fitness_table, fitness_threshold, plot_omega, plot_epsilon,
-                   mu, sigma, mutation_rate, run_path)
+    legend_title = "; ".join([r"$\mu$ = {}".format(mu),
+                              r"$\sigma$ = {}".format(sigma),
+                              r"$\delta$ = {}".format(mutation_rate)])
+    plot_evolution(history, fitness_table, fitness_threshold,
+                   plot_omega, plot_epsilon, run_path, legend_title)
     return history

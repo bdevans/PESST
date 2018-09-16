@@ -104,9 +104,9 @@ def plot_histogram_of_fitness(disthistfullname, distributions, initial,
     plt.close()
 
 
-def plot_evolution(history, n_clones, n_amino_acids, initial_fitness,
-                   fitness_table, fitness_threshold, plot_omega, plot_epsilon,
-                   mu, sigma, mutation_rate, run_path):
+def plot_evolution(history, fitness_table, fitness_threshold,
+                   plot_omega, plot_epsilon,
+                   run_path, legend_title=None):
     """Plot fitness against generation for all clones.
 
     This plots after mutation but before replacement so that subthreshold
@@ -115,6 +115,8 @@ def plot_evolution(history, n_clones, n_amino_acids, initial_fitness,
     # Create array of fitness values with shape (n_generations, n_clones)
     n_generations = len(history) - 1  # First entry is the initial state
     generation_numbers = np.arange(n_generations+1)  # Skip initial generation
+    (n_amino_acids, n_variants) = fitness_table.shape
+    n_clones = len(history[0].population)
     fitnesses = np.array([[history[g].fitness[c] for c in range(n_clones)]
                           for g in range(n_generations+1)])
 
@@ -126,14 +128,8 @@ def plot_evolution(history, n_clones, n_amino_acids, initial_fitness,
     plt.plot(generation_numbers, fitnesses)
 
     # Average across clones
-    parameter_string = "; ".join([r"$\mu$ = {}".format(mu),
-                                  r"$\sigma$ = {}".format(sigma),
-                                  r"$\delta$ = {}".format(mutation_rate)])
     plt.plot(generation_numbers, np.mean(final_fitnesses, axis=1),
-             "k--", lw=2, label="Mean")  # "\n".join(["Mean", parameter_string]))
-    # plt.ylim([fitness_threshold-25, initial_fitness+10])  # not suitable for "low or med" graphs
-    # plt.ylim([fitness_threshold-5, ((n_amino_acids+1)*mu)+80]) # for low graphs
-    # plt.ylim([fitness_threshold-25, initial_fitness+100])  # suitable for med graphs
+             "k--", lw=2, label="Mean")
     plt.xlim([0, n_generations])
     plt.xlabel("Generations", fontweight='bold')
     plt.ylabel("$T_m$", fontweight='bold')
@@ -142,26 +138,17 @@ def plot_evolution(history, n_clones, n_amino_acids, initial_fitness,
                              "mutated over {} generations"
                              .format(n_clones, n_amino_acids, n_generations),
                              60)), fontweight='bold')
-    # plt.text(n_generations+15, fitness_threshold-3, r"$\Omega$")
     if plot_omega:  # Add fitness threshold
         plt.axhline(fitness_threshold, color="k", lw=2, linestyle="-",
                     label=r"$\Omega$ = {}".format(fitness_threshold))
-        # plt.plot([0, n_generations], [fitness_threshold, fitness_threshold],
-        #          'k-', lw=2, label=r"$\Omega$")
     if plot_epsilon:  # Add theoretical convergence line
         epsilon = n_amino_acids * np.mean(fitness_table)
         plt.axhline(epsilon, color="b", lw=2, linestyle="-",
                     label=r"$\epsilon$")
-        # plt.plot([0, n_generations], [epsilon, epsilon],
-        #          'k-', lw=2, label=r"$\epsilon$")
-    plt.legend(title=parameter_string)
-    # plt.text(n_generations-1000, initial_fitness+50,
-    #          "\n".join([r"$\mu$ = {}".format(mu),
-    #                     r"$\sigma$ = {}".format(sigma),
-    #                     r"$\delta$ = {}".format(mutation_rate)]))
+    plt.legend(title=legend_title)
 
     # Define dynamic filename
-    fitgraphfilename = "fitness_change_over{}generations.png".format(n_generations)
+    fitgraphfilename = "fitness_over_{}_generations.png".format(n_generations)
     fitgraphfullname = os.path.join(run_path, "fitnessgraph", fitgraphfilename)
     plt.savefig(fitgraphfullname)
     return

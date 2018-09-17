@@ -528,7 +528,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
     return evolution
 
 
-def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
+def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, sigma=2.5,
          n_clones=52, n_amino_acids=80, mutation_rate=0.001, n_anchors=None,
          n_gens_per_death=5, death_rate=0.05, seed=None,
          n_roots=4, gamma=None, record=None):
@@ -595,6 +595,7 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
                      fitness_threshold, sites, p_location, mutation_rate,
                      n_gens_per_death, death_rate, tree, LG_matrix,
                      record, run_path)
+
     # TODO: Set lines automatically
     plot_omega, plot_epsilon = True, False
     legend_title = "; ".join([r"$\mu$ = {}".format(mu),

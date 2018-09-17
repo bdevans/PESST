@@ -9,8 +9,6 @@ from pest.evolution import pest
 # matplotlib.use('TkAgg')
 mpl.rc('savefig', dpi=300)
 
-# TODO: Give these default values
-
 # parameters of protein evolution
 n_generations = 200  # amount of generations the protein evolves for
 # TODO: Create parameters for the numeric literals which define the medium boundaries

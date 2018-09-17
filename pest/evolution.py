@@ -529,14 +529,14 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
 
 
 def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, sigma=2.5,
-         n_clones=52, n_roots=4, n_amino_acids=80, n_anchors=None, mutation_rate=0.001, 
+         n_clones=52, n_roots=4, n_amino_acids=80, n_anchors=None, mutation_rate=0.001,
          n_gens_per_death=5, death_rate=0.05, seed=None,
          gamma=None, record=None):
 
     # TODO: Add rerun flag to load settings (and seed)
     # settings = json.load(sf)
     if n_anchors is None:
-        n_anchors = int((n_amino_acids)/10)
+        n_anchors = int(n_amino_acids/10)
     # TODO: switch from random to np.random for proper seeding
     if seed is not None:
         np.random.seed(seed)
@@ -560,7 +560,7 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
                        "n_amino_acids": n_amino_acids,
                        "mutation_rate": mutation_rate,
                        "n_anchors": n_anchors,
-                       "n_gens_per_death": n_gens_per_death,
+                       "n_gens_per_death": n_gens_per_death,  # TODO: remove!
                        "death_rate": death_rate,
                        "n_roots": n_roots,
                        "seed": seed,

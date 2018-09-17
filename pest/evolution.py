@@ -383,17 +383,13 @@ def build_generation_fitness_table(population, variant_sites, fitness_table, rec
 
 
 def select_from_pool(protein_index, candidates, fitnesses, fitness_threshold):
-    # Filter out original protein and those below the fitness threshold
+    """Filter out original protein and those below the fitness threshold."""
     pool = [c for c in candidates
             if c != protein_index and fitnesses[c] >= fitness_threshold]
     if len(pool) > 0:
         new_protein_index = random.choice(pool)
     else:
-        # raise Exception("No suitable candidates on branch!")
-        # warnings.warn("No suitable candidates on branch!")
-        # new_protein = np.nan
         new_protein_index = None
-        # print({c: fitnesses[c] for c in candidates})
     return new_protein_index
 
 

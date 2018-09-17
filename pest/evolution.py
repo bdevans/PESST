@@ -272,8 +272,7 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
 
 
 def mutate_population(current_generation, n_mutations_per_gen, tree,
-                      variant_sites, p_location, LG_matrix,
-                      fitness_table, fitness_threshold):
+                      p_location, LG_matrix, fitness_table, fitness_threshold):
     """Mutate a set of sequences based on the LG+I+G model of amino acid
     substitution.
     """
@@ -294,7 +293,6 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
 
         for pi in range(len(fitnesses)):
             if fitnesses[pi] < fitness_threshold:  # clone a random sequence
-
                 mutant_index = replace_protein(pi, tree, fitnesses,
                                                fitness_threshold)
                 # If no suitable clones are available, re-mutate and try again
@@ -505,9 +503,12 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
             tree["branches"] = bifurcate_branches(tree["branches"])
 
         # Mutate population
-        (next_generation, fitnesses) = mutate_population(population, n_mutations_per_gen,
-                                                         tree, sites.variant, p_location,
-                                                         LG_matrix, fitness_table, fitness_threshold)
+        (next_generation, fitnesses) = mutate_population(population,
+                                                         n_mutations_per_gen,
+                                                         tree, p_location,
+                                                         LG_matrix,
+                                                         fitness_table,
+                                                         fitness_threshold)
 
         # Allow sequences to die and be replacecd at a predefined rate
         if n_gens_per_death > 0 and (gen+1) % n_gens_per_death == 0:

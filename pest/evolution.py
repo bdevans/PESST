@@ -165,16 +165,17 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
         elif fitness_level == 'high':  # generate superfit protein
             sequence = [-1, -2, -3]  # Three highest
 
-        aminos = [["M"] * 3]
+        pool = [["M"] * 3]
         for ai in range(1, len(fitness_table.index)):  # range(n_amino_acids):
             if ai in sites.invariant:
-                aminos.append([initial_protein[ai]] * 3)
+                pool.append([initial_protein[ai]] * 3)
             else:
-                sorted_aa = fitness_table.columns.values[fitness_table.loc[ai].argsort()]
+                amino_acids = fitness_table.columns.values
+                sorted_aa = amino_acids[fitness_table.loc[ai].argsort()]
                 # sorted_aa = fitness_table.sort_values(fitness_table.loc[ai], axis=1).columns.tolist()
-                aminos.append([sorted_aa[rank] for rank in sequence])
+                pool.append([sorted_aa[rank] for rank in sequence])
         protein = []
-        for candidates in aminos:
+        for candidates in pool:
             protein.append(random.choice(candidates))
 
     # Generate medium fitness protein.

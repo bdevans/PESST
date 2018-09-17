@@ -17,6 +17,10 @@ fitness_start = (fitness_threshold + 10, fitness_threshold + 20)  # 'medium'  # 
 # parameters for normal distribution used to select fitness values
 mu = -1.2
 sigma = 2.5
+fitness = {"start": fitness_start,
+           "omega": fitness_threshold,
+           "mu": mu,
+           "sigma": sigma}
 
 # TODO: These could possibly go into their own dictionary too
 n_clones = 52  # amount of clones that will be generated in the first generation

@@ -141,8 +141,7 @@ def twist_protein(protein, mutation_sites, fitness_table):
     return (mutant, fitness)
 
 
-def get_fit_protein(fitness_level, n_amino_acids, sites,
-                    fitness_table, fitness_threshold):
+def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
     """Generate a protein of a specified fitness.
 
     Make either a superfit protein, a superunfit protein or a 'medium
@@ -188,8 +187,6 @@ def get_fit_protein(fitness_level, n_amino_acids, sites,
         initial_fitness = calculate_fitness(initial_protein, fitness_table)
 
         lower_bound, upper_bound = fitness_level
-        # upper_bound = fitness_threshold + 20
-        # lower_bound = fitness_threshold + 10
         # TODO: This is slightly different to the original algorithm (below)
         # fitness = initial_fitness
         # counter = 0

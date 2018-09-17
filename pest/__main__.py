@@ -17,7 +17,6 @@ n_gens_per_death = 5  # TODO: Remove
 death_rate = 0.05  # Set to 0 to turn off protein deaths
 
 n_amino_acids = 80  # number of amino acids in the protein including the start methionine
-# TODO: Allow user to pass a number but default to None and calculate as follows
 n_anchors = int(n_amino_acids/10)  # amount of invariant sites in a generation (not including root)
 
 fitness_threshold = 0  # arbitrary number for fitness threshold
@@ -30,6 +29,11 @@ mutation_rate = 0.001  # Proportion of the total amino acids in mutating in the 
 seed = 42
 
 # TODO: Put into dictionary
+population = {"n_proteins": n_clones,
+              "n_roots": n_roots,
+              "death_rate": death_rate,
+              "bifurcate": True}
+
 fitness = {"start": fitness_start,
            "omega": fitness_threshold,
            "mu": mu,

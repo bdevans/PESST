@@ -12,7 +12,7 @@ mpl.rc('savefig', dpi=300)
 # TODO: Give these default values
 
 # parameters of protein evolution
-n_generations = 2000  # amount of generations the protein evolves for
+n_generations = 200  # amount of generations the protein evolves for
 # TODO: Create parameters for the numeric literals which define the medium boundaries
 fitness_threshold = 0  # arbitrary number for fitness threshold
 fitness_start = (fitness_threshold + 10, fitness_threshold + 20)  # 'medium'  # high, medium or low; must be lower case. If selecting low, fitness threshold needs to be significantly smaller (i.e. 4x) than #positions*mu
@@ -44,9 +44,9 @@ gamma = {"shape": 1.9,  # Most phylogenetic systems that use gamma only let you 
 # Set what to record
 record = {"rate": 50,           # write a new fasta file every x generations
           "fasta_rate": 50,     # write a new fasta file every x generations
-          "dot_fitness": True,
-          "hist_fitness_stats": True,
-          "hist_fitness": True,
+          "dot_fitness": False,
+          "hist_fitness_stats": False,
+          "hist_fitness": False,
           "invariants": False}
 
 history = pest(n_generations, fitness_start, fitness_threshold, mu, sigma,

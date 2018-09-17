@@ -194,7 +194,7 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses, record):
     stats_file.close()
 
 
-def write_fasta_alignment(population, generation, run_path):
+def write_fasta_alignment(generation, population, run_path):
     """Write fasta alignment from sequences provided."""
     fastafilepath = os.path.join(run_path, "fastas")
     fastafilename = "generation_{}.fasta".format(generation)

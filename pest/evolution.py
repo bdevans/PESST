@@ -478,7 +478,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
     record_generation_fitness(0, population, sites.variant,
                               fitness_table, fitness_threshold,
                               record, run_path)
-    write_fasta_alignment(population, 0, run_path)
+    write_fasta_alignment(0, population, run_path)
 
     # Store each generation along with its fitness
     Generation = namedtuple('Generation',
@@ -517,7 +517,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
                                     final_fitness=final_fitnesses))
         # Write fasta every record["fasta_rate"] generations
         if (gen+1) % record["fasta_rate"] == 0:
-            write_fasta_alignment(population, gen+1, run_path)
+            write_fasta_alignment(gen+1, population, run_path)
         # Record population details at the end of processing
         if (gen+1) % record["rate"] == 0:
             record_generation_fitness(gen+1, population, sites.variant,

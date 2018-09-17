@@ -457,17 +457,18 @@ def kill_proteins(population, tree, death_rate, fitness_table, fitness_threshold
 
 
 def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
-           sites, p_location, n_mutations_per_gen,
-           n_gens_per_death, death_rate,
+           sites, p_location, mutation_rate, n_gens_per_death, death_rate,
            n_roots, LG_matrix, record, run_path):
     """Generation generator - mutate a protein for a defined number of
     generations according to an LG matrix and gamma distribution.
     """
 
     n_clones = len(initial_population)
+    n_amino_acids = len(initial_population[0])
+    n_mutations_per_gen = int(n_clones * n_amino_acids * mutation_rate)
+
     # Generate list of clone keys for bifurication
     tree = create_tree(n_clones, n_roots)
-
     rootsfullname = os.path.join(run_path, "start", "Roots.txt")
     write_roots(rootsfullname, tree["roots"])
 
@@ -538,7 +539,6 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
 
     # TODO: Add rerun flag to load settings (and seed)
     # settings = json.load(sf)
-    n_mutations_per_gen = int(n_clones*(n_amino_acids)*mutation_rate)
     if n_anchors is None:
         n_anchors = int((n_amino_acids)/10)
     # TODO: switch from random to np.random for proper seeding
@@ -591,9 +591,9 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
     initial_population = clone_protein(initial_protein, n_clones)  # copy
 
     history = evolve(n_generations, initial_population, fitness_table,
-                     fitness_threshold, sites, p_location,
-                     n_mutations_per_gen, n_gens_per_death, death_rate,
-                     n_roots, LG_matrix, record, run_path)
+                     fitness_threshold, sites, p_location, mutation_rate,
+                     n_gens_per_death, death_rate, n_roots, LG_matrix, record,
+                     run_path)
     # TODO: Set lines automatically
     plot_omega, plot_epsilon = True, False
     legend_title = "; ".join([r"$\mu$ = {}".format(mu),

@@ -581,7 +581,7 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
     # sites created (calling variables in this order stops the evolutionary
     # process being biased by superfit invariant sites.)
     initial_protein = get_fit_protein(fitness_start, n_amino_acids, sites,
-                                      fitness_table, fitness_threshold)
+                                      fitness_table)
     # print_protein(initial_protein)
     write_initial_protein(initial_protein, run_path)  # Record initial protein
     initial_population = clone_protein(initial_protein, n_clones)  # copy

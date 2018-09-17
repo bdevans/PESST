@@ -441,9 +441,9 @@ def bifurcate_branches(branches):
     return new_bifurcations[:]
 
 
-def kill_proteins(population, tree, death_ratio, fitness_table, fitness_threshold):
+def kill_proteins(population, tree, death_rate, fitness_table, fitness_threshold):
     n_clones = len(population)
-    mortals = random.sample(range(n_clones), int(n_clones*death_ratio))
+    mortals = random.sample(range(n_clones), int(n_clones*death_rate))
     # Recalculate fitnesses after all mutations
     fitnesses = calculate_population_fitness(population, fitness_table)
     for pi in mortals:
@@ -458,7 +458,7 @@ def kill_proteins(population, tree, death_ratio, fitness_table, fitness_threshol
 
 def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
            sites, p_location, n_mutations_per_gen,
-           n_gens_per_death, death_ratio,
+           n_gens_per_death, death_rate,
            n_roots, LG_matrix, record, run_path):
     """Generation generator - mutate a protein for a defined number of
     generations according to an LG matrix and gamma distribution.
@@ -508,7 +508,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
 
         # Allow sequences to die and be replacecd at a predefined rate
         if n_gens_per_death > 0 and (gen+1) % n_gens_per_death == 0:
-            next_generation = kill_proteins(next_generation, tree, death_ratio,
+            next_generation = kill_proteins(next_generation, tree, death_rate,
                                             fitness_table, fitness_threshold)
 
         final_fitnesses = calculate_population_fitness(next_generation,
@@ -533,7 +533,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
 
 def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
          n_clones=52, n_amino_acids=80, mutation_rate=0.001, n_anchors=None,
-         n_gens_per_death=5, death_ratio=0.05, seed=None,
+         n_gens_per_death=5, death_rate=0.05, seed=None,
          n_roots=4, gamma=None, record=None):
 
     # TODO: Add rerun flag to load settings (and seed)
@@ -565,7 +565,7 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
                        "mutation_rate": mutation_rate,
                        "n_anchors": n_anchors,
                        "n_gens_per_death": n_gens_per_death,
-                       "death_ratio": death_ratio,
+                       "death_rate": death_rate,
                        "n_roots": n_roots,
                        "seed": seed,
                        "gamma": gamma,
@@ -592,7 +592,7 @@ def pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
 
     history = evolve(n_generations, initial_population, fitness_table,
                      fitness_threshold, sites, p_location,
-                     n_mutations_per_gen, n_gens_per_death, death_ratio,
+                     n_mutations_per_gen, n_gens_per_death, death_rate,
                      n_roots, LG_matrix, record, run_path)
     # TODO: Set lines automatically
     plot_omega, plot_epsilon = True, False

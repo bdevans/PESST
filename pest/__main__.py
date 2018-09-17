@@ -23,12 +23,11 @@ sigma = 2.5
 # TODO: These could possibly go into their own dictionary too
 n_clones = 52  # amount of clones that will be generated in the first generation
 n_amino_acids = 80  # number of amino acids in the protein including the start methionine
-mutation_rate = 0.001  # should be small!
+mutation_rate = 0.001  # Proportion of the total amino acids in mutating in the population each gnereation - should be small!
 # TODO: Allow user to pass a number but default to None and calculate as follows
-n_mutations_per_gen = int(n_clones*(n_amino_acids)*mutation_rate)  # number of mutations per generation
-n_anchors = int((n_amino_acids)/10)  # amount of invariant sites in a generation (not including root)
+n_anchors = int(n_amino_acids/10)  # amount of invariant sites in a generation (not including root)
 deaths_per_generation = 5  # Set to 0 to turn off protein deaths
-death_ratio = 0.05
+death_rate = 0.05
 seed = 42
 
 # TODO: Place bifurcation parameters into kwargs dict with a flag for bifurcations
@@ -50,6 +49,5 @@ record = {"rate": 50,           # write a new fasta file every x generations
           "invariants": False}
 
 history = pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
-               n_clones, n_amino_acids, mutation_rate, n_mutations_per_gen,
-               n_anchors, deaths_per_generation, death_ratio, seed,
-               n_roots, gamma, record)
+               n_clones, n_amino_acids, mutation_rate, n_anchors,
+               deaths_per_generation, death_rate, seed, n_roots, gamma, record)

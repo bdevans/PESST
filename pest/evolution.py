@@ -600,6 +600,11 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
                                       fitness_table)
     # print_protein(initial_protein)
     write_initial_protein(initial_protein, run_path)  # Record initial protein
+    initial_fitness = calculate_fitness(initial_protein, fitness_table)
+    if initial_fitness < fitness_threshold:
+        raise Exception("The fitness threshold is too high!")
+    # assert initial_fitness < T_max
+
     initial_population = clone_protein(initial_protein, n_clones)  # copy
 
     # Generate list of clone keys for bifurication

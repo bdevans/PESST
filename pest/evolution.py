@@ -546,15 +546,20 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
         n_anchors = int(n_amino_acids/10)
     else:
         assert n_anchors < n_amino_acids
+
+    if fitness_start == "low":
+        warnings.warn("With low starting fitness selected Omega is ignored.")
+                      # "If the run fails, please check your fitness threshold,"
+                      # "omega, is low enough: {}".format(fitness_threshold))
+        plot_omega, plot_epsilon = False, True
+        fitness_threshold = -np.inf
+    else:
+        plot_omega, plot_epsilon = True, True
+
     # TODO: switch from random to np.random for proper seeding
     if seed is not None:
         np.random.seed(seed)
         random.seed(seed)
-
-    if fitness_start == "low":
-        warnings.warn("You have selected low starting fitness. "
-                      "If the run fails, please check your fitness threshold"
-                      "is low enough: {}".format(fitness_threshold))
 
     # TODO: Put run_path (and subdirs) in record dict
     # create folder and subfolders
@@ -605,8 +610,6 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
                      n_gens_per_death, death_rate, tree, LG_matrix,
                      record, run_path)
 
-    # TODO: Set lines automatically
-    plot_omega, plot_epsilon = True, False
     legend_title = "; ".join([r"$\mu$ = {}".format(mu),
                               r"$\sigma$ = {}".format(sigma),
                               r"$\delta$ = {}".format(mutation_rate)])

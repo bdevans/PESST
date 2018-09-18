@@ -45,11 +45,15 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
     ax1.hlines(mean_initial_fitness, 0, n_amino_acids-1,
                colors="r", linestyles="--", lw=2,
                label=r"$\mu_1$ = {:.2f}".format(mean_initial_fitness))
+    if fitness_threshold > -np.inf:
+        ax1.hlines(fitness_threshold, 0, n_amino_acids-1,
+                   colors="k", linestyles="-", lw=2,
+                   label=r"$\Omega$ = {}".format(fitness_threshold))
     ax1.set_ylim(-scale, scale)
     ax1.set_ylabel(r"$\Delta T_m$")
     ax1.set_xlabel("Amino acid position")
-    ax1.legend(loc="upper left", fontsize=6.5,
-               title=r"$\Omega$ = {}".format(fitness_threshold))
+    ax1.legend(loc="upper left", fontsize=6.5,)
+               # title=r"$\Omega$ = {}".format(fitness_threshold))
     ax1.set_title(r"Fitness distribution of $\Delta T_m$ matrix", size=8)
 
     # Find and plot all fitness values in the current generation
@@ -60,12 +64,16 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
     ax2.hlines(mean_fitness, 0, len(population)-1,
                colors="r", linestyles="--", lw=2,
                label=r"$\mu_2$ = {:.2f}".format(mean_fitness))
+    if fitness_threshold > -np.inf:
+        ax2.hlines(fitness_threshold, 0, len(population)-1,
+                   colors="k", linestyles="-", lw=2,
+                   label=r"$\Omega$ = {}".format(fitness_threshold))
     ax2.set_ylim(-scale, scale)
     ax2.set_xlabel("Protein")
-    ax2.legend(loc="upper left", fontsize=6.5,
-               title=r"$\Omega$ = {}".format(fitness_threshold))
     ax2.set_title("\n".join(wrap("Fitness distribution of every sequence in "
                                  "the evolving dataset", 40)), size=8)
+    ax2.legend(loc="upper left", fontsize=6.5,)
+               # title=r"$\Omega$ = {}".format(fitness_threshold))
 
     # plt.subplots_adjust(top=0.85)
     fig.suptitle(("Generation {}".format(generation)), fontweight='bold')
@@ -93,9 +101,13 @@ def plot_histogram_of_fitness(disthistfullname, distributions, initial,
                              "vs. changing fitness distribution across every "
                              "evolving clone", 60)), fontweight='bold')
     plt.axvline(x=mu2distspace, color="#404040", linestyle=":")
-    plt.text(4.1, 0.4, "\n".join([r"$\mu_1$ = {:.3}".format(mu1distspace),
-                                  r"$\mu_2$ = {:.3}".format(mu2distspace),
-                                  r"$\Omega$ = {}".format(fitness_threshold)]))
+    if fitness_threshold > -np.inf:
+        plt.axvline(x=fitness_threshold, color="k", linestyle="-",
+                    label=r"$\Omega$ = {}".format(fitness_threshold))
+    plt.legend()
+    # plt.text(4.1, 0.4, "\n".join([r"$\mu_1$ = {:.3}".format(mu1distspace),
+    #                               r"$\mu_2$ = {:.3}".format(mu2distspace),
+    #                               r"$\Omega$ = {}".format(fitness_threshold)]))
 
     plt.savefig(disthistfullname)
     plt.close()

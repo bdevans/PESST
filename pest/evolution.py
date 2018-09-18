@@ -533,10 +533,19 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
          n_gens_per_death=5, death_rate=0.05, seed=None,
          gamma=None, record=None):
 
+    # Validate arguments
+    assert 1 < n_amino_acids
+    assert 2 < n_roots < n_clones
+    assert 0 <= mutation_rate <= 1
+    assert 0 < n_gens_per_death < n_generations
+    assert 0 <= death_rate <= 1
+
     # TODO: Add rerun flag to load settings (and seed)
     # settings = json.load(sf)
     if n_anchors is None:
         n_anchors = int(n_amino_acids/10)
+    else:
+        assert n_anchors < n_amino_acids
     # TODO: switch from random to np.random for proper seeding
     if seed is not None:
         np.random.seed(seed)

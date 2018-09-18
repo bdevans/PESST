@@ -139,9 +139,9 @@ def plot_evolution(history, fitness_table, fitness_threshold,
         plt.axhline(fitness_threshold, color="k", lw=2, linestyle="-",
                     label=r"$\Omega$ = {}".format(fitness_threshold))
     if plot_epsilon:  # Add theoretical convergence line
-        epsilon = n_amino_acids * np.mean(fitness_table)
         plt.axhline(epsilon, color="b", lw=2, linestyle="-",
                     label=r"$\epsilon$")
+        epsilon = n_amino_acids * np.mean(fitness_table.values)
     plt.legend(title=legend_title)
 
     # Define dynamic filename

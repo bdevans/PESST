@@ -38,7 +38,8 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
     mean_initial_fitness = np.mean(fitness_table.values)
     scale = round((4 * np.std(fitness_table.values)) + 1)
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
+    fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True,
+                                   gridspec_kw={'width_ratios': [1, 2]})
     # Plot each column of fitness_table as a separate dataseries against 0..N-1
     ax1.plot(fitness_table, "o", color='k', markersize=2)
     ax1.hlines(mean_initial_fitness, 0, n_amino_acids-1,

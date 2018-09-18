@@ -41,7 +41,7 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
     fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True,
                                    gridspec_kw={'width_ratios': [1, 2]})
     # Plot each column of fitness_table as a separate dataseries against 0..N-1
-    ax1.plot(fitness_table, "o", color='k', markersize=2)
+    ax1.plot(fitness_table, "o", color='k', markersize=1)
     ax1.hlines(mean_initial_fitness, 0, n_amino_acids-1,
                colors="r", linestyles="--", lw=2,
                label=r"$\mu_1$ = {:.2f}".format(mean_initial_fitness))
@@ -61,22 +61,26 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
     # x: proteins within population; y: Fitness for each locus for that protein
     # TODO: Swap colour to a particular protein not locus or make monochrome
     ax2.plot(np.arange(len(population)), fitnesses, "o", markersize=1)
+    # ax2.plot(np.arange(len(population)), np.sum(fitnesses, axis=1), "*k", markersize=4, label=r"$\mu_p$")
     ax2.hlines(mean_fitness, 0, len(population)-1,
                colors="r", linestyles="--", lw=2,
-               label=r"$\mu_2$ = {:.2f}".format(mean_fitness))
+               label=r"$\mu_2$ = {:.2f}".format(mean_fitness))  # \mu_\phi ?
     if fitness_threshold > -np.inf:
         ax2.hlines(fitness_threshold, 0, len(population)-1,
                    colors="k", linestyles="-", lw=2,
                    label=r"$\Omega$ = {}".format(fitness_threshold))
     ax2.set_ylim(-scale, scale)
     ax2.set_xlabel("Protein")
-    ax2.set_title("\n".join(wrap("Fitness distribution of every sequence in "
-                                 "the evolving dataset", 40)), size=8)
     ax2.legend(loc="upper left", fontsize=6.5,)
                # title=r"$\Omega$ = {}".format(fitness_threshold))
+    # ax2.set_title("\n".join(wrap("Fitness distribution of every sequence in "
+    #                              "the evolving dataset", 40)), size=8)
+    ax2.set_title("Fitness distribution of every protein in the population",
+                  size=8)
 
     # plt.subplots_adjust(top=0.85)
     fig.suptitle(("Generation {}".format(generation)), fontweight='bold')
+    # fig.tight_layout()
     filename = os.path.join(save_dir, "generation_{}.png".format(generation))
     fig.savefig(filename)
     plt.close()
@@ -92,7 +96,9 @@ def plot_histogram_of_fitness(disthistfullname, distributions, initial,
     plt.hist(initial, 50, density=True, color='k', alpha=0.4)
     plt.title("\n".join(wrap('Fitness distribution of the total fitness space',
                              60)), fontweight='bold')
-    plt.axvline(x=mu1distspace, color="#404040", linestyle=":")
+    # plt.axvline(x=mu1distspace, color="#404040", linestyle=":")
+    plt.axvline(x=mu1distspace, color="k", linestyle=":",
+                label=r"$\mu_1$ = {:.3}".format(mu1distspace))
 
     # Plot normal distribution of the current generation's fitness space
     mu2distspace = sum(distributions) / len(distributions)
@@ -100,7 +106,10 @@ def plot_histogram_of_fitness(disthistfullname, distributions, initial,
     plt.title("\n".join(wrap("Fitness distribution of the total fitness space "
                              "vs. changing fitness distribution across every "
                              "evolving clone", 60)), fontweight='bold')
-    plt.axvline(x=mu2distspace, color="#404040", linestyle=":")
+    # plt.axvline(x=mu2distspace, color="#404040", linestyle=":")
+    plt.axvline(x=mu2distspace, color="r", linestyle=":",
+                label=r"$\mu_1$ = {:.3}".format(mu2distspace))
+
     if fitness_threshold > -np.inf:
         plt.axvline(x=fitness_threshold, color="k", linestyle="-",
                     label=r"$\Omega$ = {}".format(fitness_threshold))
@@ -138,7 +147,7 @@ def plot_evolution(history, fitness_table, fitness_threshold,
 
     # Average across clones
     plt.plot(generation_numbers, np.mean(final_fitnesses, axis=1),
-             "k--", lw=2, label="Mean")
+             "k:", lw=2, label="Mean")
     plt.xlim([0, n_generations])
     plt.xlabel("Generations", fontweight='bold')
     plt.ylabel("$T_m$", fontweight='bold')
@@ -151,9 +160,9 @@ def plot_evolution(history, fitness_table, fitness_threshold,
         plt.axhline(fitness_threshold, color="k", lw=2, linestyle="-",
                     label=r"$\Omega$ = {}".format(fitness_threshold))
     if plot_epsilon:  # Add theoretical convergence line
-        plt.axhline(epsilon, color="b", lw=2, linestyle="-",
-                    label=r"$\epsilon$")
         epsilon = n_amino_acids * np.mean(fitness_table.values)
+        plt.axhline(epsilon, color="b", lw=2, linestyle="--",
+                    label=r"$\epsilon$ = {:.2f}".format(epsilon))
     plt.legend(title=legend_title)
 
     # Define dynamic filename

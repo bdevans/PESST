@@ -422,10 +422,11 @@ def create_tree(n_proteins, n_roots):
 
 
 def calc_gens_per_bifurcation(n_generations, n_clones, n_roots):
+    # TODO: Rewrite with logs
     pool = n_clones - n_roots
     n_phases = 1  # n_bifurations + 1
     # NOTE: Originally this also claimed to stop with 6 leaves per branch
-    while pool >= 6:  # stop when there are 3, 4 or 5 leaves per branch
+    while pool > 5:  # stop when there are 3, 4 or 5 leaves per branch
         pool //= 2  # Floor division
         n_phases += 1
     return int(n_generations/n_phases)  # number of generations per bifurcation
@@ -582,13 +583,14 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
                        "record": record}
     write_settings_file(run_path, settings_kwargs)  # record run settings
     LG_matrix = load_LG_matrix()  # Load LG matrix
-    # Make first fitness dictionary
+    # Make fitness table of Delta T_m values
     fitness_table = get_fitness_table(n_amino_acids, mu, sigma, LG_matrix)
     write_protein_fitness(run_path, "start", fitness_table)
     T_max = sum(np.amax(fitness_table, axis=1))  # Fittest possible protein
     assert fitness_threshold < T_max
 
     # Generate variant/invariant sites
+    # TODO: return boolean array where True is variant
     sites = get_allowed_sites(n_amino_acids, n_anchors)
     # Generate mutation probabilities for every site
     p_location = gamma_ray(n_amino_acids, sites, gamma)
@@ -596,6 +598,7 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
     # Generate a protein of specified fitness taking into account the invariant
     # sites created (calling variables in this order stops the evolutionary
     # process being biased by superfit invariant sites.)
+    # phi
     initial_protein = get_fit_protein(fitness_start, n_amino_acids, sites,
                                       fitness_table)
     # print_protein(initial_protein)
@@ -606,6 +609,7 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
     # assert initial_fitness < T_max
 
     initial_population = clone_protein(initial_protein, n_clones)  # copy
+    # Population = namedtuple('Population', ['proteins', 'sites', 'fitnesses'])
 
     # Generate list of clone keys for bifurication
     tree = create_tree(n_clones, n_roots)

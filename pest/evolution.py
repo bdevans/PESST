@@ -529,7 +529,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
 
 
 def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, sigma=2.5,
-         n_clones=52, n_roots=4, n_amino_acids=80, n_anchors=None, mutation_rate=0.001,
+         n_clones=52, n_roots=4, n_amino_acids=100, n_anchors=None, mutation_rate=0.001,
          n_gens_per_death=5, death_rate=0.05, seed=None,
          gamma=None, record=None):
 

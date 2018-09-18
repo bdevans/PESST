@@ -45,7 +45,7 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
     ax1.plot(fitness_table, "o", color='k', markersize=1)
     ax1.hlines(mean_initial_fitness, 0, n_amino_acids-1,
                colors="r", linestyles="--", lw=2,
-               label=r"$\mu_1$ = {:.2f}".format(mean_initial_fitness))
+               label=r"$\mu_0$ = {:.2f}".format(mean_initial_fitness))
     if fitness_threshold > -np.inf:
         ax1.hlines(fitness_threshold, 0, n_amino_acids-1,
                    colors="k", linestyles="-", lw=2,
@@ -65,7 +65,7 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
     # ax2.plot(np.arange(len(population)), np.sum(fitnesses, axis=1), "*k", markersize=4, label=r"$\mu_p$")
     ax2.hlines(mean_fitness, 0, len(population)-1,
                colors="r", linestyles="--", lw=2,
-               label=r"$\mu_2$ = {:.2f}".format(mean_fitness))  # \mu_\phi ?
+               label=r"$\mu_p$ = {:.2f}".format(mean_fitness))  # \mu_\phi ?
     if fitness_threshold > -np.inf:
         ax2.hlines(fitness_threshold, 0, len(population)-1,
                    colors="k", linestyles="-", lw=2,

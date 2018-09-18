@@ -176,7 +176,7 @@ def plot_histogram_of_fitness(disthistfullname, distributions, initial,
                              60)), fontweight='bold')
     # plt.axvline(x=mu1distspace, color="#404040", linestyle=":")
     plt.axvline(x=mu1distspace, color="k", linestyle=":",
-                label=r"$\mu_1$ = {:.3}".format(mu1distspace))
+                label=r"$\mu_0$ = {:.3}".format(mu1distspace))
 
     # Plot normal distribution of the current generation's fitness space
     mu2distspace = sum(distributions) / len(distributions)
@@ -186,7 +186,7 @@ def plot_histogram_of_fitness(disthistfullname, distributions, initial,
                              "evolving clone", 60)), fontweight='bold')
     # plt.axvline(x=mu2distspace, color="#404040", linestyle=":")
     plt.axvline(x=mu2distspace, color="r", linestyle=":",
-                label=r"$\mu_1$ = {:.3}".format(mu2distspace))
+                label=r"$\mu_p$ = {:.3}".format(mu2distspace))
 
     if fitness_threshold > -np.inf:
         plt.axvline(x=fitness_threshold, color="k", linestyle="-",

@@ -17,13 +17,16 @@ import pandas as pd
 
 
 def load_LG_matrix(full_file_name=None):
-    """Load amino acid substitution probabilities matrix.
+    """Load amino acid transition probabilities matrix.
 
     Load .csv file defining aa substitution probabilities calculated from R
-    matrix multiplied by PI matrix, with diagonals forced to zero as mutation
-    has to happen then converted to event rates p(lambda) where lambda = sum Qx
-    and p(lambda)x=Qxy/lambda.
+    matrix multiplied by PI matrix, with diagonals set to zero to force
+    mutation then converted to event rates p(lambda) where:
+    lambda = sum Qx
+    and
+    p(lambda) x = Qxy / lambda.
     """
+    # TODO: Check: p(lambda) x = Qxy / lambda
     if full_file_name is None:
         full_file_name = os.path.join("data", "LGaa.csv")
     LG_matrix = pd.read_csv(full_file_name, index_col="Original")

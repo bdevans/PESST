@@ -18,7 +18,7 @@ n_roots = 4
 n_gens_per_death = 5  # TODO: Remove
 death_rate = 0.05  # Set to 0 to turn off protein deaths
 
-n_amino_acids = 80  # number of amino acids in the protein including the start methionine TODO: Rename to protein_length
+n_amino_acids = 100  # number of amino acids in the protein including the start methionine TODO: Rename to protein_length
 # TODO: Change to n_anchors = p_anchored * n_amino_acids
 n_anchors = int(n_amino_acids/10)  # amount of invariant sites in a generation (not including root)
 

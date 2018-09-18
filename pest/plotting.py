@@ -250,7 +250,7 @@ def plot_evolution(history, fitness_table, fitness_threshold,
     return
 
 
-def plot_gamma_distribution(gamma, quartiles, average_medians):
+def plot_gamma_distribution(gamma, quartiles, average_medians, run_path):
     """Plot the distribution along with the quartiles and medians."""
     kappa, theta, n_iterations, n_samples = (gamma["shape"],
                                              gamma["scale"],
@@ -260,7 +260,9 @@ def plot_gamma_distribution(gamma, quartiles, average_medians):
     x = np.linspace(0, 6, 1000)
     y = x ** (kappa - 1) * (np.exp(-x / theta)
                             / (stats.gamma(kappa).pdf(x) * theta ** kappa))
-    plt.plot(x, y, linewidth=2, color='k', alpha=0)
+    plt.plot(x, y, linewidth=2, color='k', alpha=0,
+             label="\n".join([r"$\kappa$ = {}".format(kappa),
+                              r"$\theta$ = $\frac{1}{\kappa}$"]))
     plt.fill_between(x, y, where=x > quartiles[0], color='#4c4cff')
     plt.fill_between(x, y, where=x > quartiles[1], color='#7f7fff')
     plt.fill_between(x, y, where=x > quartiles[2], color='#b2b2ff')
@@ -274,9 +276,10 @@ def plot_gamma_distribution(gamma, quartiles, average_medians):
                              "quartiles of {} randomly sampled vaules"
                              .format(n_iterations, n_samples), 60)),
               fontweight='bold', fontsize=10)
-    plt.text(5, 0.6, r"$\kappa$ = %s\n$\theta$ = $\frac{1}{\kappa}$" % (kappa))
+    # plt.text(5, 0.6, r"$\kappa$ = %s\n$\theta$ = $\frac{1}{\kappa}$" % (kappa))
+    plt.legend()
     plt.show()
-    plt.savefig(os.path.join(".", "gamma.png"))
+    plt.savefig(os.path.join(run_path, "start", "gamma.png"))
 
 
 def plot_fitness_table(fitness_table, run_path):

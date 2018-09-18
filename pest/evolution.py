@@ -58,7 +58,7 @@ def get_allowed_sites(n_amino_acids, n_anchors):
     return Sites(invariant=anchored_sequences, variant=allowed_values)
 
 
-def gamma_ray(n_amino_acids, sites, gamma):
+def gamma_ray(n_amino_acids, sites, gamma, run_path):
     """Generate a set of gamma rate categories.
 
     Does so by sampling many times from a gamma distribution.
@@ -93,8 +93,7 @@ def gamma_ray(n_amino_acids, sites, gamma):
     average_medians = np.mean(medians, axis=0)
 
     # Replot the gamma distributuion as a check
-    if False:
-        plot_gamma_distribution(gamma, quartiles, average_medians)
+    plot_gamma_distribution(gamma, quartiles, average_medians, run_path)
 
     gamma_categories = np.random.choice(average_medians, size=n_amino_acids)
     gamma_categories[sites.invariant] = 0
@@ -598,7 +597,7 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
     # TODO: return boolean array where True is variant
     sites = get_allowed_sites(n_amino_acids, n_anchors)
     # Generate mutation probabilities for every site
-    p_location = gamma_ray(n_amino_acids, sites, gamma)
+    p_location = gamma_ray(n_amino_acids, sites, gamma, run_path)  # TODO: Move plotting out
 
     # Generate a protein of specified fitness taking into account the invariant
     # sites created (calling variables in this order stops the evolutionary

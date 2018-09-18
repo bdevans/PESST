@@ -551,7 +551,7 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
         assert n_anchors < n_amino_acids
 
     if fitness_start == "low":
-        warnings.warn("With low starting fitness selected Omega is ignored.")
+        warnings.warn("With 'low' starting fitness selected Omega is ignored.")
                       # "If the run fails, please check your fitness threshold,"
                       # "omega, is low enough: {}".format(fitness_threshold))
         plot_omega, plot_epsilon = False, True

@@ -20,8 +20,8 @@ def load_LG_matrix(full_file_name=None):
     """Load amino acid transition probabilities matrix.
 
     Load .csv file defining aa substitution probabilities calculated from R
-    matrix multiplied by PI matrix, with diagonals set to zero to force
-    mutation then converted to event rates p(lambda) where:
+    matrix multiplied by PI matrix, with normalised rows and diagonals set to
+    zero to force mutation then converted to event rates p(lambda) where:
     lambda = sum Qx
     and
     p(lambda) x = Qxy / lambda.

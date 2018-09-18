@@ -586,6 +586,7 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
     # Make fitness table of Delta T_m values
     fitness_table = get_fitness_table(n_amino_acids, mu, sigma, LG_matrix)
     write_protein_fitness(run_path, "start", fitness_table)
+    plot_fitness_table(fitness_table, run_path)
     T_max = sum(np.amax(fitness_table, axis=1))  # Fittest possible protein
     assert fitness_threshold < T_max
 

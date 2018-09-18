@@ -3,6 +3,7 @@ from textwrap import wrap
 
 import numpy as np
 from matplotlib import pyplot as plt
+import seaborn as sns
 from scipy import stats  # gamma
 
 # from .evolution import calculate_fitness, get_random_protein
@@ -199,3 +200,18 @@ def plot_gamma_distribution(gamma, quartiles, average_medians):
     plt.text(5, 0.6, r"$\kappa$ = %s\n$\theta$ = $\frac{1}{\kappa}$" % (kappa))
     plt.show()
     plt.savefig(os.path.join(".", "gamma.png"))
+
+
+def plot_fitness_table(fitness_table, run_path):
+
+    (n_amino_acids, n_variants) = fitness_table.shape
+    fig, ax = plt.subplots(figsize=(8, n_amino_acids/5))
+    sns.heatmap(fitness_table, center=0, annot=True, fmt=".2f", linewidths=.5,
+                cmap="RdBu_r", annot_kws={"size": 5},
+                cbar_kws={"label": r"$\Delta T_m$"}, ax=ax)
+    ax.xaxis.set_ticks_position('top')
+    ax.set_xlabel("Amino Acid")
+    ax.set_ylabel("Location")
+    filename = os.path.join(run_path, "start", "fitness_table.png")
+    fig.savefig(filename)
+    plt.close()

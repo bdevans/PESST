@@ -10,7 +10,7 @@ dependencies:
   - matplotlib
   - tqdm
   - pandas
-  # - seaborn
+  - seaborn
   # - dill
   # - joblib
   # - h5py

@@ -215,3 +215,18 @@ def plot_fitness_table(fitness_table, run_path):
     filename = os.path.join(run_path, "start", "fitness_table.png")
     fig.savefig(filename)
     plt.close()
+
+
+def plot_LG_matrix(LG_matrix, run_path):
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+    sns.heatmap(LG_matrix, annot=True, fmt=".2f", linewidths=.5,
+                square=True, annot_kws={"size": 5},  # vmin=0, vmax=1,
+                cbar_kws={"label": r"$\Delta T_m$"}, ax=ax)
+    ax.xaxis.set_ticks_position('top')
+    ax.set_xlabel("Amino Acid")
+    ax.set_ylabel("Amino Acid")
+    ax.set_title("LG model transition probabilities")
+    filename = os.path.join(run_path, "start", "LG_matrix.png")
+    fig.savefig(filename)
+    plt.close()

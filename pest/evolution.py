@@ -19,7 +19,8 @@ from .dataio import (create_output_folders, write_settings_file,
                      write_fasta_alignment, write_final_fasta, load_LG_matrix,
                      write_histogram_statistics, append_ks_statistics)
 from .plotting import (plot_evolution, plot_gamma_distribution,
-                       plot_threshold_fitness, plot_histogram_of_fitness)
+                       plot_threshold_fitness, plot_histogram_of_fitness,
+                       plot_fitness_space, plot_fitness_table, plot_LG_matrix)
 
 
 def get_fitness_table(n_amino_acids, mu, sigma, LG_matrix):
@@ -583,6 +584,7 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
                        "record": record}
     write_settings_file(run_path, settings_kwargs)  # record run settings
     LG_matrix = load_LG_matrix()  # Load LG matrix
+    plot_LG_matrix(LG_matrix, run_path)
     # Make fitness table of Delta T_m values
     fitness_table = get_fitness_table(n_amino_acids, mu, sigma, LG_matrix)
     write_protein_fitness(run_path, "start", fitness_table)

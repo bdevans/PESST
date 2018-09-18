@@ -585,6 +585,8 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
     # Make first fitness dictionary
     fitness_table = get_fitness_table(n_amino_acids, mu, sigma, LG_matrix)
     write_protein_fitness(run_path, "start", fitness_table)
+    T_max = sum(np.amax(fitness_table, axis=1))  # Fittest possible protein
+    assert fitness_threshold < T_max
 
     # Generate variant/invariant sites
     sites = get_allowed_sites(n_amino_acids, n_anchors)

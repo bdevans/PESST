@@ -87,6 +87,83 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
     plt.close()
 
 
+def plot_fitness_space(generation, population, fitnesses, fitness_table,
+                       fitness_threshold, save_dir):
+    # Store fitness values for each amino in the dataset for the left subfigure
+    (n_amino_acids, n_variants) = fitness_table.shape
+    # Average across flattened array
+    # mean_initial_fitness = np.mean(fitness_table.values)
+    scale = round((4 * np.std(fitness_table.values)) + 1)
+    T_max = sum(np.amax(fitness_table, axis=1))  # Fittest possible protein
+
+    fig, (ax_arr) = plt.subplots(2, 2, sharey='row', #  sharex='col',
+                                 gridspec_kw={'width_ratios': [4, 1],
+                                              'height_ratios': [1, 2]})
+    # Plot each column of fitness_table as a separate dataseries against 0..N-1
+    # ax1.plot(fitness_table, "o", color='k', markersize=1)
+    # ax1.hlines(mean_initial_fitness, 0, n_amino_acids-1,
+    #            colors="r", linestyles="--", lw=2,
+    #            label=r"$\mu_1$ = {:.2f}".format(mean_initial_fitness))
+    # if fitness_threshold > -np.inf:
+    #     ax1.hlines(fitness_threshold, 0, n_amino_acids-1,
+    #                colors="k", linestyles="-", lw=2,
+    #                label=r"$\Omega$ = {}".format(fitness_threshold))
+    # ax1.set_ylim(-scale, scale)
+    # ax1.set_ylabel(r"$\Delta T_m$")
+    # ax1.set_xlabel("Amino acid position")
+    # ax1.legend(loc="upper left", fontsize=6.5,)
+               # title=r"$\Omega$ = {}".format(fitness_threshold))
+    # ax1.set_title(r"Fitness distribution of $\Delta T_m$ matrix", size=8)
+
+    # Find and plot all fitness values in the current generation
+    mean_fitness = np.mean(fitnesses)
+    # x: proteins within population; y: Fitness for each locus for that protein
+    # TODO: Swap colour to a particular protein not locus or make monochrome
+    ax_arr[0, 0].plot(np.arange(len(population)), np.sum(fitnesses, axis=1), "*k", markersize=4, label=r"$\mu_p$")
+    ax_arr[0, 1].hist(np.sum(fitnesses, axis=1), bins=10, align='mid', orientation='horizontal', density=True)
+    ax_arr[0, 0].hlines(np.mean(np.sum(fitnesses, axis=1)), 0, len(population)-1,
+                        colors="r", linestyles="--", lw=2,
+                        label=r"$\mu_\phi$ = {:.2f}".format(mean_fitness))  # \mu_\phi ?
+    # epsilon = n_amino_acids * np.mean(fitness_table.values)
+    # ax_arr[0, 0].hlines(epsilon, 0, len(population)-1,
+    #                     colors="k", linestyles="-", lw=2,
+    #                     label=r"$\epsilon$ = {}".format(epsilon))
+    if fitness_threshold > -np.inf:
+        ax_arr[0, 0].hlines(fitness_threshold, 0, len(population)-1,
+                            colors="k", linestyles="-", lw=2,
+                            label=r"$\Omega$ = {}".format(fitness_threshold))
+
+    ax_arr[1, 0].plot(np.arange(len(population)), fitnesses, "o", markersize=1)
+    ax_arr[1, 1].hist(fitnesses.ravel(), bins=20, align='mid', orientation='horizontal', density=True)
+
+    ax_arr[1, 0].hlines(mean_fitness, 0, len(population)-1,
+                        colors="r", linestyles="--", lw=2,
+                        label=r"$\mu_p$ = {:.2f}".format(mean_fitness))  # \mu_\phi ?
+    if fitness_threshold > -np.inf:
+        ax_arr[1, 0].hlines(fitness_threshold, 0, len(population)-1,
+                            colors="k", linestyles="-", lw=2,
+                            label=r"$\Omega$ = {}".format(fitness_threshold))
+
+    ax_arr[0, 0].set_ylim(None, round(T_max))
+    ax_arr[1, 0].set_ylim(-scale, scale)
+    ax_arr[1, 0].set_xlabel("Protein")
+    ax_arr[1, 1].set_xlabel("Density")
+    ax_arr[1, 0].set_ylabel(r"$\Delta T_m$")
+    ax_arr[1, 0].legend(loc="upper left", fontsize=6.5,)
+               # title=r"$\Omega$ = {}".format(fitness_threshold))
+    # ax2.set_title("\n".join(wrap("Fitness distribution of every sequence in "
+    #                              "the evolving dataset", 40)), size=8)
+    ax_arr[1, 0].set_title("Fitness distribution of every protein in the population",
+                  size=8)
+
+    # plt.subplots_adjust(top=0.85)
+    fig.suptitle(("Generation {}".format(generation)), fontweight='bold')
+    fig.tight_layout()
+    filename = os.path.join(save_dir, "fit_dist_gen_{}.png".format(generation))
+    fig.savefig(filename)
+    plt.close()
+
+
 def plot_histogram_of_fitness(disthistfullname, distributions, initial,
                               fitness_threshold):
     plt.figure()

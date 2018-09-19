@@ -328,8 +328,8 @@ def record_generation_fitness(generation, population, variant_sites,
     """
 
     # Build distribution of fitness values existing in evolving protein
-    fitnesses = build_generation_fitness_table(population, variant_sites,
-                                               fitness_table, record)
+    fitnesses = get_phi_fitness_table(population, variant_sites,
+                                      fitness_table, record)
 
     if record["dot_fitness"]:
         save_dir = os.path.join(run_path, "fitnessdotmatrix")
@@ -362,7 +362,7 @@ def record_generation_fitness(generation, population, variant_sites,
                                   fitness_threshold)
 
 
-def build_generation_fitness_table(population, variant_sites, fitness_table, record):
+def get_phi_fitness_table(population, variant_sites, fitness_table, record):
     """Build a fitness table for given generation's population.
 
     The array has one row for each protein in the population and the fitness

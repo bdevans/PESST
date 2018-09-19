@@ -20,7 +20,8 @@ from .dataio import (create_output_folders, write_settings_file,
                      write_histogram_statistics, append_ks_statistics)
 from .plotting import (plot_evolution, plot_gamma_distribution,
                        plot_threshold_fitness, plot_histogram_of_fitness,
-                       plot_fitness_space, plot_fitness_table, plot_LG_matrix)
+                       plot_fitness_space, plot_fitness_table, plot_LG_matrix,
+                       plot_phi_fitness_table)
 
 
 def get_fitness_table(n_amino_acids, mu, sigma, LG_matrix):
@@ -322,7 +323,7 @@ def calculate_population_fitness(population, fitness_table):
 
 
 def record_generation_fitness(generation, population, variant_sites,
-                              fitness_table, fitness_threshold, record, run_path):
+                              fitness_table, fitness_threshold, p_location, record, run_path):
     """Record the fitness of every protein in the generation and store them in
     dictionary. Optionally generate data and figures about fitness.
     """
@@ -330,6 +331,7 @@ def record_generation_fitness(generation, population, variant_sites,
     # Build distribution of fitness values existing in evolving protein
     fitnesses = get_phi_fitness_table(population, variant_sites,
                                       fitness_table, record)
+    plot_phi_fitness_table(generation, fitnesses, p_location, run_path)
 
     if record["dot_fitness"]:
         save_dir = os.path.join(run_path, "fitnessdotmatrix")
@@ -479,7 +481,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
     fitnesses = calculate_population_fitness(population, fitness_table)
     # Record initial population
     record_generation_fitness(0, population, sites.variant,
-                              fitness_table, fitness_threshold,
+                              fitness_table, fitness_threshold, p_location,
                               record, run_path)
     write_fasta_alignment(0, population, run_path)
 
@@ -525,7 +527,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
         if (gen+1) % record["rate"] == 0:
             record_generation_fitness(gen+1, population, sites.variant,
                                       fitness_table, fitness_threshold,
-                                      record, run_path)
+                                      p_location, record, run_path)
 
     write_final_fasta(population, tree, run_path)
     return history

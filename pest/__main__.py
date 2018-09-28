@@ -29,7 +29,7 @@ mu = -1.2
 sigma = 2.5
 mutation_rate = 0.001  # Proportion of the total amino acids in mutating in the population each gnereation - should be small!
 
-seed = 42
+seed = None  # Maximum seed: 2**32 - 1
 
 # TODO: Put into dictionary
 population = {"n_proteins": n_clones,

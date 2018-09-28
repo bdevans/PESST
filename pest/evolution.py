@@ -562,9 +562,11 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
         plot_omega, plot_epsilon = True, True
 
     # TODO: switch from random to np.random for proper seeding
-    if seed is not None:
-        np.random.seed(seed)
-        random.seed(seed)
+    if seed is None:
+        # Get a random integer to seed both
+        seed = random.randrange(2**32)
+    np.random.seed(seed)
+    random.seed(seed)
 
     # TODO: Put run_path (and subdirs) in record dict
     # create folder and subfolders

@@ -353,7 +353,7 @@ def record_generation_fitness(generation, population, variant_sites,
             distributions = fitnesses
         stats_full_name = os.path.join(run_path, "fitnessdistribution",
                                        "statistics", stats_file_name)
-        write_histogram_statistics(stats_full_name, distributions, record)
+        write_histogram_statistics(stats_full_name, distributions)
         if generation > 0:
             append_ks_statistics(stats_full_name, distributions.ravel(),
                                  fitness_table.values.ravel())

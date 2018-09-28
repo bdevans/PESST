@@ -336,7 +336,7 @@ def record_generation_fitness(generation, population, variant_sites,
                                       fitness_table, record)
     plot_phi_fitness_table(generation, fitnesses, p_location, run_path)
 
-    if record["dot_fitness"]:
+    if record["residues"]:
         save_dir = os.path.join(run_path, "fitnessdotmatrix")
         plot_threshold_fitness(generation, population, fitnesses,
                                fitness_table, omega, save_dir)
@@ -638,7 +638,7 @@ def pest(n_generations=2000, fitness_start='high', omega=0, mu=0, sigma=2.5,
     # Create animations
     if record["gif"]:
         record_generations = list(range(0, n_generations+1, record["rate"]))
-        if record["dot_fitness"]:
+        if record["residues"]:
             for root in ["fit_dist_gen_", "generation_", "phi_fitness_table_"]:
                 path_root = os.path.join(run_path, "fitnessdotmatrix", root)
                 filenames = [path_root+"{}.png".format(gen)

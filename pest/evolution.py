@@ -429,7 +429,6 @@ def calc_gens_per_bifurcation(n_generations, n_clones, n_roots):
     # TODO: Rewrite with logs
     pool = n_clones - n_roots
     n_phases = 1  # n_bifurations + 1
-    # NOTE: Originally this also claimed to stop with 6 leaves per branch
     while pool > 5:  # stop when there are 3, 4 or 5 leaves per branch
         pool //= 2  # Floor division
         n_phases += 1

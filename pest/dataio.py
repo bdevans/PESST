@@ -216,7 +216,6 @@ def write_final_fasta(population, tree, run_path):
     """
     tree_size = sum([len(branch) for branch in tree["branches"]])
     average_branch_size = tree_size / len(tree["branches"])
-    # NOTE: Originally claimed 4 --> 2
     n_clones_to_take = int((average_branch_size-1)/2)  # if 5, gives 2, if 4 gives 1, if 3 gives 1.
     # Choose a random selection of proteins from each branch
     selection = []

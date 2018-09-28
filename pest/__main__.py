@@ -1,4 +1,4 @@
-import matplotlib as mpl
+# import matplotlib as mpl
 from matplotlib import pyplot as plt
 
 from pest.evolution import pest

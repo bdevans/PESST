@@ -233,7 +233,7 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
 # TODO: Refactor for efficiency?
 # def mutate_population(current_generation, n_mutations_per_gen, tree,
 #                       variant_sites, p_location, LG_matrix,
-#                       fitness_table, fitness_threshold):
+#                       fitness_table, omega):
 #     """Mutate a set of sequences based on the LG+I+G model of amino acid
 #     substitution.
 #     """
@@ -254,9 +254,9 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
 #             # next_generation[pi] = mutant  # update with new sequence
 #             fitness = calculate_fitness(mutant, fitness_table)
 #
-#             if fitness < fitness_threshold:  # if fitness is less than threshold clone a random sequence in its place.
+#             if fitness < omega:  # if fitness is less than threshold clone a random sequence in its place.
 #                 mutant_index = replace_protein(pi, tree, fitnesses,
-#                                                fitness_threshold)
+#                                                omega)
 #                 # If no suitable clones are available, re-mutate the generation and start again
 #                 if mutant_index is None:
 #                     successful_mutation = False
@@ -275,7 +275,7 @@ def get_fit_protein(fitness_level, n_amino_acids, sites, fitness_table):
 
 
 def mutate_population(current_generation, n_mutations_per_gen, tree,
-                      p_location, LG_matrix, fitness_table, fitness_threshold):
+                      p_location, LG_matrix, fitness_table, omega):
     """Mutate a set of sequences based on the LG+I+G model of amino acid
     substitution.
     """
@@ -295,9 +295,8 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
         fitnesses = calculate_population_fitness(next_generation, fitness_table)
 
         for pi in range(len(fitnesses)):
-            if fitnesses[pi] < fitness_threshold:  # clone a random sequence
-                mutant_index = replace_protein(pi, tree, fitnesses,
-                                               fitness_threshold)
+            if fitnesses[pi] < omega:  # clone a random sequence
+                mutant_index = replace_protein(pi, tree, fitnesses, omega)
                 # If no suitable clones are available, re-mutate and try again
                 if mutant_index is None:
                     successful_mutation = False
@@ -325,7 +324,7 @@ def calculate_population_fitness(population, fitness_table):
 
 
 def record_generation_fitness(generation, population, variant_sites,
-                              fitness_table, fitness_threshold, p_location, record, run_path):
+                              fitness_table, omega, p_location, record, run_path):
     """Record the fitness of every protein in the generation and store them in
     dictionary. Optionally generate data and figures about fitness.
     """
@@ -338,9 +337,9 @@ def record_generation_fitness(generation, population, variant_sites,
     if record["dot_fitness"]:
         save_dir = os.path.join(run_path, "fitnessdotmatrix")
         plot_threshold_fitness(generation, population, fitnesses,
-                               fitness_table, fitness_threshold, save_dir)
+                               fitness_table, omega, save_dir)
         plot_fitness_space(generation, population, fitnesses, fitness_table,
-                           fitness_threshold, save_dir)
+                           omega, save_dir)
 
     if record["hist_fitness_stats"]:
         # Record 5 statistical tests on the protein fitness space
@@ -362,8 +361,7 @@ def record_generation_fitness(generation, population, variant_sites,
         disthistfullname = os.path.join(run_path, "fitnessdistribution",
                                         "histograms", disthistfilename)
         plot_histogram_of_fitness(disthistfullname, fitnesses.ravel(),
-                                  fitness_table.values.ravel(),
-                                  fitness_threshold)
+                                  fitness_table.values.ravel(), omega)
 
 
 def get_phi_fitness_table(population, variant_sites, fitness_table, record):
@@ -388,10 +386,10 @@ def get_phi_fitness_table(population, variant_sites, fitness_table, record):
     return np.asarray(dist_clone_fitness)
 
 
-def select_from_pool(protein_index, candidates, fitnesses, fitness_threshold):
+def select_from_pool(protein_index, candidates, fitnesses, omega):
     """Filter out original protein and those below the fitness threshold."""
     pool = [c for c in candidates
-            if c != protein_index and fitnesses[c] >= fitness_threshold]
+            if c != protein_index and fitnesses[c] >= omega]
     if len(pool) > 0:
         new_protein_index = random.choice(pool)
     else:
@@ -399,16 +397,16 @@ def select_from_pool(protein_index, candidates, fitnesses, fitness_threshold):
     return new_protein_index
 
 
-def replace_protein(protein_index, tree, fitnesses, fitness_threshold):
+def replace_protein(protein_index, tree, fitnesses, omega):
 
     if protein_index in tree["roots"]:
         new_index = select_from_pool(protein_index, tree["roots"], fitnesses,
-                                     fitness_threshold)
+                                     omega)
     else:  # Protein is in one of the branches
         for branch in tree["branches"]:
             if protein_index in branch:
                 new_index = select_from_pool(protein_index, branch, fitnesses,
-                                             fitness_threshold)
+                                             omega)
     return new_index
 
 
@@ -447,13 +445,13 @@ def bifurcate_branches(branches):
     return new_bifurcations[:]
 
 
-def kill_proteins(population, tree, death_rate, fitness_table, fitness_threshold):
+def kill_proteins(population, tree, death_rate, fitness_table, omega):
     n_clones = len(population)
     mortals = random.sample(range(n_clones), int(n_clones*death_rate))
     # Recalculate fitnesses after all mutations
     fitnesses = calculate_population_fitness(population, fitness_table)
     for pi in mortals:
-        new_index = replace_protein(pi, tree, fitnesses, fitness_threshold)
+        new_index = replace_protein(pi, tree, fitnesses, omega)
         if new_index is None:  # Should never happen
             warnings.warn("Unable to kill protein {}!".format(pi))
             raise Exception("No suitable candidates on branch!")
@@ -462,7 +460,7 @@ def kill_proteins(population, tree, death_rate, fitness_table, fitness_threshold
     return population
 
 
-def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
+def evolve(n_generations, initial_population, fitness_table, omega,
            sites, p_location, mutation_rate, n_gens_per_death, death_rate,
            tree, LG_matrix, record, run_path):
     """Generation generator - mutate a protein for a defined number of
@@ -482,7 +480,7 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
     fitnesses = calculate_population_fitness(population, fitness_table)
     # Record initial population
     record_generation_fitness(0, population, sites.variant,
-                              fitness_table, fitness_threshold, p_location,
+                              fitness_table, omega, p_location,
                               record, run_path)
     write_fasta_alignment(0, population, run_path)
 
@@ -506,13 +504,12 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
                                                          n_mutations_per_gen,
                                                          tree, p_location,
                                                          LG_matrix,
-                                                         fitness_table,
-                                                         fitness_threshold)
+                                                         fitness_table, omega)
 
         # Allow sequences to die and be replacecd at a predefined rate
         if death_rate > 0 and (gen+1) % n_gens_per_death == 0:
             next_generation = kill_proteins(next_generation, tree, death_rate,
-                                            fitness_table, fitness_threshold)
+                                            fitness_table, omega)
 
         final_fitnesses = calculate_population_fitness(next_generation,
                                                        fitness_table)
@@ -527,14 +524,14 @@ def evolve(n_generations, initial_population, fitness_table, fitness_threshold,
         # Record population details at the end of processing
         if (gen+1) % record["rate"] == 0:
             record_generation_fitness(gen+1, population, sites.variant,
-                                      fitness_table, fitness_threshold,
-                                      p_location, record, run_path)
+                                      fitness_table, omega, p_location,
+                                      record, run_path)
 
     write_final_fasta(population, tree, run_path)
     return history
 
 
-def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, sigma=2.5,
+def pest(n_generations=2000, fitness_start='high', omega=0, mu=0, sigma=2.5,
          n_clones=52, n_roots=4, n_amino_acids=100, n_anchors=None, mutation_rate=0.001,
          n_gens_per_death=5, death_rate=0.05, seed=None,
          gamma=None, record=None):
@@ -556,9 +553,9 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
     if fitness_start == "low":
         warnings.warn("With 'low' starting fitness selected Omega is ignored.")
                       # "If the run fails, please check your fitness threshold,"
-                      # "omega, is low enough: {}".format(fitness_threshold))
+                      # "omega, is low enough: {}".format(omega))
         plot_omega, plot_epsilon = False, True
-        fitness_threshold = -np.inf
+        omega = -np.inf
     else:
         plot_omega, plot_epsilon = True, True
 
@@ -575,7 +572,7 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
     run_path = create_output_folders()
     settings_kwargs = {"n_generations": n_generations,
                        "fitness_start": fitness_start,
-                       "fitness_threshold": fitness_threshold,
+                       "omega": omega,
                        "mu": mu,
                        "sigma": sigma,
                        "n_clones": n_clones,
@@ -596,7 +593,7 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
     write_protein_fitness(run_path, "start", fitness_table)
     plot_fitness_table(fitness_table, run_path)
     T_max = sum(np.amax(fitness_table, axis=1))  # Fittest possible protein
-    assert fitness_threshold < T_max
+    assert omega < T_max
 
     # Generate variant/invariant sites
     # TODO: return boolean array where True is variant
@@ -613,7 +610,7 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
     # print_protein(initial_protein)
     write_initial_protein(initial_protein, run_path)  # Record initial protein
     initial_fitness = calculate_fitness(initial_protein, fitness_table)
-    if initial_fitness < fitness_threshold:
+    if initial_fitness < omega:
         raise Exception("The fitness threshold is too high!")
     # assert initial_fitness < T_max
 
@@ -626,15 +623,15 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
     write_roots(rootsfullname, tree["roots"])
 
     history = evolve(n_generations, initial_population, fitness_table,
-                     fitness_threshold, sites, p_location, mutation_rate,
+                     omega, sites, p_location, mutation_rate,
                      n_gens_per_death, death_rate, tree, LG_matrix,
                      record, run_path)
 
     legend_title = "; ".join([r"$\mu$ = {}".format(mu),
                               r"$\sigma$ = {}".format(sigma),
                               r"$\delta$ = {}".format(mutation_rate)])
-    plot_evolution(history, fitness_table, fitness_threshold,
-                   plot_omega, plot_epsilon, run_path, legend_title)
+    plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
+                   run_path, legend_title)
 
     # Create animations
     if record["gif"]:

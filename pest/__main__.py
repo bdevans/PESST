@@ -22,8 +22,8 @@ n_amino_acids = 100  # number of amino acids in the protein including the start 
 # TODO: Change to n_anchors = p_anchored * n_amino_acids
 n_anchors = int(n_amino_acids/10)  # amount of invariant sites in a generation (not including root)
 
-fitness_threshold = 0  # arbitrary number for fitness threshold
-fitness_start = (fitness_threshold + 10, fitness_threshold + 20)  # high, (x, y) or low; must be lower case. If selecting low, fitness threshold needs to be significantly smaller (i.e. 4x) than #positions*mu
+omega = 0  # arbitrary number for fitness threshold
+fitness_start = (omega + 10, omega + 20)  # high, (x, y) or low; must be lower case. If selecting low, fitness threshold needs to be significantly smaller (i.e. 4x) than #positions*mu
 # parameters for normal distribution used to select fitness values
 mu = -1.2
 sigma = 2.5
@@ -38,7 +38,7 @@ population = {"n_proteins": n_clones,
               "bifurcate": True}
 
 fitness = {"start": fitness_start,
-           "omega": fitness_threshold,
+           "omega": omega,  # Stability threshold
            "mu": mu,
            "sigma": sigma,
            "delta": mutation_rate}
@@ -58,6 +58,6 @@ record = {"rate": 50,           # write a new fasta file every x generations
           "invariants": False,
           "gif": False}
 
-history = pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
+history = pest(n_generations, fitness_start, omega, mu, sigma,
                n_clones, n_roots, n_amino_acids, n_anchors, mutation_rate,
                n_gens_per_death, death_rate, seed, gamma, record)

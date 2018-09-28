@@ -343,7 +343,7 @@ def record_generation_fitness(generation, population, variant_sites,
         plot_fitness_space(generation, population, fitnesses, fitness_table,
                            omega, save_dir)
 
-    if record["hist_fitness_stats"]:
+    if record["statistics"]:
         # Record 5 statistical tests on the protein fitness space
         if generation == 0:
             stats_file_name = "normal_distribution_statistics_fitness_space.md"
@@ -645,7 +645,7 @@ def pest(n_generations=2000, fitness_start='high', omega=0, mu=0, sigma=2.5,
                              for gen in record_generations]
                 create_gif(filenames, duration=0.5)
 
-        if record["hist_fitness_stats"]:
+        if record["statistics"]:
             path_root = os.path.join(run_path, "fitnessdistribution", "histograms", "generation_")
             filenames = [path_root+"{}.png".format(gen)
                          for gen in record_generations]

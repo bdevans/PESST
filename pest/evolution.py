@@ -533,7 +533,7 @@ def evolve(n_generations, initial_population, fitness_table, omega,
     return history
 
 
-def pest(n_generations=2000, fitness_start='high', omega=0, mu=0, sigma=2.5,
+def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
          n_clones=52, n_roots=4, n_amino_acids=100, n_anchors=None, mutation_rate=0.001,
          n_gens_per_death=5, death_rate=0.05, seed=None,
          gamma=None, record=None):
@@ -552,7 +552,7 @@ def pest(n_generations=2000, fitness_start='high', omega=0, mu=0, sigma=2.5,
     else:
         assert n_anchors < n_amino_acids
 
-    if fitness_start == "low":
+    if stability_start == "low":
         warnings.warn("With 'low' starting fitness selected Omega is ignored.")
                       # "If the run fails, please check your fitness threshold,"
                       # "omega, is low enough: {}".format(omega))
@@ -573,7 +573,7 @@ def pest(n_generations=2000, fitness_start='high', omega=0, mu=0, sigma=2.5,
     # PWD = os.path.dirname(__file__)
     run_path = create_output_folders()
     settings_kwargs = {"n_generations": n_generations,
-                       "fitness_start": fitness_start,
+                       "stability_start": stability_start,
                        "omega": omega,
                        "mu": mu,
                        "sigma": sigma,
@@ -607,7 +607,7 @@ def pest(n_generations=2000, fitness_start='high', omega=0, mu=0, sigma=2.5,
     # sites created (calling variables in this order stops the evolutionary
     # process being biased by superfit invariant sites.)
     # phi
-    initial_protein = get_fit_protein(fitness_start, n_amino_acids, sites,
+    initial_protein = get_fit_protein(stability_start, n_amino_acids, sites,
                                       fitness_table)
     # print_protein(initial_protein)
     write_initial_protein(initial_protein, run_path)  # Record initial protein

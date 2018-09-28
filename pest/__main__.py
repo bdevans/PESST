@@ -5,8 +5,8 @@ from pest.evolution import pest
 
 # NOTE: __path__ is initialized to be a list containing the name of the directory holding the package’s __init__.py
 # mpl.use('TkAgg')
-mpl.rc('savefig', dpi=300)
 plt.style.use('seaborn-whitegrid')
+# mpl.rc('savefig', dpi=300)
 
 # parameters of protein evolution
 n_generations = 200  # amount of generations the protein evolves for
@@ -55,7 +55,8 @@ record = {"rate": 50,           # write a new fasta file every x generations
           "dot_fitness": True,
           "hist_fitness_stats": True,
           "hist_fitness": True,
-          "invariants": False}
+          "invariants": True,
+          "gif": True}
 
 history = pest(n_generations, fitness_start, fitness_threshold, mu, sigma,
                n_clones, n_roots, n_amino_acids, n_anchors, mutation_rate,

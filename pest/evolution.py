@@ -17,7 +17,8 @@ from tqdm import trange
 from .dataio import (create_output_folders, write_settings_file,
                      write_roots, write_initial_protein, write_protein_fitness,
                      write_fasta_alignment, write_final_fasta, load_LG_matrix,
-                     write_histogram_statistics, append_ks_statistics)
+                     write_histogram_statistics, append_ks_statistics,
+                     create_gif)
 from .plotting import (plot_evolution, plot_gamma_distribution,
                        plot_threshold_fitness, plot_histogram_of_fitness,
                        plot_fitness_space, plot_fitness_table, plot_LG_matrix,
@@ -631,4 +632,20 @@ def pest(n_generations=2000, fitness_start='high', fitness_threshold=0, mu=0, si
                               r"$\delta$ = {}".format(mutation_rate)])
     plot_evolution(history, fitness_table, fitness_threshold,
                    plot_omega, plot_epsilon, run_path, legend_title)
+
+    # Create animations
+    if record["gif"]:
+        record_generations = list(range(0, n_generations+1, record["rate"]))
+        if record["dot_fitness"]:
+            for root in ["fit_dist_gen_", "generation_", "phi_fitness_table_"]:
+                path_root = os.path.join(run_path, "fitnessdotmatrix", root)
+                filenames = [path_root+"{}.png".format(gen)
+                             for gen in record_generations]
+                create_gif(filenames, duration=0.5)
+
+        if record["hist_fitness_stats"]:
+            path_root = os.path.join(run_path, "fitnessdistribution", "histograms", "generation_")
+            filenames = [path_root+"{}.png".format(gen)
+                         for gen in record_generations]
+            create_gif(filenames, duration=0.5)
     return history

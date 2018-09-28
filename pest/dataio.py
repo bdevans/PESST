@@ -11,6 +11,7 @@ import scipy.stats
 # from scipy.stats import binned_statistic
 # from scipy.stats import anderson, normaltest, skew, skewtest, kurtosistest, shapiro, kurtosis, ks_2samp
 import pandas as pd
+import imageio
 
 # from .evolution import build_generation_fitness_table
 # from .plotting import plot_threshold_fitness, plot_histogram_of_fitness
@@ -264,3 +265,18 @@ def write_settings_file(run_path, settings):
     settingsfullname = os.path.join(run_path, "runsettings", "settings.json")
     with open(settingsfullname, "w") as sf:  # open file
         json.dump(settings, sf, indent=4)
+
+
+def create_gif(filenames, duration=0.5):
+    basename, ext = os.path.splitext(filenames[0])  # os.path.basename(filenames[0])
+    output_file, _ = basename.rsplit('_', 1)
+    images = []
+    for filename in filenames:
+        images.append(imageio.imread(filename))
+    imageio.mimsave(output_file+'.gif', images, duration=duration)
+
+    # Streaming approach for longer animations
+    # with imageio.get_writer('/path/to/movie.gif', mode='I') as writer:
+    # for filename in filenames:
+    #     image = imageio.imread(filename)
+    #     writer.append_data(image)

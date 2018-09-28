@@ -193,8 +193,8 @@ def plot_histogram_of_fitness(disthistfullname, distributions, initial,
     # Plot normal distribution of the original fitness space
     mu1distspace = sum(initial) / len(initial)
     plt.hist(initial, 50, density=True, color='k', alpha=0.4)
-    plt.title("\n".join(wrap('Fitness distribution of the total fitness space',
-                             60)), fontweight='bold')
+    # plt.title("\n".join(wrap('Fitness distribution of the total fitness space',
+    #                          60)), fontweight='bold')
     # plt.axvline(x=mu1distspace, color="#404040", linestyle=":")
     plt.axvline(x=mu1distspace, color="k", linestyle=":",
                 label=r"$\mu_0$ = {:.3}".format(mu1distspace))
@@ -351,5 +351,6 @@ def plot_phi_fitness_table(generation, phi_fitness_table, p_location, run_path):
     ax_arr[1].set_ylabel("Protein")
     filename = os.path.join(run_path, "fitnessdotmatrix",
                             "phi_fitness_table_{}.png".format(generation))
+    ax_arr[0].set_title("Generation {}".format(generation), fontweight="bold")
     fig.savefig(filename)
     plt.close()

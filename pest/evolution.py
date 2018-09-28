@@ -358,7 +358,7 @@ def record_generation_fitness(generation, population, variant_sites,
             append_ks_statistics(stats_full_name, distributions.ravel(),
                                  fitness_table.values.ravel())
 
-    if record["hist_fitness"]:
+    if record["histograms"]:
         disthistfilename = "generation_{}.png".format(generation)
         disthistfullname = os.path.join(run_path, "fitnessdistribution",
                                         "histograms", disthistfilename)

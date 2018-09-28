@@ -54,7 +54,7 @@ record = {"rate": 50,           # write a new fasta file every x generations
           "fasta_rate": 50,     # write a new fasta file every x generations
           "dot_fitness": True,
           "statistics": True,
-          "hist_fitness": True,
+          "histograms": True,
           "invariants": False,
           "gif": False}
 

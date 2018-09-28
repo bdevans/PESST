@@ -83,7 +83,8 @@ def gamma_ray(n_amino_acids, sites, gamma, run_path):
 
     for i in range(n_iterations):
         # Draw n_samples from the gamma distribution
-        samples = np.random.gamma(kappa, theta, n_samples)
+        # samples = np.random.gamma(kappa, theta, n_samples)
+        samples = sp.stats.gamma.rvs(kappa, scale=theta, size=n_samples)
         # Define quartiles in that data with equal probability
         quartiles = np.percentile(samples, (0, 25, 50, 75, 100),
                                   interpolation='midpoint')
@@ -95,7 +96,7 @@ def gamma_ray(n_amino_acids, sites, gamma, run_path):
     average_medians = np.mean(medians, axis=0)
 
     # Replot the gamma distributuion as a check
-    plot_gamma_distribution(gamma, quartiles, average_medians, run_path)
+    plot_gamma_distribution(gamma, samples, quartiles, average_medians, run_path)
 
     gamma_categories = np.random.choice(average_medians, size=n_amino_acids)
     gamma_categories[sites.invariant] = 0

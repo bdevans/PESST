@@ -45,7 +45,7 @@ fitness = {"start": fitness_start,
 
 # parameters for forming discrete gamma distribution used for evolution of protein
 gamma = {"shape": 1.9,  # Most phylogenetic systems that use gamma only let you set kappa (often called shape alpha) and calculate theta as 1/kappa giving mean of 1
-         "scale": 1/1.9,  # NOTE: 1/gamma_shape. Set as default in func?
+         "scale": 1/1.9,  # theta = 1/beta NOTE: 1/gamma_shape. Set as default in func?
          "iterations": 50,
          "samples": 10000}
 

@@ -271,7 +271,7 @@ def plot_evolution(history, fitness_table, fitness_threshold,
     return
 
 
-def plot_gamma_distribution(gamma, quartiles, average_medians, run_path):
+def plot_gamma_distribution(gamma, samples, quartiles, average_medians, run_path):
     """Plot the distribution along with the quartiles and medians."""
     kappa, theta, n_iterations, n_samples = (gamma["shape"],
                                              gamma["scale"],
@@ -279,11 +279,14 @@ def plot_gamma_distribution(gamma, quartiles, average_medians, run_path):
                                              gamma["samples"])
 
     x = np.linspace(0, 6, 1000)
-    y = x ** (kappa - 1) * (np.exp(-x / theta)
-                            / (stats.gamma(kappa).pdf(x) * theta ** kappa))
+    # y = x**(kappa - 1) * (np.exp(-x / theta)
+    #                         / (stats.gamma(kappa).pdf(x, kappa)))  # * theta ** kappa))
+    y = stats.gamma.pdf(x, kappa, scale=theta)
     plt.plot(x, y, linewidth=2, color='k', alpha=0,
              label="\n".join([r"$\kappa$ = {}".format(kappa),
                               r"$\theta$ = $\frac{1}{\kappa}$"]))
+    plt.hist(samples, bins=int(np.sqrt(len(samples))), range=(0,6),
+             density=True, color='g', histtype='step')
     plt.fill_between(x, y, where=x > quartiles[0], color='#4c4cff')
     plt.fill_between(x, y, where=x > quartiles[1], color='#7f7fff')
     plt.fill_between(x, y, where=x > quartiles[2], color='#b2b2ff')
@@ -297,7 +300,6 @@ def plot_gamma_distribution(gamma, quartiles, average_medians, run_path):
                              "quartiles of {} randomly sampled vaules"
                              .format(n_iterations, n_samples), 60)),
               fontweight='bold', fontsize=10)
-    # plt.text(5, 0.6, r"$\kappa$ = %s\n$\theta$ = $\frac{1}{\kappa}$" % (kappa))
     plt.legend()
     plt.show()
     plt.savefig(os.path.join(run_path, "start", "gamma.png"))

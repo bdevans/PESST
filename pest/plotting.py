@@ -6,30 +6,6 @@ from matplotlib import pyplot as plt
 import seaborn as sns
 from scipy import stats  # gamma
 
-# from .evolution import calculate_fitness, get_random_protein
-
-
-# NOTE: unused
-# def test_normal_distribution(mu, sigma):
-#     """Plot a distribution to test normalality."""
-#     s = np.random.normal(mu, sigma, 2000)  # generate distribution
-#     count, bins, ignored = plt.hist(s, 30, density=True)  # plot distribuiton
-#     plt.plot(bins, 1/(sigma * np.sqrt(2 * np.pi)) *
-#                    np.exp(- (bins - mu)**2 / (2 * sigma**2)),
-#              linewidth=2, color='r')
-#     plt.show()
-#     return
-
-
-# # NOTE: Not used
-# def plot_fitness_histogram(n_proteins, n_amino_acids, fitness_table):
-#     """Generate and plot fitness values for f proteins."""
-#     fitnesses = [calculate_fitness(get_random_protein(n_amino_acids, fitness_table), fitness_table)
-#                  for p in range(n_proteins)]
-#     plt.hist(fitnesses, density=True)  # plot fitnesses as histogram
-#     plt.show()
-#     return
-
 
 def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
                            fitness_threshold, save_dir):

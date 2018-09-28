@@ -5,8 +5,8 @@ from pest.evolution import pest
 
 # NOTE: __path__ is initialized to be a list containing the name of the directory holding the package’s __init__.py
 # mpl.use('TkAgg')
-plt.style.use('seaborn-whitegrid')
 # mpl.rc('savefig', dpi=300)
+plt.style.use('seaborn-ticks')
 
 # parameters of protein evolution
 n_generations = 200  # amount of generations the protein evolves for

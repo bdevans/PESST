@@ -3,6 +3,7 @@ import json
 import datetime
 import warnings
 import random
+import pkg_resources
 
 import numpy as np
 import scipy as sp
@@ -29,7 +30,8 @@ def load_LG_matrix(full_file_name=None):
     """
     # TODO: Check: p(lambda) x = Qxy / lambda
     if full_file_name is None:
-        full_file_name = os.path.join("data", "LGaa.csv")
+        resource = os.path.join("data", "LGaa.csv")
+        full_file_name = pkg_resources.resource_filename("pest", resource)
     LG_matrix = pd.read_csv(full_file_name, index_col="Original")
     return LG_matrix
 

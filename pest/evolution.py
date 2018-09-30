@@ -35,9 +35,7 @@ def get_fitness_table(clone_size, mu, sigma, amino_acids):
 
 
 def clone_protein(protein, n_clones):
-    """Generate a dictionary containing n_clones of generated protein
-    - this contains the evolving dataset.
-    """
+    """Generate a dictionary containing n_clones of an initial protein."""
     return {l: copy.deepcopy(protein) for l in range(n_clones)}
 
 

@@ -224,7 +224,7 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
     plt.plot(generation_numbers, np.mean(final_fitnesses, axis=1),
              "k:", lw=3, zorder=20, label=r"$\mu_\phi$")
     plt.xlim([0, n_generations])
-    plt.xlabel("Generations", fontweight='bold')
+    plt.xlabel("Generation")  # , fontweight='bold')
     plt.ylabel("$T_m$", fontweight='bold')
     plt.title("\n".join(wrap("Fitness change for {} randomly generated "
                              "'superfit' clones of {} amino acids, "
@@ -259,8 +259,9 @@ def plot_gamma_distribution(gamma, samples, quartiles, average_medians, run_path
     #                         / (stats.gamma(kappa).pdf(x, kappa)))  # * theta ** kappa))
     y = stats.gamma.pdf(x, kappa, scale=theta)
     plt.plot(x, y, linewidth=2, color='k', alpha=0,
-             label="\n".join([r"$\kappa$ = {}".format(kappa),
-                              r"$\theta$ = $\frac{1}{\kappa}$"]))
+             label="\n".join([r"$\kappa$ = {:.2f}".format(kappa),
+                              r"$\theta$ = {:.2f}".format(theta)]))
+                              #r"$\theta$ = $\frac{{}}{{}}$".format(1, kappa)]))
     plt.hist(samples, bins=int(np.sqrt(len(samples))), range=(0,6),
              density=True, color='g', histtype='step')
     plt.fill_between(x, y, where=x > quartiles[0], color='#4c4cff')

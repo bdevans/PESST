@@ -207,8 +207,8 @@ def write_fasta_alignment(generation, population, run_path):
         # Write fasta header followed by residue in generation string
         # TODO: This should be an ordered dict or list to preserve the order...
         for p, protein in list(population.items()):
-            fastafile.write("\n>clone_%s\n" % (p+1))
-            fastafile.write(''.join(protein))
+            fastafile.write(">clone_{}\n".format(p+1))
+            fastafile.write("".join(protein)+"\n")
 
 
 def write_final_fasta(population, tree, run_path):

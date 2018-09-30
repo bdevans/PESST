@@ -141,7 +141,7 @@ def twist_protein(protein, mutation_sites, fitness_table):
     return (mutant, fitness)
 
 
-def get_fit_protein(fitness_level, clone_size, sites, fitness_table):
+def get_fit_protein(stability_start, clone_size, sites, fitness_table):
     """Generate a protein of a specified fitness.
 
     Make either a superfit protein, a superunfit protein or a 'medium
@@ -156,13 +156,12 @@ def get_fit_protein(fitness_level, clone_size, sites, fitness_table):
     """
     initial_protein = get_random_protein(clone_size, fitness_table)
 
-    # if fitness_level != 'medium':
-    if isinstance(fitness_level, str):
-        if fitness_level.lower() == 'low':  # generate unfit protein
+    if isinstance(stability_start, str):  # not medium
+        if stability_start.lower() == 'low':  # generate unfit protein
             # TODO: Adjust threshold or allow building proteins above threshold
             sequence = [0, 1, 2]  # Three lowest
 
-        elif fitness_level.lower() == 'high':  # generate superfit protein
+        elif stability_start.lower() == 'high':  # generate superfit protein
             sequence = [-1, -2, -3]  # Three highest
 
         pool = [["M"] * 3]
@@ -183,11 +182,11 @@ def get_fit_protein(fitness_level, clone_size, sites, fitness_table):
     # fitter, then choose 5 new residues and continue.
     # If it cannot make a fitter protein with the 5 residues it's mutating it
     # reverts back to the previous state and picks 5 new residues.
-    else:  # elif fitness_level == 'medium':
+    else:  # elif stability_start == 'medium':
         n_variant_sites = 5
         initial_fitness = calculate_fitness(initial_protein, fitness_table)
 
-        lower_bound, upper_bound = fitness_level
+        lower_bound, upper_bound = stability_start
         if lower_bound is None:
             lower_bound = -np.inf
         if upper_bound is None:

@@ -550,6 +550,8 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
 
     # TODO: Add rerun flag to load settings (and seed)
     # settings = json.load(sf)
+    if omega is None:
+        omega = -np.inf
 
     if stability_start == "low":
         warnings.warn("With 'low' starting fitness selected Omega is ignored.")

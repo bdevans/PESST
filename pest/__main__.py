@@ -19,7 +19,7 @@ death_rate = 0.05  # Set to 0 to turn off protein deaths
 
 clone_size = 100  # number of amino acids in the protein including the start methionine TODO: Rename to protein_length
 # TODO: Change to n_anchors = p_anchored * clone_size
-n_anchors = int(clone_size/10)  # amount of invariant sites in a generation (not including root)
+n_invariants = int(clone_size/10)  # amount of invariant sites in a generation (not including root)
 
 omega = 0  # arbitrary number for fitness threshold
 stability_start = (omega + 10, omega + 20)  # high, (x, y) or low; must be lower case. If selecting low, fitness threshold needs to be significantly smaller (i.e. 4x) than #positions*mu
@@ -58,5 +58,5 @@ record = {"rate": 50,           # write a new fasta file every x generations
           "gif": False}
 
 history = pest(n_generations, stability_start, omega, mu, sigma,
-               n_clones, n_roots, clone_size, n_anchors, mutation_rate,
+               n_clones, n_roots, clone_size, n_invariants, mutation_rate,
                death_rate, seed, gamma, record)

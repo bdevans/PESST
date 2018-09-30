@@ -42,22 +42,22 @@ def clone_protein(protein, n_clones):
     return {l: copy.deepcopy(protein) for l in range(n_clones)}
 
 
-def get_allowed_sites(clone_size, n_anchors):
+def get_allowed_sites(clone_size, n_invariants):
     """Select invariant sites in the initially generated protein and return
     allowed values.
     """
-    allowed_values = list(range(1, clone_size))  # keys for mutable sites
+    variant_sites = list(range(1, clone_size))  # keys for mutable sites
     # Randomly define invariant sites (without replacement)
-    anchored_sequences = random.sample(allowed_values, n_anchors)
-    anchored_sequences.insert(0, 0)  # First aa is always anchored (Methionine)
+    invariant_sites = random.sample(variant_sites, n_invariants)
+    invariant_sites.insert(0, 0)  # First aa is always anchored (Methionine)
     # Remove the invariant sites from allowed values
-    for a in anchored_sequences[1:]:
-        allowed_values.remove(a)
-    # invariant = [allowed_values.pop(random.randrange(len(allowed_values)))
-    #              for r in range(n_anchors)]
+    for a in invariant_sites[1:]:
+        variant_sites.remove(a)
+    # invariant = [variant_sites.pop(random.randrange(len(variant_sites)))
+    #              for r in range(n_invariants)]
     Sites = namedtuple('Sites', ['invariant', 'variant'])
     # Return a namedtuple with anchors and available sites
-    return Sites(invariant=anchored_sequences, variant=allowed_values)
+    return Sites(invariant=invariant_sites, variant=variant_sites)
 
 
 def gamma_ray(clone_size, sites, gamma, run_path):
@@ -535,7 +535,7 @@ def evolve(n_generations, population, fitness_table, omega, sites,
 
 
 def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
-         n_clones=52, n_roots=4, clone_size=100, n_anchors=None,
+         n_clones=52, n_roots=4, clone_size=100, n_invariants=None,
          mutation_rate=0.001, death_rate=0.02, seed=None,
          gamma=None, record=None):
 
@@ -547,10 +547,10 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
 
     # TODO: Add rerun flag to load settings (and seed)
     # settings = json.load(sf)
-    if n_anchors is None:
-        n_anchors = int(clone_size/10)
+    if n_invariants is None:
+        n_invariants = int(clone_size/10)
     else:
-        assert n_anchors < clone_size
+        assert n_invariants < clone_size
 
     if stability_start == "low":
         warnings.warn("With 'low' starting fitness selected Omega is ignored.")
@@ -585,7 +585,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
                        "n_clones": n_clones,
                        "clone_size": clone_size,
                        "mutation_rate": mutation_rate,
-                       "n_anchors": n_anchors,
+                       "n_invariants": n_invariants,
                        "death_rate": death_rate,
                        "n_roots": n_roots,
                        "seed": seed,
@@ -603,7 +603,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
 
     # Generate variant/invariant sites
     # TODO: return boolean array where True is variant
-    sites = get_allowed_sites(clone_size, n_anchors)
+    sites = get_allowed_sites(clone_size, n_invariants)
     # Generate mutation probabilities for every site
     p_location = gamma_ray(clone_size, sites, gamma, run_path)  # TODO: Move plotting out
 

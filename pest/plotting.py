@@ -110,14 +110,16 @@ def plot_fitness_space(generation, population, fitnesses, fitness_table,
     ax_arr[0, 0].hlines(epsilon, 0, len(population)-1,
                         colors="b", linestyles=":", lw=3, zorder=10,
                         label=r"$\epsilon$ = {:.2f}".format(epsilon))
+    ncol = 2
     if omega > -np.inf:
         ax_arr[0, 0].hlines(omega, 0, len(population)-1,
                             colors="k", linestyles="-", lw=3, zorder=10,
                             label=r"$\Omega$ = {}".format(omega))
+        ncol += 1
 
     ax_arr[0, 0].set_ylabel(r"$T_m$")
     plt.setp(ax_arr[0, 0].get_xticklabels(), visible=False)
-    ax_arr[0, 0].legend(loc="upper left", fontsize=6.5)
+    ax_arr[0, 0].legend(loc="upper left", fontsize=6.5, ncol=ncol)
 
     ax_arr[1, 0].plot(protein_indicies, fitnesses, "o", markersize=1)
     ax_arr[1, 1].hist(fitness_table.values.ravel(), bins=int(np.sqrt(fitnesses.size)), color='k', alpha=0.4, align='mid', orientation='horizontal', density=True)
@@ -147,7 +149,7 @@ def plot_fitness_space(generation, population, fitnesses, fitness_table,
     ax_arr[1, 0].set_xlabel("Protein")
     # ax_arr[1, 1].set_xlabel("Density")
     ax_arr[1, 0].set_ylabel(r"$\Delta T_m$")
-    ax_arr[1, 0].legend(loc="upper left", fontsize=6.5,)
+    ax_arr[1, 0].legend(loc="upper left", fontsize=6.5, ncol=ncol)
                # title=r"$\Omega$ = {}".format(omega))
 
     # ax_arr[1, 0].set_title("Fitness distribution of every protein in the population",

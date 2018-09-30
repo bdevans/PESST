@@ -535,22 +535,21 @@ def evolve(n_generations, population, fitness_table, omega, sites,
 
 
 def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
-         n_clones=52, n_roots=4, clone_size=100, n_invariants=None,
+         n_clones=52, n_roots=4, clone_size=100, p_invariant=0.1,
          mutation_rate=0.001, death_rate=0.02, seed=None,
          gamma=None, record=None):
 
     # Validate arguments
     assert 1 < clone_size
     assert 2 < n_roots < n_clones
-    assert 0 <= mutation_rate <= 1
-    assert 0 <= death_rate <= 1
+    assert 0.0 <= mutation_rate <= 1.0
+    assert 0.0 <= death_rate <= 1.0
+    assert 0.0 <= p_invariant < 1.0  # Must be less than 1 for evolution
+    n_invariants = int(0.1 * clone_size)
+    assert 0 <= n_invariants < clone_size
 
     # TODO: Add rerun flag to load settings (and seed)
     # settings = json.load(sf)
-    if n_invariants is None:
-        n_invariants = int(clone_size/10)
-    else:
-        assert n_invariants < clone_size
 
     if stability_start == "low":
         warnings.warn("With 'low' starting fitness selected Omega is ignored.")
@@ -585,7 +584,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
                        "n_clones": n_clones,
                        "clone_size": clone_size,
                        "mutation_rate": mutation_rate,
-                       "n_invariants": n_invariants,
+                       "p_invariant": p_invariant,
                        "death_rate": death_rate,
                        "n_roots": n_roots,
                        "seed": seed,

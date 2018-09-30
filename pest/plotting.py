@@ -268,7 +268,7 @@ def plot_gamma_distribution(gamma, samples, quartiles, average_medians, run_path
              label="\n".join([r"$\kappa$ = {:.2f}".format(kappa),
                               r"$\theta$ = {:.2f}".format(theta)]))
                               #r"$\theta$ = $\frac{{}}{{}}$".format(1, kappa)]))
-    plt.hist(samples, bins=int(np.sqrt(len(samples))), range=(0,6),
+    plt.hist(samples, bins=int(np.sqrt(len(samples))), range=(0, 6),
              density=True, color='g', histtype='step')
     plt.fill_between(x, y, where=x > quartiles[0], color='#4c4cff')
     plt.fill_between(x, y, where=x > quartiles[1], color='#7f7fff')
@@ -322,13 +322,13 @@ def plot_phi_fitness_table(generation, phi_fitness_table, p_location, run_path):
     (n_proteins, n_amino_acids) = phi_fitness_table.shape
     fig, ax_arr = plt.subplots(2, 1, figsize=(n_amino_acids/5, n_proteins/3),
                                sharex='col', gridspec_kw={'height_ratios': [1, 20]})
-    sns.heatmap(np.expand_dims(p_location, axis=0), annot=False, fmt=".2f", linewidths=.5,
-                cmap="cubehelix", annot_kws={"size": 5}, cbar=True,
-                cbar_kws={"label": r"$p_{mutation}$"}, ax=ax_arr[0])
+    sns.heatmap(np.expand_dims(p_location, axis=0), annot=False, fmt=".2f",
+                linewidths=.5, cmap="cubehelix", annot_kws={"size": 5},
+                cbar=True, cbar_kws={"label": r"$p_{mutation}$"}, ax=ax_arr[0])
     plt.setp(ax_arr[0].get_yticklabels(), visible=False)
 
-    sns.heatmap(phi_fitness_table, center=0, annot=False, fmt=".2f", linewidths=.5,
-                cmap="RdBu_r", annot_kws={"size": 5},
+    sns.heatmap(phi_fitness_table, center=0, annot=False, fmt=".2f",
+                linewidths=.5, cmap="RdBu_r", annot_kws={"size": 5},
                 cbar_kws={"label": r"$\Delta T_m$"}, ax=ax_arr[1])
     ax_arr[1].xaxis.set_ticks_position('top')
     ax_arr[1].set_xlabel("Location")

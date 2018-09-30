@@ -449,7 +449,8 @@ def bifurcate_branches(branches):
 
 def kill_proteins(population, tree, death_rate, fitness_table, omega):
     n_clones = len(population)
-    mortals = random.sample(range(n_clones), int(n_clones*death_rate))
+    # mortals = random.sample(range(n_clones), int(n_clones*death_rate))
+    mortals = np.arange(n_clones)[np.where(np.random.rand(n_clones) < death_rate)]
     # Recalculate fitnesses after all mutations
     fitnesses = calculate_population_fitness(population, fitness_table)
     for pi in mortals:

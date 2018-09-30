@@ -191,6 +191,10 @@ def get_fit_protein(fitness_level, clone_size, sites, fitness_table):
         initial_fitness = calculate_fitness(initial_protein, fitness_table)
 
         lower_bound, upper_bound = fitness_level
+        if lower_bound is None:
+            lower_bound = -np.inf
+        if upper_bound is None:
+            upper_bound = np.inf
         # TODO: Also pass omega to check against?
         assert lower_bound < upper_bound
         # TODO: This is slightly different to the original algorithm (below)

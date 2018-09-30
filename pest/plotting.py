@@ -47,8 +47,8 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
                    colors="k", linestyles="-", lw=4, zorder=10,
                    label=r"$\Omega$ = {}".format(omega))
     ax2.set_ylim(-scale, scale)
-    ax2.set_xlabel("Protein")
-    ax2.legend(loc="upper left", fontsize=6.5,)
+    ax2.set_xlabel("Clone")
+    ax2.legend(loc="upper left", fontsize=6.5)
                # title=r"$\Omega$ = {}".format(omega))
     # ax2.set_title("\n".join(wrap("Fitness distribution of every sequence in "
     #                              "the evolving dataset", 40)), size=8)
@@ -146,7 +146,7 @@ def plot_fitness_space(generation, population, fitnesses, fitness_table,
 
     ax_arr[0, 0].set_ylim(None, round(T_max))
     ax_arr[1, 0].set_ylim(-scale, scale)
-    ax_arr[1, 0].set_xlabel("Protein")
+    ax_arr[1, 0].set_xlabel("Clone")
     # ax_arr[1, 1].set_xlabel("Density")
     ax_arr[1, 0].set_ylabel(r"$\Delta T_m$")
     ax_arr[1, 0].legend(loc="upper left", fontsize=6.5, ncol=ncol)
@@ -325,7 +325,7 @@ def plot_phi_fitness_table(generation, phi_fitness_table, p_location, run_path):
                 cbar_kws={"label": r"$\Delta T_m$"}, ax=ax_arr[1])
     ax_arr[1].xaxis.set_ticks_position('top')
     ax_arr[1].set_xlabel("Location")
-    ax_arr[1].set_ylabel("Protein")
+    ax_arr[1].set_ylabel("Clone")
     filename = os.path.join(run_path, "fitnessdotmatrix",
                             "phi_fitness_table_{}.png".format(generation))
     ax_arr[0].set_title("Generation {}".format(generation), fontweight="bold")

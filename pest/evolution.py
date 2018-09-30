@@ -463,15 +463,15 @@ def kill_proteins(population, tree, death_rate, fitness_table, omega):
     return population
 
 
-def evolve(n_generations, initial_population, fitness_table, omega, sites,
+def evolve(n_generations, population, fitness_table, omega, sites,
            p_location, mutation_rate, death_rate, tree, LG_matrix, record,
            run_path):
     """Generation generator - mutate a protein for a defined number of
     generations according to an LG matrix and gamma distribution.
     """
 
-    n_clones = len(initial_population)
-    n_amino_acids = len(initial_population[0])
+    n_clones = len(population)
+    n_amino_acids = len(population[0])
     n_mutations_per_gen = int(n_clones * n_amino_acids * mutation_rate)
     n_roots = len(tree["roots"])
 
@@ -479,7 +479,7 @@ def evolve(n_generations, initial_population, fitness_table, omega, sites,
     n_gens_per_bifurcation = calc_gens_per_bifurcation(n_generations, n_clones,
                                                        n_roots)
 
-    population = copy.deepcopy(initial_population)  # current generation
+    # population = copy.deepcopy(initial_population)  # current generation
     fitnesses = calculate_population_fitness(population, fitness_table)
     # Record initial population
     record_generation_fitness(0, population, sites.variant,

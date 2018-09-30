@@ -20,11 +20,11 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
     # Plot each column of fitness_table as a separate dataseries against 0..N-1
     ax1.plot(fitness_table, "o", color='k', markersize=1)
     ax1.hlines(mean_initial_fitness, 0, n_amino_acids-1,
-               colors="r", linestyles="--", lw=2,
+               colors="r", linestyles="--", lw=4, zorder=10,
                label=r"$\mu_0$ = {:.2f}".format(mean_initial_fitness))
     if omega > -np.inf:
         ax1.hlines(omega, 0, n_amino_acids-1,
-                   colors="k", linestyles="-", lw=2,
+                   colors="k", linestyles="-", lw=4, zorder=10,
                    label=r"$\Omega$ = {}".format(omega))
     ax1.set_ylim(-scale, scale)
     ax1.set_ylabel(r"$\Delta T_m$")
@@ -40,11 +40,11 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
     ax2.plot(np.arange(len(population)), fitnesses, "o", markersize=1)
     # ax2.plot(np.arange(len(population)), np.sum(fitnesses, axis=1), "*k", markersize=4, label=r"$\mu_p$")
     ax2.hlines(mean_fitness, 0, len(population)-1,
-               colors="r", linestyles="--", lw=2,
+               colors="r", linestyles="--", lw=4, zorder=10,
                label=r"$\mu_p$ = {:.2f}".format(mean_fitness))  # \mu_\phi ?
     if omega > -np.inf:
         ax2.hlines(omega, 0, len(population)-1,
-                   colors="k", linestyles="-", lw=2,
+                   colors="k", linestyles="-", lw=4, zorder=10,
                    label=r"$\Omega$ = {}".format(omega))
     ax2.set_ylim(-scale, scale)
     ax2.set_xlabel("Protein")
@@ -103,16 +103,16 @@ def plot_fitness_space(generation, population, fitnesses, fitness_table,
     ax_arr[0, 1].set_xticks([])
     mean_protein_fitness = np.mean(protein_fitnesses)
     ax_arr[0, 0].hlines(mean_protein_fitness, 0, len(population)-1,
-                        colors="r", linestyles="--", lw=2,
+                        colors="r", linestyles="--", lw=3, zorder=10,
                         label=r"$\mu_\phi$ = {:.2f}".format(mean_fitness))  # \mu_\phi ?
     mean_initial_amino_acid_fitness = np.mean(fitness_table.values)
     epsilon = n_amino_acids * mean_initial_amino_acid_fitness
     ax_arr[0, 0].hlines(epsilon, 0, len(population)-1,
-                        colors="b", linestyles=":", lw=2,
+                        colors="b", linestyles=":", lw=3, zorder=10,
                         label=r"$\epsilon$ = {:.2f}".format(epsilon))
     if omega > -np.inf:
         ax_arr[0, 0].hlines(omega, 0, len(population)-1,
-                            colors="k", linestyles="-", lw=2,
+                            colors="k", linestyles="-", lw=3, zorder=10,
                             label=r"$\Omega$ = {}".format(omega))
 
     ax_arr[0, 0].set_ylabel(r"$T_m$")
@@ -121,25 +121,25 @@ def plot_fitness_space(generation, population, fitnesses, fitness_table,
 
     ax_arr[1, 0].plot(protein_indicies, fitnesses, "o", markersize=1)
     ax_arr[1, 1].hist(fitness_table.values.ravel(), bins=int(np.sqrt(fitnesses.size)), color='k', alpha=0.4, align='mid', orientation='horizontal', density=True)
-    ax_arr[1, 1].axhline(y=mean_initial_amino_acid_fitness, color="k", linestyle="--",
-                         label=r"$\mu_0$ = {:.2f}".format(mean_initial_amino_acid_fitness))
     ax_arr[1, 1].hist(fitnesses.ravel(), bins=int(np.sqrt(fitnesses.size)), align='mid', color="r", alpha=0.4, orientation='horizontal', density=True)
-    ax_arr[1, 1].axhline(y=mean_fitness, color="r", linestyle="--",
-                         label=r"$\mu_p$ = {:.2f}".format(mean_fitness))
-    ax_arr[1, 1].axhline(y=omega, color="k", linestyle="-",
-                         label=r"$\Omega$ = {}".format(omega))
+    ax_arr[1, 1].axhline(y=mean_initial_amino_acid_fitness, color="k", linestyle="--", lw=3, zorder=10)
+                         # label=r"$\mu_0$ = {:.2f}".format(mean_initial_amino_acid_fitness))
+    ax_arr[1, 1].axhline(y=mean_fitness, color="r", linestyle="--", lw=3, zorder=10)
+                         # label=r"$\mu_p$ = {:.2f}".format(mean_fitness))
+    ax_arr[1, 1].axhline(y=omega, color="k", linestyle="-", lw=3, zorder=10)
+                         # label=r"$\Omega$ = {}".format(omega))
     # plt.setp(ax_arr[1, 1].get_xticklabels(), visible=False)
     ax_arr[1, 1].set_xticks([])
 
     ax_arr[1, 0].hlines(mean_initial_amino_acid_fitness, 0, len(population)-1,
-                        colors="k", linestyles="--", lw=2,
+                        colors="k", linestyles="--", lw=3, zorder=10,
                         label=r"$\mu_0$ = {:.2f}".format(mean_initial_amino_acid_fitness))
     ax_arr[1, 0].hlines(mean_fitness, 0, len(population)-1,
-                        colors="r", linestyles="--", lw=2,
+                        colors="r", linestyles="--", lw=3, zorder=10,
                         label=r"$\mu_p$ = {:.2f}".format(mean_fitness))  # \mu_\phi ?
     if omega > -np.inf:
         ax_arr[1, 0].hlines(omega, 0, len(population)-1,
-                            colors="k", linestyles="-", lw=2,
+                            colors="k", linestyles="-", lw=3, zorder=10,
                             label=r"$\Omega$ = {}".format(omega))
 
     ax_arr[0, 0].set_ylim(None, round(T_max))
@@ -220,7 +220,7 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
 
     # Average across clones
     plt.plot(generation_numbers, np.mean(final_fitnesses, axis=1),
-             "k:", lw=2, label=r"$\mu_\phi$")
+             "k:", lw=3, zorder=20, label=r"$\mu_\phi$")
     plt.xlim([0, n_generations])
     plt.xlabel("Generations", fontweight='bold')
     plt.ylabel("$T_m$", fontweight='bold')
@@ -230,11 +230,11 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
                              .format(n_clones, n_amino_acids, n_generations),
                              60)), fontweight='bold')
     if plot_omega:  # Add fitness threshold
-        plt.axhline(omega, color="k", lw=2, linestyle="-",
+        plt.axhline(omega, color="k", lw=3, linestyle="-", zorder=10,
                     label=r"$\Omega$ = {}".format(omega))
     if plot_epsilon:  # Add theoretical convergence line
         epsilon = n_amino_acids * np.mean(fitness_table.values)
-        plt.axhline(epsilon, color="b", lw=2, linestyle="--",
+        plt.axhline(epsilon, color="b", lw=3, linestyle="--", zorder=10,
                     label=r"$\epsilon$ = {:.2f}".format(epsilon))
     plt.legend(title=legend_title)
 

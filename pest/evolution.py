@@ -187,7 +187,7 @@ def get_fit_protein(fitness_level, clone_size, sites, fitness_table):
     # If it cannot make a fitter protein with the 5 residues it's mutating it
     # reverts back to the previous state and picks 5 new residues.
     else:  # elif fitness_level == 'medium':
-        n_variants = 5
+        n_variant_sites = 5
         initial_fitness = calculate_fitness(initial_protein, fitness_table)
 
         lower_bound, upper_bound = fitness_level
@@ -198,14 +198,14 @@ def get_fit_protein(fitness_level, clone_size, sites, fitness_table):
         # counter = 0
         # while not lower_bound < fitness < upper_bound and counter <= 100:
         #     # Mutate the new protein (sample without replacement)
-        #     chosen_sites = random.sample(sites.variant, n_variants)
+        #     chosen_sites = random.sample(sites.variant, n_variant_sites)
         #     (protein, fitness) = twist_protein(initial_protein, chosen_sites,
         #                                        fitness_table)
         #     counter += 1
 
         while not lower_bound < initial_fitness < upper_bound:
             # Mutate the new protein (sample without replacement)
-            chosen_sites = random.sample(sites.variant, n_variants)
+            chosen_sites = random.sample(sites.variant, n_variant_sites)
             (protein, fitness) = twist_protein(initial_protein, chosen_sites, fitness_table)
             counter = 0
             # while not lower_bound < fitness < upper_bound and counter <= 100:

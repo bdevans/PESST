@@ -275,7 +275,6 @@ def plot_gamma_distribution(gamma, samples, quartiles, average_medians, run_path
                              .format(n_iterations, n_samples), 60)),
               fontweight='bold', fontsize=10)
     plt.legend()
-    plt.show()
     plt.savefig(os.path.join(run_path, "start", "gamma.png"))
 
 

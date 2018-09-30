@@ -25,13 +25,12 @@ from .plotting import (plot_evolution, plot_gamma_distribution,
                        plot_phi_fitness_table)
 
 
-def get_fitness_table(clone_size, mu, sigma, LG_matrix):
+def get_fitness_table(clone_size, mu, sigma, amino_acids):
     """Generate a dictionary describing list of fitness values at each position
     of the generated protein.
     """
-    n_amino_acids = len(LG_matrix.columns)
-    values = np.random.normal(mu, sigma, size=(clone_size, n_amino_acids))
-    fitness_table = pd.DataFrame(values, columns=LG_matrix.columns)
+    values = np.random.normal(mu, sigma, size=(clone_size, len(amino_acids)))
+    fitness_table = pd.DataFrame(values, columns=amino_acids)
     return fitness_table
 
 
@@ -600,7 +599,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
     LG_matrix = load_LG_matrix()  # Load LG matrix
     plot_LG_matrix(LG_matrix, run_path)
     # Make fitness table of Delta T_m values
-    fitness_table = get_fitness_table(clone_size, mu, sigma, LG_matrix)
+    fitness_table = get_fitness_table(clone_size, mu, sigma, LG_matrix.columns)
     write_protein_fitness(run_path, "start", fitness_table)
     plot_fitness_table(fitness_table, run_path)
     T_max = sum(np.amax(fitness_table, axis=1))  # Fittest possible protein

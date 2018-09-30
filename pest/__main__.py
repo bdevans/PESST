@@ -17,12 +17,11 @@ n_clones = 52  # S number of clones in the population, phi
 n_roots = 4
 death_rate = 0.05  # Set to 0 to turn off protein deaths
 
-clone_size = 100  # number of amino acids in the protein including the start methionine TODO: Rename to protein_length
-# TODO: Change to n_anchors = p_anchored * clone_size
+clone_size = 100  # number of amino acids in the protein including the start methionine
 p_invariant = 0.1  # amount of invariant sites in a generation (not including root)
 
 omega = 0  # arbitrary number for fitness threshold
-stability_start = (omega + 10, omega + 20)  # high, (x, y) or low; must be lower case. If selecting low, fitness threshold needs to be significantly smaller (i.e. 4x) than #positions*mu
+stability_start = (omega + 10, omega + 20)  # high, (x, y) or low; must be lower case
 # parameters for normal distribution used to select fitness values
 mu = -1.2
 sigma = 2.5

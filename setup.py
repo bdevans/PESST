@@ -18,27 +18,27 @@ def read(*parts):
         return fp.read()
 
 
-setup(
-    name="PEST",
-    version="1.0",  # https://packaging.python.org/guides/single-sourcing-package-version/
-    author="Benjamin Evans and Adam Thomas",
-    author_email="ben.d.evans@gmail.com",
-    description=("A Python module for evolving proteins."),
-    license="BSD",
-    keywords="example documentation tutorial",
-    url="http://packages.python.org/pest",
-    packages=['pest'],
-    long_description=read('README'),
-    classifiers=[
-        "Development Status :: 5 - Production/Stable",
-        "Intended Audience :: Science/Research",
-        "Topic :: Scientific/Engineering",
-        "Topic :: Scientific/Engineering :: Artificial Life",
-        "Topic :: Scientific/Engineering :: Bio-Informatics",
-        "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.5",  # TODO: Check
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "License :: OSI Approved :: BSD License",
-    ],
-)
+setup_kwargs = {
+    "name": "PEST",
+    "version": "1.0",  # https://packaging.python.org/guides/single-sourcing-package-version/
+    "author": "Benjamin Evans and Adam Thomas",
+    "author_email": "ben.d.evans@gmail.com",
+    "description": ("A Python module for evolving proteins."),
+    "license": "BSD",
+    "keywords": "example documentation tutorial",
+    "url": "http://packages.python.org/pest",
+    "packages": ['pest'],
+    "long_description": read('README'),
+    "classifiers": ["Development Status :: 5 - Production/Stable",
+                    "Intended Audience :: Science/Research",
+                    "Topic :: Scientific/Engineering",
+                    "Topic :: Scientific/Engineering :: Artificial Life",
+                    "Topic :: Scientific/Engineering :: Bio-Informatics",
+                    "Programming Language :: Python :: 3 :: Only",
+                    "Programming Language :: Python :: 3.5",  # TODO: Check
+                    "Programming Language :: Python :: 3.6",
+                    "Programming Language :: Python :: 3.7",
+                    "License :: OSI Approved :: BSD License"],
+}
+
+setup(**setup_kwargs)

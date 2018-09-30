@@ -10,7 +10,7 @@ from scipy import stats  # gamma
 def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
                            omega, save_dir):
     # Store fitness values for each amino in the dataset for the left subfigure
-    (n_amino_acids, n_variants) = fitness_table.shape
+    (clone_size, n_variants) = fitness_table.shape
     # Average across flattened array
     mean_initial_fitness = np.mean(fitness_table.values)
     scale = round((4 * np.std(fitness_table.values)) + 1)
@@ -19,11 +19,11 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
                                    gridspec_kw={'width_ratios': [1, 2]})
     # Plot each column of fitness_table as a separate dataseries against 0..N-1
     ax1.plot(fitness_table, "o", color='k', markersize=1)
-    ax1.hlines(mean_initial_fitness, 0, n_amino_acids-1,
+    ax1.hlines(mean_initial_fitness, 0, clone_size-1,
                colors="r", linestyles="--", lw=4, zorder=10,
                label=r"$\mu_0$ = {:.2f}".format(mean_initial_fitness))
     if omega > -np.inf:
-        ax1.hlines(omega, 0, n_amino_acids-1,
+        ax1.hlines(omega, 0, clone_size-1,
                    colors="k", linestyles="-", lw=4, zorder=10,
                    label=r"$\Omega$ = {}".format(omega))
     ax1.set_ylim(-scale, scale)
@@ -66,7 +66,7 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
 def plot_fitness_space(generation, population, fitnesses, fitness_table,
                        omega, save_dir):
     # Store fitness values for each amino in the dataset for the left subfigure
-    (n_amino_acids, n_variants) = fitness_table.shape
+    (clone_size, n_variants) = fitness_table.shape
     # Average across flattened array
     # mean_initial_fitness = np.mean(fitness_table.values)
     scale = round((4 * np.std(fitness_table.values)) + 1)
@@ -77,11 +77,11 @@ def plot_fitness_space(generation, population, fitnesses, fitness_table,
                                               'height_ratios': [1, 3]})
     # Plot each column of fitness_table as a separate dataseries against 0..N-1
     # ax1.plot(fitness_table, "o", color='k', markersize=1)
-    # ax1.hlines(mean_initial_fitness, 0, n_amino_acids-1,
+    # ax1.hlines(mean_initial_fitness, 0, clone_size-1,
     #            colors="r", linestyles="--", lw=2,
     #            label=r"$\mu_1$ = {:.2f}".format(mean_initial_fitness))
     # if omega > -np.inf:
-    #     ax1.hlines(omega, 0, n_amino_acids-1,
+    #     ax1.hlines(omega, 0, clone_size-1,
     #                colors="k", linestyles="-", lw=2,
     #                label=r"$\Omega$ = {}".format(omega))
     # ax1.set_ylim(-scale, scale)
@@ -107,7 +107,7 @@ def plot_fitness_space(generation, population, fitnesses, fitness_table,
                         colors="r", linestyles="--", lw=3, zorder=10,
                         label=r"$\mu_\phi$ = {:.2f}".format(mean_fitness))  # \mu_\phi ?
     mean_initial_amino_acid_fitness = np.mean(fitness_table.values)
-    epsilon = n_amino_acids * mean_initial_amino_acid_fitness
+    epsilon = clone_size * mean_initial_amino_acid_fitness
     ax_arr[0, 0].hlines(epsilon, 0, len(population)-1,
                         colors="b", linestyles=":", lw=3, zorder=10,
                         label=r"$\epsilon$ = {:.2f}".format(epsilon))
@@ -214,7 +214,7 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
     # Create array of fitness values with shape (n_generations, n_clones)
     n_generations = len(history) - 1  # First entry is the initial state
     generation_numbers = np.arange(n_generations+1)  # Skip initial generation
-    (n_amino_acids, n_variants) = fitness_table.shape
+    (clone_size, n_variants) = fitness_table.shape
     n_clones = len(history[0].population)
     fitnesses = np.array([[history[g].fitness[c] for c in range(n_clones)]
                           for g in range(n_generations+1)])
@@ -235,13 +235,13 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
     plt.title("\n".join(wrap("Fitness change for {} randomly generated "
                              "clones of {} amino acids, "  # NOTE: Removed 'superfit' since it does not always apply
                              "mutated over {} generations"
-                             .format(n_clones, n_amino_acids, n_generations),
+                             .format(n_clones, clone_size, n_generations),
                              60)), fontweight='bold')
     if plot_omega:  # Add fitness threshold
         plt.axhline(omega, color="k", lw=3, linestyle="-", zorder=10,
                     label=r"$\Omega$ = {}".format(omega))
     if plot_epsilon:  # Add theoretical convergence line
-        epsilon = n_amino_acids * np.mean(fitness_table.values)
+        epsilon = clone_size * np.mean(fitness_table.values)
         plt.axhline(epsilon, color="b", lw=3, linestyle="--", zorder=10,
                     label=r"$\epsilon$ = {:.2f}".format(epsilon))
     plt.legend(title=legend_title)
@@ -289,8 +289,8 @@ def plot_gamma_distribution(gamma, samples, quartiles, average_medians, run_path
 
 def plot_fitness_table(fitness_table, run_path):
 
-    (n_amino_acids, n_variants) = fitness_table.shape
-    fig, ax = plt.subplots(figsize=(8, n_amino_acids/5))
+    (clone_size, n_variants) = fitness_table.shape
+    fig, ax = plt.subplots(figsize=(8, clone_size/5))
     sns.heatmap(fitness_table, center=0, annot=True, fmt=".2f", linewidths=.5,
                 cmap="RdBu_r", annot_kws={"size": 5},
                 cbar_kws={"label": r"$\Delta T_m$"}, ax=ax)
@@ -319,8 +319,8 @@ def plot_LG_matrix(LG_matrix, run_path):
 
 def plot_phi_fitness_table(generation, phi_fitness_table, p_location, run_path):
 
-    (n_proteins, n_amino_acids) = phi_fitness_table.shape
-    fig, ax_arr = plt.subplots(2, 1, figsize=(n_amino_acids/5, n_proteins/3),
+    (n_proteins, clone_size) = phi_fitness_table.shape
+    fig, ax_arr = plt.subplots(2, 1, figsize=(clone_size/5, n_proteins/3),
                                sharex='col', gridspec_kw={'height_ratios': [1, 20]})
     sns.heatmap(np.expand_dims(p_location, axis=0), annot=False, fmt=".2f",
                 linewidths=.5, cmap="cubehelix", annot_kws={"size": 5},

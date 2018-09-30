@@ -15,7 +15,6 @@ n_generations = 200  # amount of generations the protein evolves for
 n_clones = 52  # S number of clones in the population, phi
 # TODO: Place bifurcation parameters into kwargs dict with a flag for bifurcations
 n_roots = 4
-n_gens_per_death = 5  # TODO: Remove
 death_rate = 0.05  # Set to 0 to turn off protein deaths
 
 n_amino_acids = 100  # number of amino acids in the protein including the start methionine TODO: Rename to protein_length
@@ -60,4 +59,4 @@ record = {"rate": 50,           # write a new fasta file every x generations
 
 history = pest(n_generations, stability_start, omega, mu, sigma,
                n_clones, n_roots, n_amino_acids, n_anchors, mutation_rate,
-               n_gens_per_death, death_rate, seed, gamma, record)
+               death_rate, seed, gamma, record)

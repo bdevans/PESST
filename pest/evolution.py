@@ -462,9 +462,9 @@ def kill_proteins(population, tree, death_rate, fitness_table, omega):
     return population
 
 
-def evolve(n_generations, initial_population, fitness_table, omega,
-           sites, p_location, mutation_rate, n_gens_per_death, death_rate,
-           tree, LG_matrix, record, run_path):
+def evolve(n_generations, initial_population, fitness_table, omega, sites,
+           p_location, mutation_rate, death_rate, tree, LG_matrix, record,
+           run_path):
     """Generation generator - mutate a protein for a defined number of
     generations according to an LG matrix and gamma distribution.
     """
@@ -509,7 +509,7 @@ def evolve(n_generations, initial_population, fitness_table, omega,
                                                          fitness_table, omega)
 
         # Allow sequences to die and be replacecd at a predefined rate
-        if death_rate > 0 and (gen+1) % n_gens_per_death == 0:
+        if death_rate > 0:
             next_generation = kill_proteins(next_generation, tree, death_rate,
                                             fitness_table, omega)
 
@@ -534,15 +534,14 @@ def evolve(n_generations, initial_population, fitness_table, omega,
 
 
 def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
-         n_clones=52, n_roots=4, n_amino_acids=100, n_anchors=None, mutation_rate=0.001,
-         n_gens_per_death=5, death_rate=0.05, seed=None,
+         n_clones=52, n_roots=4, n_amino_acids=100, n_anchors=None,
+         mutation_rate=0.001, death_rate=0.02, seed=None,
          gamma=None, record=None):
 
     # Validate arguments
     assert 1 < n_amino_acids
     assert 2 < n_roots < n_clones
     assert 0 <= mutation_rate <= 1
-    assert 0 < n_gens_per_death < n_generations
     assert 0 <= death_rate <= 1
 
     # TODO: Add rerun flag to load settings (and seed)
@@ -581,7 +580,6 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
                        "n_amino_acids": n_amino_acids,
                        "mutation_rate": mutation_rate,
                        "n_anchors": n_anchors,
-                       "n_gens_per_death": n_gens_per_death,  # TODO: remove!
                        "death_rate": death_rate,
                        "n_roots": n_roots,
                        "seed": seed,
@@ -624,10 +622,9 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
     rootsfullname = os.path.join(run_path, "start", "Roots.txt")
     write_roots(rootsfullname, tree["roots"])
 
-    history = evolve(n_generations, initial_population, fitness_table,
-                     omega, sites, p_location, mutation_rate,
-                     n_gens_per_death, death_rate, tree, LG_matrix,
-                     record, run_path)
+    history = evolve(n_generations, initial_population, fitness_table, omega,
+                     sites, p_location, mutation_rate, death_rate, tree,
+                     LG_matrix, record, run_path)
 
     legend_title = "; ".join([r"$\mu$ = {}".format(mu),
                               r"$\sigma$ = {}".format(sigma),

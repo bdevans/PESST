@@ -98,7 +98,8 @@ def plot_fitness_space(generation, population, fitnesses, fitness_table,
     protein_indicies = np.arange(len(population))
     protein_fitnesses = np.sum(fitnesses, axis=1)
     ax_arr[0, 0].plot(protein_indicies, protein_fitnesses, "*k", markersize=4)  # , label=r"$\mu_p$")
-    ax_arr[0, 1].hist(protein_fitnesses, bins=int(np.sqrt(len(population))), align='mid', orientation='horizontal', density=True)
+    ax_arr[0, 1].hist(protein_fitnesses, bins=int(np.sqrt(len(population))),
+                      align='mid', orientation='horizontal', density=True)
     # plt.setp(ax_arr[0, 1].get_xticklabels(), visible=False)
     ax_arr[0, 1].set_xticks([])
     mean_protein_fitness = np.mean(protein_fitnesses)

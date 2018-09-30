@@ -10,7 +10,7 @@ from scipy import stats  # gamma
 def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
                            omega, save_dir):
     # Store fitness values for each amino in the dataset for the left subfigure
-    (clone_size, n_variants) = fitness_table.shape
+    (clone_size, n_amino_acids) = fitness_table.shape
     # Average across flattened array
     mean_initial_fitness = np.mean(fitness_table.values)
     scale = round((4 * np.std(fitness_table.values)) + 1)
@@ -66,7 +66,7 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
 def plot_fitness_space(generation, population, fitnesses, fitness_table,
                        omega, save_dir):
     # Store fitness values for each amino in the dataset for the left subfigure
-    (clone_size, n_variants) = fitness_table.shape
+    (clone_size, n_amino_acids) = fitness_table.shape
     # Average across flattened array
     # mean_initial_fitness = np.mean(fitness_table.values)
     scale = round((4 * np.std(fitness_table.values)) + 1)
@@ -214,7 +214,7 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
     # Create array of fitness values with shape (n_generations, n_clones)
     n_generations = len(history) - 1  # First entry is the initial state
     generation_numbers = np.arange(n_generations+1)  # Skip initial generation
-    (clone_size, n_variants) = fitness_table.shape
+    (clone_size, n_amino_acids) = fitness_table.shape
     n_clones = len(history[0].population)
     fitnesses = np.array([[history[g].fitness[c] for c in range(n_clones)]
                           for g in range(n_generations+1)])
@@ -289,7 +289,7 @@ def plot_gamma_distribution(gamma, samples, quartiles, average_medians, run_path
 
 def plot_fitness_table(fitness_table, run_path):
 
-    (clone_size, n_variants) = fitness_table.shape
+    (clone_size, n_amino_acids) = fitness_table.shape
     fig, ax = plt.subplots(figsize=(8, clone_size/5))
     sns.heatmap(fitness_table, center=0, annot=True, fmt=".2f", linewidths=.5,
                 cmap="RdBu_r", annot_kws={"size": 5},

@@ -29,8 +29,8 @@ def get_fitness_table(clone_size, mu, sigma, LG_matrix):
     """Generate a dictionary describing list of fitness values at each position
     of the generated protein.
     """
-    n_variants = len(LG_matrix.columns)
-    values = np.random.normal(mu, sigma, size=(clone_size, n_variants))
+    n_amino_acids = len(LG_matrix.columns)
+    values = np.random.normal(mu, sigma, size=(clone_size, n_amino_acids))
     fitness_table = pd.DataFrame(values, columns=LG_matrix.columns)
     return fitness_table
 

@@ -158,11 +158,11 @@ def get_fit_protein(fitness_level, clone_size, sites, fitness_table):
 
     # if fitness_level != 'medium':
     if isinstance(fitness_level, str):
-        if fitness_level == 'low':  # generate unfit protein
+        if fitness_level.lower() == 'low':  # generate unfit protein
             # TODO: Adjust threshold or allow building proteins above threshold
             sequence = [0, 1, 2]  # Three lowest
 
-        elif fitness_level == 'high':  # generate superfit protein
+        elif fitness_level.lower() == 'high':  # generate superfit protein
             sequence = [-1, -2, -3]  # Three highest
 
         pool = [["M"] * 3]
@@ -554,7 +554,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
     if omega is None:
         omega = -np.inf
 
-    if stability_start == "low":
+    if stability_start.lower() == "low":
         warnings.warn("With 'low' starting fitness selected Omega is ignored.")
                       # "If the run fails, please check your fitness threshold,"
                       # "omega, is low enough: {}".format(omega))

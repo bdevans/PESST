@@ -21,7 +21,7 @@ clone_size = 100  # number of amino acids in the protein including the start met
 p_invariant = 0.1  # amount of invariant sites in a generation (not including root)
 
 omega = 0  # arbitrary number for fitness threshold
-stability_start = (omega + 10, omega + 20)  # high, (x, y) or low; must be lower case
+stability_start = (omega + 10, omega + 20)  # high, (x, y) or low
 # parameters for normal distribution used to select fitness values
 mu = -1.2
 sigma = 2.5

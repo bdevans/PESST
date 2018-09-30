@@ -559,7 +559,12 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
         plot_omega, plot_epsilon = False, True
         omega = -np.inf
     else:
-        plot_omega, plot_epsilon = True, True
+        # epsilon = n_amino_acids * np.mean(fitness_table.values)
+        epsilon = n_amino_acids * mu
+        if omega < epsilon:
+            plot_omega, plot_epsilon = True, True
+        else:
+            plot_omega, plot_epsilon = True, False
 
     # TODO: switch from random to np.random for proper seeding
     if seed is None:

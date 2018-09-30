@@ -74,7 +74,7 @@ def plot_fitness_space(generation, population, fitnesses, fitness_table,
 
     fig, (ax_arr) = plt.subplots(2, 2, sharey='row', #  sharex='col',
                                  gridspec_kw={'width_ratios': [4, 1],
-                                              'height_ratios': [1, 2]})
+                                              'height_ratios': [1, 3]})
     # Plot each column of fitness_table as a separate dataseries against 0..N-1
     # ax1.plot(fitness_table, "o", color='k', markersize=1)
     # ax1.hlines(mean_initial_fitness, 0, n_amino_acids-1,

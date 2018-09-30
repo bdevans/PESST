@@ -646,11 +646,11 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
                 path_root = os.path.join(run_path, "fitnessdotmatrix", root)
                 filenames = [path_root+"{}.png".format(gen)
                              for gen in record_generations]
-                create_gif(filenames, duration=0.5)
+                create_gif(filenames, duration=0.25)
 
         if record["statistics"]:
             path_root = os.path.join(run_path, "fitnessdistribution", "histograms", "generation_")
             filenames = [path_root+"{}.png".format(gen)
                          for gen in record_generations]
-            create_gif(filenames, duration=0.5)
+            create_gif(filenames, duration=0.25)
     return history

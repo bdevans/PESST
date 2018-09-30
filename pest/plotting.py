@@ -233,7 +233,7 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
     plt.xlabel("Generation")  # , fontweight='bold')
     plt.ylabel("$T_m$", fontweight='bold')
     plt.title("\n".join(wrap("Fitness change for {} randomly generated "
-                             "'superfit' clones of {} amino acids, "
+                             "clones of {} amino acids, "  # NOTE: Removed 'superfit' since it does not always apply
                              "mutated over {} generations"
                              .format(n_clones, n_amino_acids, n_generations),
                              60)), fontweight='bold')

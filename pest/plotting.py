@@ -225,7 +225,7 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
                                 for g in range(n_generations+1)])
 
     plt.figure()
-    plt.plot(generation_numbers, fitnesses)
+    plt.plot(generation_numbers, fitnesses, lw=1)
 
     # Average across clones
     plt.plot(generation_numbers, np.mean(final_fitnesses, axis=1),

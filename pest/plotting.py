@@ -324,7 +324,7 @@ def plot_LG_matrix(LG_matrix, run_path):
 def plot_phi_fitness_table(generation, phi_fitness_table, run_path):
 
     (n_proteins, clone_size) = phi_fitness_table.shape
-    fig, ax = plt.subplots(figsize=(clone_size/5, n_proteins/3))
+    fig, ax = plt.subplots(figsize=(clone_size/6, n_proteins/8))
     sns.heatmap(phi_fitness_table, center=0, annot=False, fmt=".2f",
                 linewidths=.5, cmap="RdBu_r", annot_kws={"size": 5},
                 cbar_kws={"label": r"$\Delta T_m$"}, ax=ax)

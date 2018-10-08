@@ -247,16 +247,17 @@ def write_final_fasta(population, tree, run_path):
         treefastafile.write(''.join(root))
 
 
-def create_output_folders(output_directory=""):
+def create_output_folders(run_directory=None):
     """Create output directory structure.
 
     Each run will be saved in a time-stamped folder within the run path.
     """
-    paths = ['runsettings', 'start', 'fastas', 'fitnessgraph',
+    paths = ['runsettings', 'start', 'tree', 'fastas', 'fitnessgraph',
              'fitnessdotmatrix', 'fitnessdistribution', 'treefastas']
 
-    date_time = "run{}".format(datetime.datetime.now().strftime("%y-%m-%d-%H-%M"))
-    run_path = os.path.join(output_directory, "results", date_time)
+    if run_directory is None:
+        run_directory = datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
+    run_path = os.path.join("results", run_directory)
     os.makedirs(run_path)
     if os.path.isdir(run_path):
         print("Results directory successfully created: {}".format(os.path.join(os.getcwd(), run_path)))

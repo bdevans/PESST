@@ -321,13 +321,14 @@ def plot_LG_matrix(LG_matrix, run_path):
     plt.close()
 
 
-def plot_phi_fitness_table(generation, phi_fitness_table, run_path):
-
+def plot_phi_fitness_table(generation, phi_fitness_table, clims, run_path):
+    r"""Plot a heatmap of changes in stability (\Delta T_m) for each amino acid
+    in each protein."""
     (n_proteins, clone_size) = phi_fitness_table.shape
     fig, ax = plt.subplots(figsize=(clone_size/6, n_proteins/8))
     sns.heatmap(phi_fitness_table, center=0, annot=False, fmt=".2f",
                 linewidths=.5, cmap="RdBu_r", annot_kws={"size": 5},
-                cbar_kws={"label": r"$\Delta T_m$"}, ax=ax)
+                cbar_kws={"label": r"$\Delta T_m$"}, vmin=clims[0], vmax=clims[1], ax=ax)
     ax.xaxis.set_ticks_position('top')
     ax.set_xlabel("Location")
     ax.set_ylabel("Clone")

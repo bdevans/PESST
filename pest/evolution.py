@@ -335,7 +335,9 @@ def record_generation_fitness(generation, population, variant_sites,
     # Build distribution of fitness values existing in evolving protein
     fitnesses = get_phi_fitness_table(population, variant_sites,
                                       fitness_table, record)
-    plot_phi_fitness_table(generation, fitnesses, run_path)
+    clims = (np.floor(np.amin(fitness_table.values)),
+             np.ceil(np.amax(fitness_table.values)))
+    plot_phi_fitness_table(generation, fitnesses, clims, run_path)
 
     if record["residues"]:
         save_dir = os.path.join(run_path, "fitnessdotmatrix")

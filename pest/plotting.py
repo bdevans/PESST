@@ -230,7 +230,7 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
     # Average across clones
     plt.plot(generation_numbers, np.mean(final_fitnesses, axis=1),
              "k:", lw=3, zorder=20, label=r"$\mu_\phi$")
-    plt.xlim([0, n_generations])
+    plt.xlim([-5, n_generations+5])
     plt.xlabel("Generation")  # , fontweight='bold')
     plt.ylabel("$T_m$", fontweight='bold')
     plt.title("\n".join(wrap("Fitness change for {} randomly generated "

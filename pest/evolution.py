@@ -14,7 +14,7 @@ import pandas as pd
 # import matplotlib as mpl
 from tqdm import trange
 
-from .dataio import (create_output_folders, write_settings_file,
+from .dataio import (create_output_folders, write_settings_file, write_tree,
                      write_roots, write_initial_protein, write_protein_fitness,
                      write_fasta_alignment, write_final_fasta, load_LG_matrix,
                      write_histogram_statistics, append_ks_statistics,
@@ -501,6 +501,9 @@ def evolve(n_generations, population, fitness_table, omega, sites,
         if gen > 0 and (gen+1) % n_gens_per_bifurcation == 0 \
                    and len(tree["branches"][0]) > 3:
             tree["branches"] = bifurcate_branches(tree["branches"])
+            # Write out bifurcations
+            # tree_log_file = os.path.join(run_path, "tree", "tree.txt")
+            write_tree(gen+1, tree, os.path.join(run_path, "tree", "tree.txt"))
 
         # Mutate population
         (next_generation, fitnesses) = mutate_population(population,
@@ -628,6 +631,8 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
     tree = create_tree(n_clones, n_roots)
     rootsfullname = os.path.join(run_path, "start", "Roots.txt")
     write_roots(rootsfullname, tree["roots"])
+    tree_log_file = os.path.join(run_path, "tree", "tree.txt")
+    write_tree(0, tree, tree_log_file)
 
     history = evolve(n_generations, initial_population, fitness_table, omega,
                      sites, p_location, mutation_rate, death_rate, tree,

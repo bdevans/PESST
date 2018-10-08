@@ -57,6 +57,15 @@ def write_roots(rootsfullname, root_keys):
             rootsfile.write("\nClone {}".format(str(k+1)))
 
 
+def write_tree(generation, tree, bifurcation_file):
+    """Write the roots and branches created by bifurcations."""
+    with open(bifurcation_file, "a") as bf:
+        bf.write("Generation {}\n".format(generation))
+        bf.write("Roots: {}\n".format(tree["roots"]))
+        for b, branch in enumerate(tree["branches"]):
+            bf.write("Branch {}: {}\n".format(b, branch))
+
+
 def append_ks_statistics(stats_full_name, distribution_fitness, initial_fitness):
     with open(stats_full_name, "a") as stats_file:  # Append to file
         # Kolmogorov-Smirnov test of similarity to original distributuion

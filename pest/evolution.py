@@ -58,7 +58,7 @@ def get_allowed_sites(clone_size, n_invariants):
     return Sites(invariant=invariant_sites, variant=variant_sites)
 
 
-def gamma_ray(clone_size, sites, gamma, run_path):
+def gamma_ray(clone_size, sites, gamma, out_paths):
     """Generate a set of gamma rate categories.
 
     Does so by sampling many times from a gamma distribution.
@@ -94,7 +94,7 @@ def gamma_ray(clone_size, sites, gamma, run_path):
     average_medians = np.mean(medians, axis=0)
 
     # Replot the gamma distributuion as a check
-    plot_gamma_distribution(gamma, samples, quartiles, average_medians, run_path)
+    plot_gamma_distribution(gamma, samples, quartiles, average_medians, out_paths)
 
     gamma_categories = np.random.choice(average_medians, size=clone_size)
     gamma_categories[sites.invariant] = 0
@@ -327,7 +327,7 @@ def calculate_population_fitness(population, fitness_table):
 
 
 def record_generation_fitness(generation, population, variant_sites,
-                              fitness_table, omega, p_location, record, run_path):
+                              fitness_table, omega, p_location, record, out_paths):
     """Record the fitness of every protein in the generation and store them in
     dictionary. Optionally generate data and figures about fitness.
     """
@@ -337,14 +337,14 @@ def record_generation_fitness(generation, population, variant_sites,
                                       fitness_table, record)
     clims = (np.floor(np.amin(fitness_table.values)),
              np.ceil(np.amax(fitness_table.values)))
-    plot_phi_fitness_table(generation, fitnesses, clims, run_path)
+    plot_phi_fitness_table(generation, fitnesses, clims, out_paths)
 
     if record["residues"]:
-        save_dir = os.path.join(run_path, "fitnessdotmatrix")
+        # save_dir = os.path.join(out_paths["figures"], "fitnessdotmatrix")
         plot_threshold_fitness(generation, population, fitnesses,
-                               fitness_table, omega, save_dir)
+                               fitness_table, omega, out_paths)
         plot_fitness_space(generation, population, fitnesses, fitness_table,
-                           omega, save_dir)
+                           omega, out_paths)
 
     if record["statistics"]:
         # Record 5 statistical tests on the protein fitness space
@@ -354,19 +354,17 @@ def record_generation_fitness(generation, population, variant_sites,
         else:
             stats_file_name = "normal_distribution_statistics_generation{}.md".format(generation)
             distributions = fitnesses
-        stats_full_name = os.path.join(run_path, "fitnessdistribution",
-                                       "statistics", stats_file_name)
+        stats_full_name = os.path.join(out_paths["statistics"], stats_file_name)
         write_histogram_statistics(stats_full_name, distributions)
         if generation > 0:
             append_ks_statistics(stats_full_name, distributions.ravel(),
                                  fitness_table.values.ravel())
 
     if record["histograms"]:
-        disthistfilename = "generation_{}.png".format(generation)
-        disthistfullname = os.path.join(run_path, "fitnessdistribution",
-                                        "histograms", disthistfilename)
-        plot_histogram_of_fitness(disthistfullname, fitnesses.ravel(),
-                                  fitness_table.values.ravel(), omega)
+        # disthistfilename = "generation_{}.png".format(generation)
+        # disthistfullname = os.path.join(out_paths["figures"], "histograms", disthistfilename)
+        plot_histogram_of_fitness(generation, fitnesses.ravel(),
+                                  fitness_table.values.ravel(), omega, out_paths)
 
 
 def get_phi_fitness_table(population, variant_sites, fitness_table, record):
@@ -468,7 +466,7 @@ def kill_proteins(population, tree, death_rate, fitness_table, omega):
 
 def evolve(n_generations, population, fitness_table, omega, sites,
            p_location, mutation_rate, death_rate, tree, LG_matrix, record,
-           run_path):
+           out_paths):
     """Generation generator - mutate a protein for a defined number of
     generations according to an LG matrix and gamma distribution.
     """
@@ -487,8 +485,8 @@ def evolve(n_generations, population, fitness_table, omega, sites,
     # Record initial population
     record_generation_fitness(0, population, sites.variant,
                               fitness_table, omega, p_location,
-                              record, run_path)
-    write_fasta_alignment(0, population, run_path)
+                              record, out_paths)
+    write_fasta_alignment(0, population, out_paths)
 
     # Store each generation along with its fitness
     Generation = namedtuple('Generation',
@@ -506,7 +504,7 @@ def evolve(n_generations, population, fitness_table, omega, sites,
             tree["branches"] = bifurcate_branches(tree["branches"])
             # Write out bifurcations
             # tree_log_file = os.path.join(run_path, "tree", "tree.txt")
-            write_tree(gen+1, tree, os.path.join(run_path, "tree", "tree.txt"))
+            write_tree(gen+1, tree, out_paths)
 
         # Mutate population
         (next_generation, fitnesses) = mutate_population(population,
@@ -529,21 +527,21 @@ def evolve(n_generations, population, fitness_table, omega, sites,
                                   final_fitness=final_fitnesses))
         # Write fasta every record["fasta_rate"] generations
         if (gen+1) % record["fasta_rate"] == 0:
-            write_fasta_alignment(gen+1, population, run_path)
+            write_fasta_alignment(gen+1, population, out_paths)
         # Record population details at the end of processing
         if (gen+1) % record["rate"] == 0:
             record_generation_fitness(gen+1, population, sites.variant,
                                       fitness_table, omega, p_location,
-                                      record, run_path)
+                                      record, out_paths)
 
-    write_final_fasta(population, tree, run_path)
+    write_final_fasta(population, tree, out_paths)
     return history
 
 
 def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, skew=0,
          n_clones=52, n_roots=4, clone_size=100, p_invariant=0.1,
          mutation_rate=0.001, death_rate=0.02, seed=None,
-         gamma=None, record=None):
+         gamma=None, output_dir=None, record=None):
 
     # Validate arguments
     assert 1 < clone_size
@@ -583,7 +581,8 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
     # TODO: Put run_path (and subdirs) in record dict
     # create folder and subfolders
     # PWD = os.path.dirname(__file__)
-    run_path = create_output_folders()
+    out_paths = create_output_folders(output_dir)
+    run_path = out_paths["results"]
     settings_kwargs = {"n_generations": n_generations,
                        "stability_start": stability_start,
                        "omega": omega,
@@ -599,13 +598,13 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
                        "seed": seed,
                        "gamma": gamma,
                        "record": record}
-    write_settings_file(run_path, settings_kwargs)  # record run settings
+    write_settings_file(settings_kwargs, out_paths)  # record run settings
     LG_matrix = load_LG_matrix()  # Load LG matrix
-    plot_LG_matrix(LG_matrix, run_path)
+    plot_LG_matrix(LG_matrix, out_paths)
     # Make fitness table of Delta T_m values
     fitness_table = get_fitness_table(clone_size, mu, sigma, skew, LG_matrix.columns)
-    write_protein_fitness(run_path, "start", fitness_table)
-    plot_fitness_table(fitness_table, run_path)
+    write_protein_fitness(fitness_table, out_paths)
+    plot_fitness_table(fitness_table, out_paths)
     T_max = sum(np.amax(fitness_table, axis=1))  # Fittest possible protein
     assert omega < T_max
 
@@ -613,7 +612,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
     # TODO: return boolean array where True is variant
     sites = get_allowed_sites(clone_size, n_invariants)
     # Generate mutation probabilities for every site
-    p_location = gamma_ray(clone_size, sites, gamma, run_path)  # TODO: Move plotting out
+    p_location = gamma_ray(clone_size, sites, gamma, out_paths)  # TODO: Move plotting out
 
     # Generate a protein of specified fitness taking into account the invariant
     # sites created (calling variables in this order stops the evolutionary
@@ -622,7 +621,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
     initial_protein = get_fit_protein(stability_start, clone_size, sites,
                                       fitness_table)
     # print_protein(initial_protein)
-    write_initial_protein(initial_protein, run_path)  # Record initial protein
+    write_initial_protein(initial_protein, out_paths)  # Record initial protein
     initial_fitness = calculate_fitness(initial_protein, fitness_table)
     if initial_fitness < omega:
         raise Exception("The fitness threshold is too high!")
@@ -633,33 +632,31 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
 
     # Generate list of clone keys for bifurication
     tree = create_tree(n_clones, n_roots)
-    rootsfullname = os.path.join(run_path, "start", "Roots.txt")
-    write_roots(rootsfullname, tree["roots"])
-    tree_log_file = os.path.join(run_path, "tree", "tree.txt")
-    write_tree(0, tree, tree_log_file)
+    write_roots(tree["roots"], out_paths)
+    write_tree(0, tree, out_paths)
 
     history = evolve(n_generations, initial_population, fitness_table, omega,
                      sites, p_location, mutation_rate, death_rate, tree,
-                     LG_matrix, record, run_path)
+                     LG_matrix, record, out_paths)
 
     legend_title = "; ".join([r"$\mu$ = {}".format(mu),
                               r"$\sigma$ = {}".format(sigma),
                               r"$\delta$ = {}".format(mutation_rate)])
     plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
-                   run_path, legend_title)
+                   out_paths, legend_title)
 
     # Create animations
     if record["gif"]:
         record_generations = list(range(0, n_generations+1, record["rate"]))
         if record["residues"]:
             for root in ["fit_dist_gen_", "generation_", "phi_fitness_table_"]:
-                path_root = os.path.join(run_path, "fitnessdotmatrix", root)
+                path_root = os.path.join(out_paths["figures"], root)
                 filenames = [path_root+"{}.png".format(gen)
                              for gen in record_generations]
                 create_gif(filenames, duration=0.25)
 
         if record["statistics"]:
-            path_root = os.path.join(run_path, "fitnessdistribution", "histograms", "generation_")
+            path_root = os.path.join(out_paths["figures"], "generation_")
             filenames = [path_root+"{}.png".format(gen)
                          for gen in record_generations]
             create_gif(filenames, duration=0.25)

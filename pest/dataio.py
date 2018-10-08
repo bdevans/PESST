@@ -36,30 +36,30 @@ def load_LG_matrix(full_file_name=None):
     return LG_matrix
 
 
-def write_protein_fitness(run_path, directory, fitness_table):
-
-    fitness_file_name = os.path.join(run_path, directory, "fitnesslibrary.csv")
+def write_protein_fitness(fitness_table, out_paths):
+    """Write matrix of stability changes."""
+    fitness_file_name = os.path.join(out_paths["initial"], "fitnesslibrary.csv")
     fitness_table.to_csv(fitness_file_name, index_label="Position")
 
 
-def write_initial_protein(initial_protein, run_path):
-    protein_full_name = os.path.join(run_path, "start", "firstprotein.fas")
+def write_initial_protein(initial_protein, out_paths):
+    protein_full_name = os.path.join(out_paths["initial"], "firstprotein.fas")
     with open(protein_full_name, "w") as ipf:  # open file
         ipf.write('>firstprotein\n')
         ipf.write(''.join(initial_protein))
 
 
-def write_roots(rootsfullname, root_keys):
+def write_roots(root_keys, out_paths):
     """Write the list of roots indicies."""
-    with open(rootsfullname, "w") as rootsfile:  # open file
+    with open(os.path.join(out_paths["initial"], "roots.txt"), "w") as rootsfile:  # open file
         rootsfile.write("Roots:")
         for k in root_keys:
             rootsfile.write("\nClone {}".format(str(k+1)))
 
 
-def write_tree(generation, tree, bifurcation_file):
+def write_tree(generation, tree, out_paths):
     """Write the roots and branches created by bifurcations."""
-    with open(bifurcation_file, "a") as bf:
+    with open(os.path.join(out_paths["tree"], "tree.txt"), "a") as bf:
         bf.write("Generation {}\n".format(generation))
         bf.write("Roots: {}\n".format(tree["roots"]))
         for b, branch in enumerate(tree["branches"]):
@@ -209,11 +209,10 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
     stats_file.close()
 
 
-def write_fasta_alignment(generation, population, run_path):
+def write_fasta_alignment(generation, population, out_paths):
     """Write fasta alignment from sequences provided."""
-    fastafilepath = os.path.join(run_path, "fastas")
     fastafilename = "generation_{}.fasta".format(generation)
-    fullname = os.path.join(fastafilepath, fastafilename)
+    fullname = os.path.join(out_paths["fastas"], fastafilename)
     with open(fullname, "w") as fastafile:  # open file
         # Write fasta header followed by residue in generation string
         # TODO: This should be an ordered dict or list to preserve the order...
@@ -222,7 +221,7 @@ def write_fasta_alignment(generation, population, run_path):
             fastafile.write("".join(protein)+"\n")
 
 
-def write_final_fasta(population, tree, run_path):
+def write_final_fasta(population, tree, out_paths):
     """Write a random selection of proteins from each branch with a random
     root.
     """
@@ -234,7 +233,7 @@ def write_final_fasta(population, tree, run_path):
     for branch in tree["branches"]:
         selection.extend(random.sample(set(branch), n_clones_to_take))
 
-    full_name = os.path.join(run_path, "treefastas", "selected_fastas.fasta")
+    full_name = os.path.join(out_paths["treefastas"], "selected_fastas.fasta")
     with open(full_name, "w") as treefastafile:  # open file
         # Write fasta header followed by residue in generation string
         for pi in selection:
@@ -247,17 +246,20 @@ def write_final_fasta(population, tree, run_path):
         treefastafile.write(''.join(root))
 
 
-def create_output_folders(run_directory=None):
+def create_output_folders(output_dir=None):
     """Create output directory structure.
 
-    Each run will be saved in a time-stamped folder within the run path.
+    If no output directory is passed, each run will be saved in a time-stamped
+    folder within the run path.
     """
-    paths = ['runsettings', 'start', 'tree', 'fastas', 'fitnessgraph',
+    paths = ['runsettings', 'start', 'figures', 'data', 'tree', 'fastas', 'fitnessgraph',
              'fitnessdotmatrix', 'fitnessdistribution', 'treefastas']
+    paths = ['initial', 'data', 'figures', 'tree', 'fastas', 'treefastas',
+             'statistics']
 
-    if run_directory is None:
-        run_directory = datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
-    run_path = os.path.join("results", run_directory)
+    if output_dir is None:
+        output_dir = datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
+    run_path = os.path.join("results", output_dir)
     os.makedirs(run_path)
     if os.path.isdir(run_path):
         print("Results directory successfully created: {}".format(os.path.join(os.getcwd(), run_path)))
@@ -267,14 +269,17 @@ def create_output_folders(run_directory=None):
     for path in paths:
         os.makedirs(os.path.join(run_path, path))
 
-    innerpaths = ['statistics', 'histograms']
-    for innerpath in innerpaths:
-        os.makedirs(os.path.join(run_path, "fitnessdistribution", innerpath))
-    return run_path
+    # innerpaths = ['statistics', 'histograms']
+    # for innerpath in innerpaths:
+    #     os.makedirs(os.path.join(run_path, "fitnessdistribution", innerpath))
+
+    out_paths = {path: os.path.join(run_path, path) for path in paths}
+    out_paths["results"] = run_path
+    return out_paths
 
 
-def write_settings_file(run_path, settings):
-    settingsfullname = os.path.join(run_path, "runsettings", "settings.json")
+def write_settings_file(settings, out_paths):
+    settingsfullname = os.path.join(out_paths["initial"], "settings.json")
     with open(settingsfullname, "w") as sf:  # open file
         json.dump(settings, sf, indent=4)
 

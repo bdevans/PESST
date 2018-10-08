@@ -8,7 +8,7 @@ from scipy import stats  # gamma
 
 
 def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
-                           omega, save_dir):
+                           omega, out_paths):
     # Store fitness values for each amino in the dataset for the left subfigure
     (clone_size, n_amino_acids) = fitness_table.shape
     # Average across flattened array
@@ -58,13 +58,13 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
     # plt.subplots_adjust(top=0.85)
     fig.suptitle(("Generation {}".format(generation)), fontweight='bold')
     # fig.tight_layout()
-    filename = os.path.join(save_dir, "generation_{}.png".format(generation))
+    filename = os.path.join(out_paths["figures"], "generation_{}.png".format(generation))
     fig.savefig(filename)
     plt.close()
 
 
 def plot_fitness_space(generation, population, fitnesses, fitness_table,
-                       omega, save_dir):
+                       omega, out_paths):
 
     col_aa_g = "#3498db"  # Blue
     col_aa_0 = "#95a5a6"  # Green
@@ -177,16 +177,17 @@ def plot_fitness_space(generation, population, fitnesses, fitness_table,
     #               size=8)
 
     # plt.subplots_adjust(top=0.85)
-    fig.suptitle(("Generation {}".format(generation)), fontweight='bold')
+    fig.suptitle(("Generation {}".format(generation)), fontweight='bold')  # TODO Prevent overlap with spines
     fig.set_tight_layout(True)
-    filename = os.path.join(save_dir, "fit_dist_gen_{}.png".format(generation))
+    filename = os.path.join(out_paths["figures"], "fit_dist_gen_{}.png".format(generation))
     fig.savefig(filename)
     plt.close()
+    return (fig, ax_arr)
 
 
-def plot_histogram_of_fitness(disthistfullname, distributions, initial, omega):
+def plot_histogram_of_fitness(generation, distributions, initial, omega, out_paths):
     plt.figure()
-    plt.axis([-10, 8, 0, 0.5])  # generate attractive figure
+    # plt.axis([-10, 8, 0, 0.5])  # generate attractive figure
 
     # Plot normal distribution of the original fitness space
     mu1distspace = sum(initial) / len(initial)
@@ -215,12 +216,12 @@ def plot_histogram_of_fitness(disthistfullname, distributions, initial, omega):
     #                               r"$\mu_2$ = {:.3}".format(mu2distspace),
     #                               r"$\Omega$ = {}".format(omega)]))
 
-    plt.savefig(disthistfullname)
+    plt.savefig(os.path.join(out_paths["figures"], "histogram_{}.png".format(generation)))
     plt.close()
 
 
 def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
-                   run_path, legend_title=None):
+                   out_paths, legend_title=None):
     """Plot fitness against generation for all clones.
 
     This plots after mutation but before replacement so that subthreshold
@@ -263,12 +264,12 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
 
     # Define dynamic filename
     fitgraphfilename = "fitness_over_{}_generations.png".format(n_generations)
-    fitgraphfullname = os.path.join(run_path, "fitnessgraph", fitgraphfilename)
+    fitgraphfullname = os.path.join(out_paths["figures"], fitgraphfilename)
     plt.savefig(fitgraphfullname)
     return
 
 
-def plot_gamma_distribution(gamma, samples, quartiles, average_medians, run_path):
+def plot_gamma_distribution(gamma, samples, quartiles, average_medians, out_paths):
     """Plot the distribution along with the quartiles and medians."""
     kappa, theta, n_iterations, n_samples = (gamma["shape"],
                                              gamma["scale"],
@@ -299,10 +300,10 @@ def plot_gamma_distribution(gamma, samples, quartiles, average_medians, run_path
                              .format(n_iterations, n_samples), 60)),
               fontweight='bold', fontsize=10)
     plt.legend()
-    plt.savefig(os.path.join(run_path, "start", "gamma.png"))
+    plt.savefig(os.path.join(out_paths["initial"], "gamma.png"))
 
 
-def plot_fitness_table(fitness_table, run_path):
+def plot_fitness_table(fitness_table, out_paths):
 
     (clone_size, n_amino_acids) = fitness_table.shape
     fig, ax = plt.subplots(figsize=(8, clone_size/5))
@@ -312,12 +313,12 @@ def plot_fitness_table(fitness_table, run_path):
     ax.xaxis.set_ticks_position('top')
     ax.set_xlabel("Amino Acid")
     ax.set_ylabel("Location")
-    filename = os.path.join(run_path, "start", "fitness_table.png")
+    filename = os.path.join(out_paths["initial"], "fitness_table.png")
     fig.savefig(filename)
     plt.close()
 
 
-def plot_LG_matrix(LG_matrix, run_path):
+def plot_LG_matrix(LG_matrix, out_paths):
 
     fig, ax = plt.subplots(figsize=(10, 8))
     sns.heatmap(LG_matrix, annot=True, fmt=".2f", linewidths=.5, cmap="cubehelix",
@@ -327,12 +328,12 @@ def plot_LG_matrix(LG_matrix, run_path):
     ax.set_xlabel("Amino Acid")
     ax.set_ylabel("Amino Acid")
     ax.set_title("LG model transition probabilities")
-    filename = os.path.join(run_path, "start", "LG_matrix.png")
+    filename = os.path.join(out_paths["initial"], "LG_matrix.png")
     fig.savefig(filename)
     plt.close()
 
 
-def plot_phi_fitness_table(generation, phi_fitness_table, clims, run_path):
+def plot_phi_fitness_table(generation, phi_fitness_table, clims, out_paths):
     r"""Plot a heatmap of changes in stability (\Delta T_m) for each amino acid
     in each protein."""
     (n_proteins, clone_size) = phi_fitness_table.shape
@@ -343,7 +344,7 @@ def plot_phi_fitness_table(generation, phi_fitness_table, clims, run_path):
     ax.xaxis.set_ticks_position('top')
     ax.set_xlabel("Location")
     ax.set_ylabel("Clone")
-    filename = os.path.join(run_path, "fitnessdotmatrix",
+    filename = os.path.join(out_paths["figures"],
                             "phi_fitness_table_{}.png".format(generation))
     ax.set_title("Generation {}".format(generation), fontweight="bold")
     fig.savefig(filename)

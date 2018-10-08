@@ -29,6 +29,7 @@ skew = 3  # skewnorm.pdf(x, skew) = 2 * norm.pdf(x) * norm.cdf(skew*x)
 mutation_rate = 0.001  # Proportion of the total amino acids in mutating in the population each gnereation - should be small!
 
 seed = None  # Maximum seed: 2**32 - 1
+output_dir = None
 
 # TODO: Put into dictionary
 population = {"n_proteins": n_clones,
@@ -60,4 +61,4 @@ record = {"rate": 50,           # write a new fasta file every x generations
 
 history = pest(n_generations, stability_start, omega, mu, sigma, skew,
                n_clones, n_roots, clone_size, p_invariant, mutation_rate,
-               death_rate, seed, gamma, record)
+               death_rate, seed, gamma, output_dir, record)

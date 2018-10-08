@@ -25,6 +25,7 @@ stability_start = (omega + 10, omega + 20)  # high, (x, y) or low
 # parameters for normal distribution used to select fitness values
 mu = -1.2
 sigma = 2.5
+skew = 3  # skewnorm.pdf(x, skew) = 2 * norm.pdf(x) * norm.cdf(skew*x)
 mutation_rate = 0.001  # Proportion of the total amino acids in mutating in the population each gnereation - should be small!
 
 seed = None  # Maximum seed: 2**32 - 1
@@ -39,6 +40,7 @@ stability = {"start": stability_start,
              "omega": omega,  # Stability threshold
              "mu": mu,
              "sigma": sigma,
+             "skew": skew,
              "delta": mutation_rate}
 
 # parameters for forming discrete gamma distribution used for evolution of protein
@@ -56,6 +58,6 @@ record = {"rate": 50,           # write a new fasta file every x generations
           "invariants": False,
           "gif": False}
 
-history = pest(n_generations, stability_start, omega, mu, sigma,
+history = pest(n_generations, stability_start, omega, mu, sigma, skew,
                n_clones, n_roots, clone_size, p_invariant, mutation_rate,
                death_rate, seed, gamma, record)

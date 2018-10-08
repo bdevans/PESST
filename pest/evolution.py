@@ -25,11 +25,12 @@ from .plotting import (plot_evolution, plot_gamma_distribution,
                        plot_phi_fitness_table)
 
 
-def get_fitness_table(clone_size, mu, sigma, amino_acids):
+def get_fitness_table(clone_size, mu, sigma, skew, amino_acids):
     """Generate a dictionary describing list of fitness values at each position
     of the generated protein.
     """
-    values = np.random.normal(mu, sigma, size=(clone_size, len(amino_acids)))
+    values = sp.stats.skewnorm.rvs(skew, loc=mu, scale=sigma,
+                                   size=(clone_size, len(amino_acids)))
     fitness_table = pd.DataFrame(values, columns=amino_acids)
     return fitness_table
 
@@ -537,7 +538,7 @@ def evolve(n_generations, population, fitness_table, omega, sites,
     return history
 
 
-def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
+def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, skew=0,
          n_clones=52, n_roots=4, clone_size=100, p_invariant=0.1,
          mutation_rate=0.001, death_rate=0.02, seed=None,
          gamma=None, record=None):
@@ -586,6 +587,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
                        "omega": omega,
                        "mu": mu,
                        "sigma": sigma,
+                       "skew": skew,
                        "n_clones": n_clones,
                        "clone_size": clone_size,
                        "mutation_rate": mutation_rate,
@@ -599,7 +601,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
     LG_matrix = load_LG_matrix()  # Load LG matrix
     plot_LG_matrix(LG_matrix, run_path)
     # Make fitness table of Delta T_m values
-    fitness_table = get_fitness_table(clone_size, mu, sigma, LG_matrix.columns)
+    fitness_table = get_fitness_table(clone_size, mu, sigma, skew, LG_matrix.columns)
     write_protein_fitness(run_path, "start", fitness_table)
     plot_fitness_table(fitness_table, run_path)
     T_max = sum(np.amax(fitness_table, axis=1))  # Fittest possible protein

@@ -98,13 +98,13 @@ def gamma_ray(clone_size, sites, gamma, out_paths):
 
     gamma_categories = np.random.choice(average_medians, size=clone_size)
     gamma_categories[sites.invariant] = 0
-    return gamma_categories/sum(gamma_categories)  # p_location
+    return gamma_categories/sum(gamma_categories)  # p_mutation
 
 
-def mutate_protein(protein, p_location, LG_matrix):
+def mutate_protein(protein, p_mutation, LG_matrix):
     """Mutate a residue to another residue based on the LG matrix."""
     mutant = copy.deepcopy(protein)  # Necessary!
-    location = np.random.choice(len(mutant), p=p_location)
+    location = np.random.choice(len(mutant), p=p_mutation)
     amino_acid = mutant[location]
     p_transition = LG_matrix.loc[amino_acid]
     LG_residues = LG_matrix.columns.values  # .tolist()
@@ -235,7 +235,7 @@ def get_fit_protein(stability_start, clone_size, sites, fitness_table):
 
 # TODO: Refactor for efficiency?
 # def mutate_population(current_generation, n_mutations_per_gen, tree,
-#                       variant_sites, p_location, LG_matrix,
+#                       variant_sites, p_mutation, LG_matrix,
 #                       fitness_table, omega):
 #     """Mutate a set of sequences based on the LG+I+G model of amino acid
 #     substitution.
@@ -252,7 +252,7 @@ def get_fit_protein(stability_start, clone_size, sites, fitness_table):
 #             # Pick random key, clone to make a random generation
 #             pi, protein = random.choice(list(next_generation.items()))
 #             # Mutate the copy with the randomly chosen residue
-#             mutant = mutate_protein(protein, p_location, LG_matrix)
+#             mutant = mutate_protein(protein, p_mutation, LG_matrix)
 #
 #             # next_generation[pi] = mutant  # update with new sequence
 #             fitness = calculate_fitness(mutant, fitness_table)
@@ -278,7 +278,7 @@ def get_fit_protein(stability_start, clone_size, sites, fitness_table):
 
 
 def mutate_population(current_generation, n_mutations_per_gen, tree,
-                      p_location, LG_matrix, fitness_table, omega):
+                      p_mutation, LG_matrix, fitness_table, omega):
     """Mutate a set of sequences based on the LG+I+G model of amino acid
     substitution.
     """
@@ -292,7 +292,7 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
             # Pick random key, clone to make a random generation
             pi, protein = random.choice(list(next_generation.items()))
             # Mutate the copy with the randomly chosen residue
-            mutant = mutate_protein(protein, p_location, LG_matrix)
+            mutant = mutate_protein(protein, p_mutation, LG_matrix)
             next_generation[pi] = mutant  # update with new sequence
 
         fitnesses = calculate_population_fitness(next_generation, fitness_table)
@@ -327,7 +327,7 @@ def calculate_population_fitness(population, fitness_table):
 
 
 def record_generation_fitness(generation, population, variant_sites,
-                              fitness_table, omega, p_location, record, out_paths):
+                              fitness_table, omega, p_mutation, record, out_paths):
     """Record the fitness of every protein in the generation and store them in
     dictionary. Optionally generate data and figures about fitness.
     """
@@ -465,7 +465,7 @@ def kill_proteins(population, tree, death_rate, fitness_table, omega):
 
 
 def evolve(n_generations, population, fitness_table, omega, sites,
-           p_location, mutation_rate, death_rate, tree, LG_matrix, record,
+           p_mutation, mutation_rate, death_rate, tree, LG_matrix, record,
            out_paths):
     """Generation generator - mutate a protein for a defined number of
     generations according to an LG matrix and gamma distribution.
@@ -484,7 +484,7 @@ def evolve(n_generations, population, fitness_table, omega, sites,
     fitnesses = calculate_population_fitness(population, fitness_table)
     # Record initial population
     record_generation_fitness(0, population, sites.variant,
-                              fitness_table, omega, p_location,
+                              fitness_table, omega, p_mutation,
                               record, out_paths)
     write_fasta_alignment(0, population, out_paths)
 
@@ -509,7 +509,7 @@ def evolve(n_generations, population, fitness_table, omega, sites,
         # Mutate population
         (next_generation, fitnesses) = mutate_population(population,
                                                          n_mutations_per_gen,
-                                                         tree, p_location,
+                                                         tree, p_mutation,
                                                          LG_matrix,
                                                          fitness_table, omega)
 
@@ -531,7 +531,7 @@ def evolve(n_generations, population, fitness_table, omega, sites,
         # Record population details at the end of processing
         if (gen+1) % record["rate"] == 0:
             record_generation_fitness(gen+1, population, sites.variant,
-                                      fitness_table, omega, p_location,
+                                      fitness_table, omega, p_mutation,
                                       record, out_paths)
 
     write_final_fasta(population, tree, out_paths)
@@ -612,7 +612,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
     # TODO: return boolean array where True is variant
     sites = get_allowed_sites(clone_size, n_invariants)
     # Generate mutation probabilities for every site
-    p_location = gamma_ray(clone_size, sites, gamma, out_paths)  # TODO: Move plotting out
+    p_mutation = gamma_ray(clone_size, sites, gamma, out_paths)  # TODO: Move plotting out
 
     # Generate a protein of specified fitness taking into account the invariant
     # sites created (calling variables in this order stops the evolutionary
@@ -636,7 +636,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
     write_tree(0, tree, out_paths)
 
     history = evolve(n_generations, initial_population, fitness_table, omega,
-                     sites, p_location, mutation_rate, death_rate, tree,
+                     sites, p_mutation, mutation_rate, death_rate, tree,
                      LG_matrix, record, out_paths)
 
     legend_title = "; ".join([r"$\mu$ = {}".format(mu),

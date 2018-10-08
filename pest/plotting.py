@@ -139,6 +139,9 @@ def plot_fitness_space(generation, population, fitnesses, fitness_table,
     ax_arr[1, 1].legend(loc="upper left", fontsize=6.5)
     # plt.setp(ax_arr[1, 1].get_xticklabels(), visible=False)
     ax_arr[1, 1].set_xticks([])
+    # Set to 1.5*largest original bin count
+    # ax_arr[1, 1].set_ylim(0, round(1.5*np.amax(n)))
+    ax_arr[1, 1].set_ybound(0, 0.5)
 
     ax_arr[1, 0].hlines(mean_initial_amino_acid_fitness, 0, len(population)-1,
                         colors="k", linestyles="--", lw=3, zorder=10,

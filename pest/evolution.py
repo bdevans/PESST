@@ -663,4 +663,4 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
             filenames = [path_root+"{}.png".format(gen)
                          for gen in record_generations]
             create_gif(filenames, duration=0.25)
-    return history
+    return history, run_path

@@ -65,6 +65,14 @@ def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
 
 def plot_fitness_space(generation, population, fitnesses, fitness_table,
                        omega, save_dir):
+
+    col_aa_g = "#3498db"  # Blue
+    col_aa_0 = "#95a5a6"  # Green
+    col_phi = "#34495e"
+    col_mu_phi = "#9b59b6"  # Purple
+    col_omega = "#e74c3c"  # "k"
+    col_epsilon = "#2ecc71"  # Red
+
     # Store fitness values for each amino in the dataset for the left subfigure
     (clone_size, n_amino_acids) = fitness_table.shape
     # Average across flattened array
@@ -98,24 +106,24 @@ def plot_fitness_space(generation, population, fitnesses, fitness_table,
     # TODO: Swap colour to a particular protein not locus or make monochrome
     protein_indicies = np.arange(len(population))
     protein_fitnesses = np.sum(fitnesses, axis=1)
-    ax_arr[0, 0].plot(protein_indicies, protein_fitnesses, "*k", markersize=4)  # , label=r"$\mu_p$")
+    ax_arr[0, 0].plot(protein_indicies, protein_fitnesses, "*", color=col_phi, markersize=4)  # , label=r"$\mu_p$")
     ax_arr[0, 1].hist(protein_fitnesses, bins=int(np.sqrt(len(population))),
                       align='mid', orientation='horizontal', density=True)
     # plt.setp(ax_arr[0, 1].get_xticklabels(), visible=False)
     ax_arr[0, 1].set_xticks([])
     mean_protein_fitness = np.mean(protein_fitnesses)
     ax_arr[0, 0].hlines(mean_protein_fitness, 0, len(population)-1,
-                        colors="r", linestyles="--", lw=3, zorder=10,
+                        colors=col_mu_phi, linestyles="--", lw=3, zorder=10,
                         label=r"$\mu_\phi$ = {:.2f}".format(mean_fitness))  # \mu_\phi ?
     mean_initial_amino_acid_fitness = np.mean(fitness_table.values)
     epsilon = clone_size * mean_initial_amino_acid_fitness
     ax_arr[0, 0].hlines(epsilon, 0, len(population)-1,
-                        colors="b", linestyles=":", lw=3, zorder=10,
+                        colors=col_epsilon, linestyles=":", lw=3, zorder=10,
                         label=r"$\epsilon$ = {:.2f}".format(epsilon))
     ncol = 2
     if omega > -np.inf:
         ax_arr[0, 0].hlines(omega, 0, len(population)-1,
-                            colors="k", linestyles="-", lw=3, zorder=10,
+                            colors=col_omega, linestyles="-", lw=3, zorder=10,
                             label=r"$\Omega$ = {}".format(omega))
         ncol += 1
 
@@ -123,18 +131,21 @@ def plot_fitness_space(generation, population, fitnesses, fitness_table,
     plt.setp(ax_arr[0, 0].get_xticklabels(), visible=False)
     ax_arr[0, 0].legend(loc="upper left", fontsize=6.5, ncol=ncol)
 
-    ax_arr[1, 0].plot(protein_indicies, fitnesses, "o", markersize=1)
-    ax_arr[1, 1].hist(fitness_table.values.ravel(), bins=int(np.sqrt(fitnesses.size)),
-                      color='k', alpha=0.4, align='mid',
-                      orientation='horizontal', density=True, label="Initial dist.")
-    ax_arr[1, 1].axhline(y=mean_initial_amino_acid_fitness, color="k", linestyle="--", lw=3, zorder=10)
+    ax_arr[1, 0].plot(protein_indicies, fitnesses, "o", color=col_aa_g, markersize=1)
+    n, bins, _ = ax_arr[1, 1].hist(fitness_table.values.ravel(),
+                                   bins='sqrt',  # int(np.sqrt(fitnesses.size))
+                                   color=col_aa_0, alpha=0.4, align='mid',
+                                   orientation='horizontal', density=True,
+                                   label="Initial dist.")
+    ax_arr[1, 1].axhline(y=mean_initial_amino_acid_fitness, color=col_aa_0,
+                         linestyle="--", lw=3, zorder=10)
                          # label=r"$\mu_0$ = {:.2f}".format(mean_initial_amino_acid_fitness))
-    ax_arr[1, 1].hist(fitnesses.ravel(), bins=int(np.sqrt(fitnesses.size)),
-                      align='mid', color="r", alpha=0.4,
+    ax_arr[1, 1].hist(fitnesses.ravel(), bins=bins,  # int(np.sqrt(fitnesses.size))
+                      align='mid', color=col_aa_g, alpha=0.4,
                       orientation='horizontal', density=True, label="Present dist.")
-    ax_arr[1, 1].axhline(y=mean_fitness, color="r", linestyle="--", lw=3, zorder=10)
+    ax_arr[1, 1].axhline(y=mean_fitness, color=col_aa_g, linestyle="--", lw=3, zorder=10)
                          # label=r"$\mu_p$ = {:.2f}".format(mean_fitness))
-    ax_arr[1, 1].axhline(y=omega, color="k", linestyle="-", lw=3, zorder=10)
+    ax_arr[1, 1].axhline(y=omega, color=col_omega, linestyle="-", lw=3, zorder=10)
                          # label=r"$\Omega$ = {}".format(omega))
     ax_arr[1, 1].legend(loc="upper left", fontsize=6.5)
     # plt.setp(ax_arr[1, 1].get_xticklabels(), visible=False)
@@ -144,14 +155,14 @@ def plot_fitness_space(generation, population, fitnesses, fitness_table,
     ax_arr[1, 1].set_ybound(0, 0.5)
 
     ax_arr[1, 0].hlines(mean_initial_amino_acid_fitness, 0, len(population)-1,
-                        colors="k", linestyles="--", lw=3, zorder=10,
+                        colors=col_aa_0, linestyles="--", lw=3, zorder=10,
                         label=r"$\mu_0$ = {:.2f}".format(mean_initial_amino_acid_fitness))
     ax_arr[1, 0].hlines(mean_fitness, 0, len(population)-1,
-                        colors="r", linestyles="--", lw=3, zorder=10,
+                        colors=col_aa_g, linestyles="--", lw=3, zorder=10,
                         label=r"$\mu_p$ = {:.2f}".format(mean_fitness))  # \mu_\phi ?
     if omega > -np.inf:
         ax_arr[1, 0].hlines(omega, 0, len(population)-1,
-                            colors="k", linestyles="-", lw=3, zorder=10,
+                            colors=col_omega, linestyles="-", lw=3, zorder=10,
                             label=r"$\Omega$ = {}".format(omega))
 
     ax_arr[0, 0].set_ylim(None, round(T_max))

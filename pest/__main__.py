@@ -1,11 +1,11 @@
-# import matplotlib as mpl
+import matplotlib as mpl
 from matplotlib import pyplot as plt
 
 from pest.evolution import pest
 
 # NOTE: __path__ is initialized to be a list containing the name of the directory holding the package’s __init__.py
 # mpl.use('TkAgg')
-# mpl.rc('savefig', dpi=300)
+mpl.rc('savefig', dpi=300)
 plt.style.use('seaborn-ticks')
 
 # parameters of protein evolution
@@ -55,7 +55,7 @@ record = {"rate": 50,           # write a new fasta file every x generations
           "residues": True,
           "statistics": True,
           "histograms": True,
-          "invariants": False,
+          "invariants": True,
           "gif": False}
 
 history = pest(n_generations, stability_start, omega, mu, sigma, skew,

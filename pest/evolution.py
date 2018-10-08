@@ -553,7 +553,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5,
     if omega is None:
         omega = -np.inf
 
-    if stability_start.lower() == "low":
+    if isinstance(stability_start, str) and stability_start.lower() == "low":
         warnings.warn("With 'low' starting fitness selected Omega is ignored.")
                       # "If the run fails, please check your fitness threshold,"
                       # "omega, is low enough: {}".format(omega))

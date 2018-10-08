@@ -70,6 +70,7 @@ def plot_fitness_space(generation, population, fitnesses, fitness_table,
     # Average across flattened array
     # mean_initial_fitness = np.mean(fitness_table.values)
     scale = round((4 * np.std(fitness_table.values)) + 1)
+    loc = np.mean(fitness_table.values)
     T_max = sum(np.amax(fitness_table, axis=1))  # Fittest possible protein
 
     fig, (ax_arr) = plt.subplots(2, 2, sharey='row', #  sharex='col',
@@ -151,7 +152,7 @@ def plot_fitness_space(generation, population, fitnesses, fitness_table,
                             label=r"$\Omega$ = {}".format(omega))
 
     ax_arr[0, 0].set_ylim(None, round(T_max))
-    ax_arr[1, 0].set_ylim(-scale, scale)
+    ax_arr[1, 0].set_ylim(loc-scale, loc+scale)
     ax_arr[1, 0].set_xlabel("Clone")
     # ax_arr[1, 1].set_xlabel("Density")
     ax_arr[1, 0].set_ylabel(r"$\Delta T_m$")

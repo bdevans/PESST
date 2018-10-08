@@ -3,7 +3,6 @@
 # docker run -i -t -p 8888:8888 continuumio/miniconda3 /bin/bash -c "/opt/conda/bin/conda install jupyter -y --quiet && mkdir /opt/notebooks && /opt/conda/bin/jupyter notebook --notebook-dir=/opt/notebooks --ip='*' --port=8888 --no-browser"
 
 FROM continuumio/miniconda3
-
 LABEL maintainer="Ben Evans <ben.d.evans@gmail.com>"
 
 # Set the ENTRYPOINT to use bash (this is also where you’d set SHELL,
@@ -20,7 +19,7 @@ WORKDIR /tmp
 # RUN [ "conda", "env", "create" ]
 # RUN conda update -n base conda
 RUN conda env update -n root -f /tmp/environment.yml
-# RUN ["conda", "env", "update", "-n" "root", "-f" "/tmp/environment.yml" ]
+# RUN [ "conda", "env", "update", "-n" "root", "-f" "/tmp/environment.yml" ]
 
 # Use bash to source our new environment for setting up private dependencies
 # Note that /bin/bash is called in exec mode directly
@@ -34,10 +33,8 @@ RUN echo "backend : Agg" > /root/.config/matplotlib/matplotlibrc
 COPY data /usr/pest/data/
 # COPY *.py /usr/pest/pest/
 # VOLUME /usr/pest/results
-
 ENV PYTHONPATH "${PYTONPATH}:/usr/pest"
 # We set ENTRYPOINT, so while we still use exec mode, we don’t
 # explicitly call /bin/bash
 # CMD [ "source activate pest && exec python pest/evolution.py" ]
-# CMD [ "exec python pest/evolution.py" ]
 CMD [ "exec python pest" ]

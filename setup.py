@@ -28,6 +28,7 @@ setup_kwargs = {
     "keywords": "example documentation tutorial",
     "url": "http://packages.python.org/pest",
     "packages": ['pest'],
+    "extras_require": {"process":  ["biopython"]},
     "long_description": read('README'),
     "classifiers": ["Development Status :: 5 - Production/Stable",
                     "Intended Audience :: Science/Research",

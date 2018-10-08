@@ -125,12 +125,12 @@ def plot_fitness_space(generation, population, fitnesses, fitness_table,
     ax_arr[1, 0].plot(protein_indicies, fitnesses, "o", markersize=1)
     ax_arr[1, 1].hist(fitness_table.values.ravel(), bins=int(np.sqrt(fitnesses.size)),
                       color='k', alpha=0.4, align='mid',
-                      orientation='horizontal', density=True, label="Initial distribution")
+                      orientation='horizontal', density=True, label="Initial dist.")
     ax_arr[1, 1].axhline(y=mean_initial_amino_acid_fitness, color="k", linestyle="--", lw=3, zorder=10)
                          # label=r"$\mu_0$ = {:.2f}".format(mean_initial_amino_acid_fitness))
     ax_arr[1, 1].hist(fitnesses.ravel(), bins=int(np.sqrt(fitnesses.size)),
                       align='mid', color="r", alpha=0.4,
-                      orientation='horizontal', density=True, label="Present distribution")
+                      orientation='horizontal', density=True, label="Present dist.")
     ax_arr[1, 1].axhline(y=mean_fitness, color="r", linestyle="--", lw=3, zorder=10)
                          # label=r"$\mu_p$ = {:.2f}".format(mean_fitness))
     ax_arr[1, 1].axhline(y=omega, color="k", linestyle="-", lw=3, zorder=10)

@@ -409,7 +409,7 @@ def create_tree(n_proteins, n_roots):
     return tree
 
 
-def calc_gens_per_bifurcation(n_generations, n_clones, n_roots):
+def calc_bifurcation_interval(n_generations, n_clones, n_roots):
     # TODO: Rewrite with logs
     pool = n_clones - n_roots
     n_phases = 1  # n_bifurations + 1
@@ -482,7 +482,7 @@ def evolve(n_generations, population, fitness_table, omega, sites,
     n_roots = len(tree["roots"])
 
     # Calculate number of bifurications per generation.
-    n_gens_per_bifurcation = calc_gens_per_bifurcation(n_generations, n_clones,
+    n_gens_per_bifurcation = calc_bifurcation_interval(n_generations, n_clones,
                                                        n_roots)
 
     # population = copy.deepcopy(initial_population)  # current generation

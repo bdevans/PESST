@@ -339,8 +339,8 @@ def record_generation_fitness(generation, population, variant_sites,
     """
 
     # Build distribution of fitness values existing in evolving protein
-    fitnesses = get_phi_fitness_table(population, variant_sites,
-                                      fitness_table, record)
+    fitnesses = get_phi_stability_table(population, variant_sites,
+                                        fitness_table, record)
     clims = (np.floor(np.amin(fitness_table.values)),
              np.ceil(np.amax(fitness_table.values)))
     plot_phi_fitness_table(generation, fitnesses, clims, out_paths)
@@ -373,7 +373,7 @@ def record_generation_fitness(generation, population, variant_sites,
                                   fitness_table.values.ravel(), omega, out_paths)
 
 
-def get_phi_fitness_table(population, variant_sites, fitness_table, record):
+def get_phi_stability_table(population, variant_sites, fitness_table, record):
     """Build a fitness table for given generation's population.
 
     The array has one row for each protein in the population and the fitness

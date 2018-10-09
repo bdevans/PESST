@@ -221,12 +221,15 @@ def plot_histogram_of_fitness(generation, distributions, initial, omega, out_pat
 
 
 def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
-                   out_paths, legend_title=None):
+                   out_paths, fig_title=True, legend_title=None, xlims=None, ax=None):
     """Plot fitness against generation for all clones.
 
     This plots after mutation but before replacement so that subthreshold
     proteins are briefly shown to exist.
     """
+    col_mu_phi = "#34495e"
+    col_omega = "#e74c3c"  # Red
+    col_epsilon = '#33a02c'  # "#2ecc71"  # Green
     # Create array of fitness values with shape (n_generations, n_clones)
     n_generations = len(history) - 1  # First entry is the initial state
     generation_numbers = np.arange(n_generations+1)  # Skip initial generation
@@ -239,34 +242,37 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
                                  for c in range(n_clones)]
                                 for g in range(n_generations+1)])
 
-    plt.figure()
-    plt.plot(generation_numbers, fitnesses, lw=1)
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(8, 12))
+    ax.plot(generation_numbers, fitnesses, lw=1)
 
     # Average across clones
-    plt.plot(generation_numbers, np.mean(final_fitnesses, axis=1),
-             "k:", lw=3, zorder=20, label=r"$\mu_\phi$")
-    plt.xlim([-5, n_generations+5])
-    plt.xlabel("Generation")  # , fontweight='bold')
-    plt.ylabel("$T_m$", fontweight='bold')
-    plt.title("\n".join(wrap("Fitness change for {} randomly generated "
-                             "clones of {} amino acids, "  # NOTE: Removed 'superfit' since it does not always apply
-                             "mutated over {} generations"
-                             .format(n_clones, clone_size, n_generations),
-                             60)), fontweight='bold')
+    ax.plot(generation_numbers, np.mean(final_fitnesses, axis=1),
+            "--", color=col_mu_phi, lw=3, zorder=20, label=r"$\mu_\phi$")
+    if xlims is not None:
+        ax.set_xlim(xlims)
+    else:
+        ax.set_xlim([-5, n_generations+5])
+    ax.set_xlabel("Generation")  # , fontweight='bold')
+    ax.set_ylabel("$T_m$", fontweight='bold')
+    if fig_title:
+        ax.set_title("\n".join(wrap("Stability change for {} randomly generated "
+                                    "clones of {} amino acids, "
+                                    "mutated over {} generations"
+                                    .format(n_clones, clone_size, n_generations), 60)), fontweight='bold')
     if plot_omega:  # Add fitness threshold
-        plt.axhline(omega, color="k", lw=3, linestyle="-", zorder=10,
-                    label=r"$\Omega$ = {}".format(omega))
+        ax.axhline(omega, color=col_omega, lw=3, linestyle="-", zorder=10,
+                   label=r"$\Omega$ = {}".format(omega))
     if plot_epsilon:  # Add theoretical convergence line
         epsilon = clone_size * np.mean(fitness_table.values)
-        plt.axhline(epsilon, color="b", lw=3, linestyle="--", zorder=10,
-                    label=r"$\epsilon$ = {:.2f}".format(epsilon))
-    plt.legend(title=legend_title)
+        ax.axhline(epsilon, color=col_epsilon, lw=3, linestyle=":", zorder=10,
+                   label=r"$\epsilon$ = {:.2f}".format(epsilon))
+    ax.legend(title=legend_title)
 
-    # Define dynamic filename
-    fitgraphfilename = "fitness_over_{}_generations.png".format(n_generations)
-    fitgraphfullname = os.path.join(out_paths["figures"], fitgraphfilename)
-    plt.savefig(fitgraphfullname)
-    return
+    if ax is None:
+        evo_fig = "stability_evolution_over_{}_generations.png".format(n_generations)
+        fig.savefig(os.path.join(out_paths["figures"], evo_fig))
+    return ax
 
 
 def plot_gamma_distribution(gamma, samples, quartiles, average_medians, out_paths):

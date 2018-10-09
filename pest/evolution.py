@@ -239,90 +239,6 @@ def get_fit_protein(stability_start, clone_size, sites, fitness_table):
     return protein
 
 
-# TODO: Refactor for efficiency?
-# def mutate_population(current_generation, n_mutations_per_gen, tree,
-#                       variant_sites, p_mutation, LG_matrix,
-#                       fitness_table, omega):
-#     """Mutate a set of sequences based on the LG+I+G model of amino acid
-#     substitution.
-#     """
-#     # NOTE: This could be removed for speed after checking it is not used later
-#     next_generation = copy.deepcopy(current_generation)
-#     for q in range(n_mutations_per_gen):  # impliment gamma
-#
-#         fitnesses = calculate_generation_fitness(next_generation, fitness_table)
-#         counter = 0
-#         successful_mutation = False
-#         while not successful_mutation:  # Mutate until all branches have fit proteins
-#             successful_mutation = True
-#             # Pick random key, clone to make a random generation
-#             pi, protein = random.choice(list(next_generation.items()))
-#             # Mutate the copy with the randomly chosen residue
-#             mutant = mutate_protein(protein, p_mutation, LG_matrix)
-#
-#             # next_generation[pi] = mutant  # update with new sequence
-#             fitness = calculate_stability(mutant, fitness_table)
-#
-#             if fitness < omega:  # if fitness is less than threshold clone a random sequence in its place.
-#                 mutant_index = replace_protein(pi, tree, fitnesses,
-#                                                omega)
-#                 # If no suitable clones are available, re-mutate the generation and start again
-#                 if mutant_index is None:
-#                     successful_mutation = False
-#                     fitnesses[pi] = fitness  # Save last unsuccessful fitness
-#                     # break  # out of loop over fitnesses
-#                 else:
-#                     next_generation[pi] = next_generation[mutant_index]  # swap out unfit clone for fit clone
-#             counter += 1
-#             if counter == 100:
-#                 raise Exception("Unable to mutate population: "
-#                                 "maximum tries exceeded!\n"
-#                                 "The mutation rate is too high, mu is too low "
-#                                 "or sigma is too small.")
-#
-#     return next_generation, fitnesses
-
-
-def mutate_population(current_generation, n_mutations_per_gen, tree,
-                      p_mutation, LG_matrix, fitness_table, omega):
-    """Mutate a set of sequences based on the LG+I+G model of amino acid
-    substitution.
-    """
-    counter = 0
-    successful_mutation = False
-
-    while not successful_mutation:  # Mutate until all branches are fit
-        successful_mutation = True
-        next_generation = copy.deepcopy(current_generation)
-        for q in range(n_mutations_per_gen):  # impliment gamma
-            # Pick random key, clone to make a random generation
-            pi, protein = random.choice(list(next_generation.items()))
-            # Mutate the copy with the randomly chosen residue
-            mutant = mutate_protein(protein, p_mutation, LG_matrix)
-            next_generation[pi] = mutant  # update with new sequence
-
-        fitnesses = calculate_population_fitness(next_generation, fitness_table)
-
-        for pi in range(len(fitnesses)):
-            if fitnesses[pi] < omega:  # clone a random sequence
-                mutant_index = replace_protein(pi, tree, fitnesses, omega)
-                # If no suitable clones are available, re-mutate and try again
-                if mutant_index is None:
-                    successful_mutation = False
-                    break  # out of loop over fitnesses
-                else:  # swap out unfit clone for fit clone
-                    next_generation[pi] = next_generation[mutant_index]
-
-        counter += 1
-        if counter == 100:
-            raise Exception("Unable to mutate population: "
-                            "maximum tries exceeded!\n"
-                            "The mutation rate is too high, mu is too low "
-                            "or sigma is too small.")
-
-    return next_generation, fitnesses
-
-
 def calculate_population_fitness(population, fitness_table):
     """Calculate the fitness of every protein in a population."""
     # TODO: Replace with list once population is a list (or OrderedDict)
@@ -451,6 +367,90 @@ def replace_protein(protein_index, tree, fitnesses, omega):
                 new_index = select_from_pool(protein_index, branch, fitnesses,
                                              omega)
     return new_index
+
+
+# TODO: Refactor for efficiency?
+# def mutate_population(current_generation, n_mutations_per_gen, tree,
+#                       variant_sites, p_mutation, LG_matrix,
+#                       fitness_table, omega):
+#     """Mutate a set of sequences based on the LG+I+G model of amino acid
+#     substitution.
+#     """
+#     # NOTE: This could be removed for speed after checking it is not used later
+#     next_generation = copy.deepcopy(current_generation)
+#     for q in range(n_mutations_per_gen):  # impliment gamma
+#
+#         fitnesses = calculate_generation_fitness(next_generation, fitness_table)
+#         counter = 0
+#         successful_mutation = False
+#         while not successful_mutation:  # Mutate until all branches have fit proteins
+#             successful_mutation = True
+#             # Pick random key, clone to make a random generation
+#             pi, protein = random.choice(list(next_generation.items()))
+#             # Mutate the copy with the randomly chosen residue
+#             mutant = mutate_protein(protein, p_mutation, LG_matrix)
+#
+#             # next_generation[pi] = mutant  # update with new sequence
+#             fitness = calculate_stability(mutant, fitness_table)
+#
+#             if fitness < omega:  # if fitness is less than threshold clone a random sequence in its place.
+#                 mutant_index = replace_protein(pi, tree, fitnesses,
+#                                                omega)
+#                 # If no suitable clones are available, re-mutate the generation and start again
+#                 if mutant_index is None:
+#                     successful_mutation = False
+#                     fitnesses[pi] = fitness  # Save last unsuccessful fitness
+#                     # break  # out of loop over fitnesses
+#                 else:
+#                     next_generation[pi] = next_generation[mutant_index]  # swap out unfit clone for fit clone
+#             counter += 1
+#             if counter == 100:
+#                 raise Exception("Unable to mutate population: "
+#                                 "maximum tries exceeded!\n"
+#                                 "The mutation rate is too high, mu is too low "
+#                                 "or sigma is too small.")
+#
+#     return next_generation, fitnesses
+
+
+def mutate_population(current_generation, n_mutations_per_gen, tree,
+                      p_mutation, LG_matrix, fitness_table, omega):
+    """Mutate a set of sequences based on the LG+I+G model of amino acid
+    substitution.
+    """
+    counter = 0
+    successful_mutation = False
+
+    while not successful_mutation:  # Mutate until all branches are fit
+        successful_mutation = True
+        next_generation = copy.deepcopy(current_generation)
+        for q in range(n_mutations_per_gen):  # impliment gamma
+            # Pick random key, clone to make a random generation
+            pi, protein = random.choice(list(next_generation.items()))
+            # Mutate the copy with the randomly chosen residue
+            mutant = mutate_protein(protein, p_mutation, LG_matrix)
+            next_generation[pi] = mutant  # update with new sequence
+
+        fitnesses = calculate_population_fitness(next_generation, fitness_table)
+
+        for pi in range(len(fitnesses)):
+            if fitnesses[pi] < omega:  # clone a random sequence
+                mutant_index = replace_protein(pi, tree, fitnesses, omega)
+                # If no suitable clones are available, re-mutate and try again
+                if mutant_index is None:
+                    successful_mutation = False
+                    break  # out of loop over fitnesses
+                else:  # swap out unfit clone for fit clone
+                    next_generation[pi] = next_generation[mutant_index]
+
+        counter += 1
+        if counter == 100:
+            raise Exception("Unable to mutate population: "
+                            "maximum tries exceeded!\n"
+                            "The mutation rate is too high, mu is too low "
+                            "or sigma is too small.")
+
+    return next_generation, fitnesses
 
 
 def kill_proteins(population, tree, death_rate, fitness_table, omega):

@@ -112,7 +112,7 @@ def mutate_protein(protein, p_mutation, LG_matrix):
     return mutant
 
 
-def get_amino_acid_stabilties(protein, fitness_table):
+def get_amino_acid_stabilities(protein, fitness_table):
     """Collate the individual stability contributions of each amino acid in a
     protein."""
     stabilities = [fitness_table.loc[loc, amino_acid]
@@ -122,7 +122,7 @@ def get_amino_acid_stabilties(protein, fitness_table):
 
 def calculate_stability(protein, fitness_table):
     """Calculate stability of a protein given the sequence and fitness values."""
-    return sum(get_amino_acid_stabilties(protein, fitness_table))
+    return sum(get_amino_acid_stabilities(protein, fitness_table))
 
 
 def get_random_protein(clone_size, fitness_table, start_amino_acid="M"):
@@ -300,7 +300,7 @@ def get_phi_stability_table(population, variant_sites, fitness_table, record):
     for pi, protein in list(population.items()):
 
         if record["invariants"]:
-            stabilities = get_amino_acid_stabilties(protein, fitness_table)
+            stabilities = get_amino_acid_stabilities(protein, fitness_table)
         else:
             stabilities = [fitness_table.loc[loc, amino_acid]
                            for loc, amino_acid in enumerate(protein)

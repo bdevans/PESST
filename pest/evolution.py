@@ -115,9 +115,7 @@ def mutate_protein(protein, p_mutation, LG_matrix):
 def get_amino_acid_stabilities(protein, fitness_table):
     """Collate the individual stability contributions of each amino acid in a
     protein."""
-    stabilities = [fitness_table.loc[loc, amino_acid]
-                   for loc, amino_acid in enumerate(protein)]
-    return stabilities
+    return [fitness_table.loc[loc, aa] for loc, aa in enumerate(protein)]
 
 
 def calculate_stability(protein, fitness_table):

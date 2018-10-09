@@ -647,7 +647,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
 
     # Create animations
     if record["gif"]:
-        record_generations = list(range(0, n_generations+1, record["rate"]))
+        recorded_generations = list(range(0, n_generations+1, record["rate"]))
         if record["residues"]:
             for root in ["fit_dist_gen_", "generation_", "phi_fitness_table_"]:
                 path_root = os.path.join(out_paths["figures"], root)
@@ -658,6 +658,6 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
         if record["statistics"]:
             path_root = os.path.join(out_paths["figures"], "generation_")
             filenames = [path_root+"{}.png".format(gen)
-                         for gen in record_generations]
+                         for gen in recorded_generations]
             create_gif(filenames, duration=0.25)
     return history, run_path

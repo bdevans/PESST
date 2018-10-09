@@ -239,11 +239,6 @@ def get_fit_protein(stability_start, clone_size, sites, fitness_table):
     return protein
 
 
-def calculate_population_fitness(population, fitness_table):
-    """Calculate the total stability of every protein in a population."""
-    return np.sum(get_phi_stability_table(population, fitness_table), axis=1)
-
-
 def record_generation_fitness(generation, population, variant_sites,
                               fitness_table, omega, p_mutation, record, out_paths):
     """Record the fitness of every protein in the generation and store them in
@@ -305,6 +300,11 @@ def get_phi_stability_table(population, fitness_table, include_invariants=True,
 
         dist_clone_fitness.append(stabilities)  # Becomes a new row
     return np.asarray(dist_clone_fitness)
+
+
+def calculate_population_fitness(population, fitness_table):
+    """Calculate the total stability of every protein in a population."""
+    return np.sum(get_phi_stability_table(population, fitness_table), axis=1)
 
 
 def create_tree(n_proteins, n_roots):
@@ -514,6 +514,7 @@ def evolve(n_generations, population, fitness_table, omega, sites,
             write_tree(gen+1, tree, out_paths)
 
         # Mutate population
+        # NOTE: Stabilities returned are intermediate to show selection
         (next_generation, fitnesses) = mutate_population(population,
                                                          n_mutations_per_gen,
                                                          tree, p_mutation,

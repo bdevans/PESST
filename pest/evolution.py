@@ -557,20 +557,6 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
     if omega is None:
         omega = -np.inf
 
-    if isinstance(stability_start, str) and stability_start.lower() == "low":
-        warnings.warn("With 'low' starting fitness selected Omega is ignored.")
-                      # "If the run fails, please check your fitness threshold,"
-                      # "omega, is low enough: {}".format(omega))
-        plot_omega, plot_epsilon = False, True
-        omega = -np.inf
-    else:
-        # epsilon = clone_size * np.mean(fitness_table.values)
-        epsilon = clone_size * mu
-        if omega < epsilon:
-            plot_omega, plot_epsilon = True, True
-        else:
-            plot_omega, plot_epsilon = True, False
-
     # TODO: switch from random to np.random for proper seeding
     if seed is None:
         # Get a random integer to seed both
@@ -603,6 +589,20 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
     plot_LG_matrix(LG_matrix, out_paths)
     # Make fitness table of Delta T_m values
     fitness_table = get_fitness_table(clone_size, mu, sigma, skew, LG_matrix.columns)
+    if isinstance(stability_start, str) and stability_start.lower() == "low":
+        warnings.warn("With 'low' starting fitness selected Omega is ignored.")
+                      # "If the run fails, please check your fitness threshold,"
+                      # "omega, is low enough: {}".format(omega))
+        plot_omega, plot_epsilon = False, True
+        omega = -np.inf
+    else:
+        # epsilon = clone_size * np.mean(fitness_table.values)
+        epsilon = clone_size * np.mean(fitness_table.values)  # mu
+        print(omega, epsilon)
+        if omega < epsilon:
+            plot_omega, plot_epsilon = True, True
+        else:
+            plot_omega, plot_epsilon = True, False
     write_protein_fitness(fitness_table, out_paths)
     plot_fitness_table(fitness_table, out_paths)
     T_max = sum(np.amax(fitness_table, axis=1))  # Fittest possible protein

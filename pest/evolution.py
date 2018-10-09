@@ -614,7 +614,6 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
     else:
         # epsilon = clone_size * np.mean(fitness_table.values)
         epsilon = clone_size * np.mean(fitness_table.values)  # mu
-        print(omega, epsilon)
         if omega < epsilon:
             plot_omega, plot_epsilon = True, True
         else:

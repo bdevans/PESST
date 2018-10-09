@@ -112,11 +112,17 @@ def mutate_protein(protein, p_mutation, LG_matrix):
     return mutant
 
 
-def calculate_fitness(protein, fitness_table):
-    """Calculate fitness of a protein given the sequence and fitness values."""
-    protein_fitness = [fitness_table.loc[ai, amino_acid]  # TODO: Indexing
-                       for ai, amino_acid in enumerate(protein)]
-    return sum(protein_fitness)
+def get_amino_acid_stabilties(protein, fitness_table):
+    """Collate the individual stability contributions of each amino acid in a
+    protein."""
+    stabilities = [fitness_table.loc[loc, amino_acid]
+                   for loc, amino_acid in enumerate(protein)]
+    return stabilities
+
+
+def calculate_stability(protein, fitness_table):
+    """Calculate stability of a protein given the sequence and fitness values."""
+    return sum(get_amino_acid_stabilties(protein, fitness_table))
 
 
 def get_random_protein(clone_size, fitness_table, start_amino_acid="M"):
@@ -138,7 +144,7 @@ def twist_protein(protein, mutation_sites, fitness_table):
     amino_acids = fitness_table.columns.values.tolist()
     for ai in mutation_sites:
         mutant[ai] = random.choice(amino_acids)
-    fitness = calculate_fitness(mutant, fitness_table)
+    fitness = calculate_stability(mutant, fitness_table)
     return (mutant, fitness)
 
 
@@ -185,7 +191,7 @@ def get_fit_protein(stability_start, clone_size, sites, fitness_table):
     # reverts back to the previous state and picks 5 new residues.
     else:  # elif stability_start == 'medium':
         n_variant_sites = 5
-        initial_fitness = calculate_fitness(initial_protein, fitness_table)
+        initial_fitness = calculate_stability(initial_protein, fitness_table)
 
         lower_bound, upper_bound = stability_start
         if lower_bound is None:
@@ -227,7 +233,7 @@ def get_fit_protein(stability_start, clone_size, sites, fitness_table):
                     counter += 1
 
             initial_protein = protein
-            initial_fitness = calculate_fitness(protein, fitness_table)
+            initial_fitness = calculate_stability(protein, fitness_table)
         protein = initial_protein
 
     return protein
@@ -255,7 +261,7 @@ def get_fit_protein(stability_start, clone_size, sites, fitness_table):
 #             mutant = mutate_protein(protein, p_mutation, LG_matrix)
 #
 #             # next_generation[pi] = mutant  # update with new sequence
-#             fitness = calculate_fitness(mutant, fitness_table)
+#             fitness = calculate_stability(mutant, fitness_table)
 #
 #             if fitness < omega:  # if fitness is less than threshold clone a random sequence in its place.
 #                 mutant_index = replace_protein(pi, tree, fitnesses,
@@ -320,9 +326,9 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
 def calculate_population_fitness(population, fitness_table):
     """Calculate the fitness of every protein in a population."""
     # TODO: Replace with list once population is a list (or OrderedDict)
-    # fitnesslist = [calculate_fitness(protein, fitness_table)
+    # fitnesslist = [calculate_stability(protein, fitness_table)
     #                for pi, protein in enumerate(population)}
-    return {pi: calculate_fitness(protein, fitness_table)
+    return {pi: calculate_stability(protein, fitness_table)
             for pi, protein in list(population.items())}
 
 
@@ -378,14 +384,13 @@ def get_phi_fitness_table(population, variant_sites, fitness_table, record):
     for pi, protein in list(population.items()):
 
         if record["invariants"]:
-            protein_fitness = [fitness_table.loc[ai, amino_acid]
-                               for ai, amino_acid in enumerate(protein)]
+            stabilities = get_amino_acid_stabilties(protein, fitness_table)
         else:
-            protein_fitness = [fitness_table.loc[ai, amino_acid]
-                               for ai, amino_acid in enumerate(protein)
-                               if ai in variant_sites]
+            stabilities = [fitness_table.loc[loc, amino_acid]
+                           for loc, amino_acid in enumerate(protein)
+                           if loc in variant_sites]
 
-        dist_clone_fitness.append(protein_fitness)  # Becomes a new row
+        dist_clone_fitness.append(stabilities)  # Becomes a new row
     return np.asarray(dist_clone_fitness)
 
 
@@ -622,7 +627,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
                                       fitness_table)
     # print_protein(initial_protein)
     write_initial_protein(initial_protein, out_paths)  # Record initial protein
-    initial_fitness = calculate_fitness(initial_protein, fitness_table)
+    initial_fitness = calculate_stability(initial_protein, fitness_table)
     if initial_fitness < omega:
         raise Exception("The fitness threshold is too high!")
     # assert initial_fitness < T_max

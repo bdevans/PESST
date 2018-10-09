@@ -240,12 +240,8 @@ def get_fit_protein(stability_start, clone_size, sites, fitness_table):
 
 
 def calculate_population_fitness(population, fitness_table):
-    """Calculate the fitness of every protein in a population."""
-    # TODO: Replace with list once population is a list (or OrderedDict)
-    # fitnesslist = [calculate_stability(protein, fitness_table)
-    #                for pi, protein in enumerate(population)}
-    return {pi: calculate_stability(protein, fitness_table)
-            for pi, protein in list(population.items())}
+    """Calculate the total stability of every protein in a population."""
+    return np.sum(get_phi_stability_table(population, fitness_table), axis=1)
 
 
 def record_generation_fitness(generation, population, variant_sites,
@@ -255,8 +251,8 @@ def record_generation_fitness(generation, population, variant_sites,
     """
 
     # Build distribution of fitness values existing in evolving protein
-    fitnesses = get_phi_stability_table(population, variant_sites,
-                                        fitness_table, record)
+    fitnesses = get_phi_stability_table(population, fitness_table,
+                                        record["invariants"], variant_sites)
     clims = (np.floor(np.amin(fitness_table.values)),
              np.ceil(np.amax(fitness_table.values)))
     plot_phi_fitness_table(generation, fitnesses, clims, out_paths)
@@ -289,7 +285,8 @@ def record_generation_fitness(generation, population, variant_sites,
                                   fitness_table.values.ravel(), omega, out_paths)
 
 
-def get_phi_stability_table(population, variant_sites, fitness_table, record):
+def get_phi_stability_table(population, fitness_table, include_invariants=True,
+                            variant_sites=None):
     """Build a fitness table for given generation's population.
 
     The array has one row for each protein in the population and the fitness
@@ -299,7 +296,7 @@ def get_phi_stability_table(population, variant_sites, fitness_table, record):
     # Find and plot all fitness values in the current generation
     for pi, protein in list(population.items()):
 
-        if record["invariants"]:
+        if include_invariants:  # record["invariants"]:
             stabilities = get_amino_acid_stabilities(protein, fitness_table)
         else:
             stabilities = [fitness_table.loc[loc, amino_acid]
@@ -500,8 +497,8 @@ def evolve(n_generations, population, fitness_table, omega, sites,
     history = [Generation(population=population, fitness=fitnesses,
                           final_fitness=fitnesses)]
     # TODO: Refactor plot_omega, plot_epsilon
-    stabilities = get_phi_stability_table(population, sites.variant,
-                                          fitness_table, record)
+    stabilities = get_phi_stability_table(population, fitness_table,
+                                          record["invariants"], sites.variant)
     plot_stability(0, history, stabilities, fitness_table, omega,
                    plot_omega, plot_epsilon, n_generations, out_paths)
 
@@ -545,8 +542,8 @@ def evolve(n_generations, population, fitness_table, omega, sites,
                                       record, out_paths)
 
         if (gen+1) % record["rate"] == 0:
-            stabilities = get_phi_stability_table(population, sites.variant,
-                                                  fitness_table, record)
+            stabilities = get_phi_stability_table(population, fitness_table,
+                                                  record["invariants"], sites.variant)
             plot_stability(gen+1, history, stabilities, fitness_table, omega,
                            plot_omega, plot_epsilon, n_generations, out_paths)
 

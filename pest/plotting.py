@@ -144,7 +144,7 @@ def plot_stability(generation, history, stabilities, fitness_table, omega,
 
     pad_factor = 1.2
     pad_offset = 5
-    initial_stabilities = history[0].fitness.values()
+    initial_stabilities = history[0].fitness
     min_s0 = min(initial_stabilities)
     max_s0 = max(initial_stabilities)
     ymax = np.ceil(pad_factor * max(epsilon, omega, max_s0) + pad_offset)

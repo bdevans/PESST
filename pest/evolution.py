@@ -394,30 +394,6 @@ def get_phi_stability_table(population, variant_sites, fitness_table, record):
     return np.asarray(dist_clone_fitness)
 
 
-def select_from_pool(protein_index, candidates, fitnesses, omega):
-    """Filter out original protein and those below the fitness threshold."""
-    pool = [c for c in candidates
-            if c != protein_index and fitnesses[c] >= omega]
-    if len(pool) > 0:
-        new_protein_index = random.choice(pool)
-    else:
-        new_protein_index = None
-    return new_protein_index
-
-
-def replace_protein(protein_index, tree, fitnesses, omega):
-
-    if protein_index in tree["roots"]:
-        new_index = select_from_pool(protein_index, tree["roots"], fitnesses,
-                                     omega)
-    else:  # Protein is in one of the branches
-        for branch in tree["branches"]:
-            if protein_index in branch:
-                new_index = select_from_pool(protein_index, branch, fitnesses,
-                                             omega)
-    return new_index
-
-
 def create_tree(n_proteins, n_roots):
     """Create a dictionary of lists of indicies for roots and branches."""
     protein_keys = list(range(n_proteins))
@@ -451,6 +427,30 @@ def bifurcate_branches(branches):
         new_bifurcations.append(branch[:midpoint])
         new_bifurcations.append(branch[midpoint:])
     return new_bifurcations[:]
+
+
+def select_from_pool(protein_index, candidates, fitnesses, omega):
+    """Filter out original protein and those below the fitness threshold."""
+    pool = [c for c in candidates
+            if c != protein_index and fitnesses[c] >= omega]
+    if len(pool) > 0:
+        new_protein_index = random.choice(pool)
+    else:
+        new_protein_index = None
+    return new_protein_index
+
+
+def replace_protein(protein_index, tree, fitnesses, omega):
+
+    if protein_index in tree["roots"]:
+        new_index = select_from_pool(protein_index, tree["roots"], fitnesses,
+                                     omega)
+    else:  # Protein is in one of the branches
+        for branch in tree["branches"]:
+            if protein_index in branch:
+                new_index = select_from_pool(protein_index, branch, fitnesses,
+                                             omega)
+    return new_index
 
 
 def kill_proteins(population, tree, death_rate, fitness_table, omega):

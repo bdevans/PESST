@@ -53,9 +53,9 @@ gamma = {"shape": 1.9,  # Most phylogenetic systems that use gamma only let you 
 # Set what to record
 record = {"rate": 50,           # write a new fasta file every x generations
           "fasta_rate": 50,     # write a new fasta file every x generations
-          "residues": True,
+          "residues": False,
           "statistics": True,
-          "histograms": True,
+          "histograms": False,
           "invariants": True,
           "gif": False}
 

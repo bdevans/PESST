@@ -19,7 +19,7 @@ from .dataio import (create_output_folders, write_settings_file, write_tree,
                      write_fasta_alignment, write_final_fasta, load_LG_matrix,
                      write_histogram_statistics, append_ks_statistics,
                      create_gif)
-from .plotting import (plot_evolution, plot_gamma_distribution,
+from .plotting import (plot_stability, plot_evolution, plot_gamma_distribution,
                        plot_threshold_fitness, plot_histogram_of_fitness,
                        plot_fitness_space, plot_fitness_table, plot_LG_matrix,
                        plot_phi_fitness_table)
@@ -470,8 +470,8 @@ def kill_proteins(population, tree, death_rate, fitness_table, omega):
 
 
 def evolve(n_generations, population, fitness_table, omega, sites,
-           p_mutation, mutation_rate, death_rate, tree, LG_matrix, record,
-           out_paths):
+           p_mutation, mutation_rate, death_rate, tree, LG_matrix,
+           plot_omega, plot_epsilon, record, out_paths):
     """Generation generator - mutate a protein for a defined number of
     generations according to an LG matrix and gamma distribution.
     """
@@ -499,6 +499,11 @@ def evolve(n_generations, population, fitness_table, omega, sites,
     # Create a list of generations and add initial population and fitness
     history = [Generation(population=population, fitness=fitnesses,
                           final_fitness=fitnesses)]
+    # TODO: Refactor plot_omega, plot_epsilon
+    stabilities = get_phi_stability_table(population, sites.variant,
+                                          fitness_table, record)
+    plot_stability(0, history, stabilities, fitness_table, omega,
+                   plot_omega, plot_epsilon, n_generations, out_paths)
 
     for gen in trange(n_generations):  # run evolution for n_generations
 
@@ -538,6 +543,12 @@ def evolve(n_generations, population, fitness_table, omega, sites,
             record_generation_fitness(gen+1, population, sites.variant,
                                       fitness_table, omega, p_mutation,
                                       record, out_paths)
+
+        if (gen+1) % record["rate"] == 0:
+            stabilities = get_phi_stability_table(population, sites.variant,
+                                                  fitness_table, record)
+            plot_stability(gen+1, history, stabilities, fitness_table, omega,
+                           plot_omega, plot_epsilon, n_generations, out_paths)
 
     write_final_fasta(population, tree, out_paths)
     return history
@@ -642,7 +653,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
 
     history = evolve(n_generations, initial_population, fitness_table, omega,
                      sites, p_mutation, mutation_rate, death_rate, tree,
-                     LG_matrix, record, out_paths)
+                     LG_matrix, plot_omega, plot_epsilon, record, out_paths)
 
     legend_title = "; ".join([r"$\mu$ = {}".format(mu),
                               r"$\sigma$ = {}".format(sigma),
@@ -653,16 +664,18 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
     # Create animations
     if record["gif"]:
         recorded_generations = list(range(0, n_generations+1, record["rate"]))
+        figures = ["pest_gen_", "phi_fitness_table_"]
         if record["residues"]:
-            for root in ["fit_dist_gen_", "generation_", "phi_fitness_table_"]:
-                path_root = os.path.join(out_paths["figures"], root)
-                filenames = [path_root+"{}.png".format(gen)
-                             for gen in record_generations]
-                create_gif(filenames, duration=0.25)
-
-        if record["statistics"]:
-            path_root = os.path.join(out_paths["figures"], "generation_")
+            figures.extend(["fit_dist_gen_", "generation_"])
+        for fig_base in figures:
+            path_root = os.path.join(out_paths["figures"], fig_base)
             filenames = [path_root+"{}.png".format(gen)
                          for gen in recorded_generations]
             create_gif(filenames, duration=0.25)
+
+        # if record["statistics"]:
+        #     path_root = os.path.join(out_paths["figures"], "generation_")
+        #     filenames = [path_root+"{}.png".format(gen)
+        #                  for gen in record_generations]
+        #     create_gif(filenames, duration=0.25)
     return history, run_path

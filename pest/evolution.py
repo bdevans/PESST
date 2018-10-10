@@ -430,15 +430,16 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
             mutant = mutate_protein(protein, p_mutation, LG_matrix)
             next_generation[pi] = mutant  # update with new sequence
 
-        fitnesses = calculate_population_fitness(next_generation, fitness_table)
+        stabilities = calculate_population_fitness(next_generation,
+                                                   fitness_table)
 
-        for pi in range(len(fitnesses)):
-            if fitnesses[pi] < omega:  # clone a random sequence
-                mutant_index = replace_protein(pi, tree, fitnesses, omega)
+        for pi in range(len(stabilities)):
+            if stabilities[pi] < omega:  # clone a random sequence
+                mutant_index = replace_protein(pi, tree, stabilities, omega)
                 # If no suitable clones are available, re-mutate and try again
                 if mutant_index is None:
                     successful_mutation = False
-                    break  # out of loop over fitnesses
+                    break  # out of loop over stabilities
                 else:  # swap out unfit clone for fit clone
                     next_generation[pi] = next_generation[mutant_index]
 
@@ -449,7 +450,7 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
                             "The mutation rate is too high, mu is too low "
                             "or sigma is too small.")
 
-    return next_generation, fitnesses
+    return next_generation
 
 
 def kill_proteins(population, tree, death_rate, fitness_table, omega):
@@ -512,11 +513,9 @@ def evolve(n_generations, population, fitness_table, omega, sites,
             write_tree(gen+1, tree, out_paths)
 
         # Mutate population
-        # NOTE: Stabilities returned are intermediate to show selection
-        (next_generation, _) = mutate_population(population,
-                                                 n_mutations_per_gen, tree,
-                                                 p_mutation, LG_matrix,
-                                                 fitness_table, omega)
+        next_generation = mutate_population(population, n_mutations_per_gen,
+                                            tree, p_mutation, LG_matrix,
+                                            fitness_table, omega)
 
         # Allow sequences to die and be replacecd at a predefined rate
         if death_rate > 0:

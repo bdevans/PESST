@@ -109,7 +109,7 @@ def plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega, colours
     ax.set_ylabel(r"$\Delta T_m$")
     ax.legend(loc="upper left", fontsize=6.5, ncol=ncol)
                    # title=r"$\Omega$ = {}".format(omega))
-    # ax_aa_g.set_title("Stability distribution of every amino acid in the population", size=8)
+    ax.set_title("Stability distribution of every amino acid in the population", size=8)
 
     return ax
 
@@ -139,13 +139,13 @@ def plot_initial_amino_acid_stabilities(fitness_table, omega, colours=None, ax=N
                        colors=colours["omega"], linestyles="-", lw=3, zorder=10,
                        label=r"$\Omega$ = {}".format(omega))
     # ax.set_ylim(-scale, scale)
-    # ax.set_ylabel(r"$\Delta T_m$")
     # plt.setp(ax.get_yticklabels(), visible=False)
     # ax.set_yticklabels([])
     ax.set_xlabel("Amino acid position")
+    ax.set_ylabel(r"$\Delta T_m$")
     ax.legend(loc="upper left", fontsize=6.5)
                    # title=r"$\Omega$ = {}".format(omega))
-    # ax_aa_0.set_title(r"Stabiltiy distribution of $\Delta T_m$ matrix", size=8)
+    ax.set_title(r"Stabiltiy distribution of $\Delta T_m$ matrix", size=8)
     return ax
 
 
@@ -289,16 +289,21 @@ def plot_stability(generation, history, fitness_table, omega,
     ymax = np.ceil(ymax + pad)
     ymin = np.floor(ymin - pad)
     ax_aa_g.set_ylim(ymin, ymax)
+    ax_aa_g.set_title(None)
 
     # Plot initial distribution
     ax_aa_0 = plt.subplot(gs[1, 1], sharey=ax_aa_g)
     plot_initial_amino_acid_stabilities(fitness_table, omega, colours=colours, ax=ax_aa_0)
     plt.setp(ax_aa_0.get_yticklabels(), visible=False)
+    ax_aa_0.set_ylabel(None)
+    ax_aa_0.set_title(None)
 
     # Plot marginal stability distributions
     ax_hist = plt.subplot(gs[1, -1], sharey=ax_aa_g)
     plot_stability_histograms(aa_stabilities, fitness_table, omega, colours=colours, ax=ax_hist)
     plt.setp(ax_hist.get_yticklabels(), visible=False)
+    ax_hist.set_ylabel(None)
+    ax_hist.set_title(None)
 
     # Find and plot all fitness values in the current generation
     # x: proteins within population; y: Fitness for each locus for that protein

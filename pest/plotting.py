@@ -8,7 +8,7 @@ import seaborn as sns
 from scipy import stats  # gamma
 
 
-def plot_stability(generation, history, stabilities, fitness_table, omega,
+def plot_stability(generation, history, fitness_table, omega,
                    plot_omega, plot_epsilon, n_generations, out_paths):
 
     # pal = sns.color_palette("Paired")
@@ -26,6 +26,7 @@ def plot_stability(generation, history, stabilities, fitness_table, omega,
     col_epsilon = '#33a02c'  # "#2ecc71"  # Red
     # population, stabilities = history[-1].population, history[-1].final_fitness
     population = history[-1].population
+    aa_stabilities = history[-1].stabilities
 
     # Store fitness values for each amino in the dataset for the left subfigure
     (clone_size, n_amino_acids) = fitness_table.shape
@@ -38,8 +39,8 @@ def plot_stability(generation, history, stabilities, fitness_table, omega,
     mean_initial_aa_stability = np.mean(fitness_table.values)
     epsilon = clone_size * mean_initial_aa_stability
     protein_indicies = np.arange(len(population))
-    protein_fitnesses = np.sum(stabilities, axis=1)
-    mean_stability = np.mean(stabilities)
+    protein_stabilities = np.sum(aa_stabilities, axis=1)
+    mean_stability = np.mean(aa_stabilities)
 
     fig = plt.figure(figsize=(10, 10))
     # https://matplotlib.org/users/gridspec.html
@@ -48,7 +49,7 @@ def plot_stability(generation, history, stabilities, fitness_table, omega,
 
     ax_aa_g = plt.subplot(gs[1, 0])
     # TODO: Move to plot_amino_acid_stabilities
-    ax_aa_g.plot(protein_indicies, stabilities, "o", color=col_aa_g, markersize=1)
+    ax_aa_g.plot(protein_indicies, aa_stabilities, "o", color=col_aa_g, markersize=1)
     ax_aa_g.hlines(mean_initial_aa_stability, 0, len(population)-1,
                    colors=col_aa_0_mu, linestyles="--", lw=3, zorder=10,
                    label=r"$\mu_0$ = {:.2f}".format(mean_initial_aa_stability))
@@ -100,7 +101,7 @@ def plot_stability(generation, history, stabilities, fitness_table, omega,
     ax_hist.axhline(y=mean_initial_aa_stability, color=col_aa_0_mu,
                     linestyle="--", lw=3, zorder=10)
                     # label=r"$\mu_0$ = {:.2f}".format(mean_initial_aa_stability))
-    ax_hist.hist(stabilities.ravel(), bins=bins,
+    ax_hist.hist(aa_stabilities.ravel(), bins=bins,
                  align='mid', color=col_aa_g, alpha=0.8,
                  orientation='horizontal', density=True, label="Present distribution")
     ax_hist.axhline(y=mean_stability, color=col_aa_g_mu, linestyle="--", lw=3, zorder=10)
@@ -119,9 +120,9 @@ def plot_stability(generation, history, stabilities, fitness_table, omega,
     # Find and plot all fitness values in the current generation
     # x: proteins within population; y: Fitness for each locus for that protein
     ax_phi = plt.subplot(gs[0, 0], sharex=ax_aa_g)
-    ax_phi.plot(protein_indicies, protein_fitnesses, "*", color=col_phi, markersize=4)  # , label=r"$\mu_p$")
+    ax_phi.plot(protein_indicies, protein_stabilities, "*", color=col_phi, markersize=4)  # , label=r"$\mu_p$")
 
-    mean_protein_stability = np.mean(protein_fitnesses)
+    mean_protein_stability = np.mean(protein_stabilities)
     ax_phi.hlines(mean_protein_stability, 0, len(population)-1,
                   colors=col_phi_mu, linestyles="--", lw=3, zorder=10,
                   label=r"$\mu_\phi$ = {:.2f}".format(mean_stability))  # \mu_\phi ?
@@ -144,9 +145,10 @@ def plot_stability(generation, history, stabilities, fitness_table, omega,
 
     pad_factor = 0.1
     # pad_offset = 5
-    initial_stabilities = history[0].fitness
-    min_s0 = min(initial_stabilities)
-    max_s0 = max(initial_stabilities)
+    initial_protein_stabilities = np.sum(history[0].stabilities, axis=1)
+    # NOTE: All clones in the initial population are currently identical
+    min_s0 = min(initial_protein_stabilities)
+    max_s0 = max(initial_protein_stabilities)
 
     ymax = max(epsilon, omega, max_s0)
     # if ymax < 0:
@@ -427,19 +429,25 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
     generation_numbers = np.arange(n_generations+1)  # Skip initial generation
     (clone_size, n_amino_acids) = fitness_table.shape
     n_clones = len(history[0].population)
-    fitnesses = np.array([[history[g].fitness[c] for c in range(n_clones)]
-                          for g in range(n_generations+1)])
+    # fitnesses = np.array([[history[g].fitness[c] for c in range(n_clones)]
+    #                       for g in range(n_generations+1)])
+    #
+    # final_fitnesses = np.array([[history[g].final_fitness[c]
+    #                              for c in range(n_clones)]
+    #                             for g in range(n_generations+1)])
 
-    final_fitnesses = np.array([[history[g].final_fitness[c]
-                                 for c in range(n_clones)]
-                                for g in range(n_generations+1)])
+    # stabiltiies = np.array([[history[g].fitness[c] for c in range(n_clones)]
+    #                         for g in range(n_generations+1)])
 
+    stabiltiies = np.array([np.sum(history[g].stabilities, axis=1)
+                            for g in range(n_generations+1)])
     if ax is None:
         fig, ax = plt.subplots(figsize=(8, 12))
-    ax.plot(generation_numbers, fitnesses, lw=1)
+    # ax.plot(generation_numbers, fitnesses, lw=1)
+    ax.plot(generation_numbers, stabiltiies, lw=1)
 
     # Average across clones
-    ax.plot(generation_numbers, np.mean(final_fitnesses, axis=1),
+    ax.plot(generation_numbers, np.mean(stabiltiies, axis=1),
             "--", color=col_mu_phi, lw=3, zorder=20, label=r"$\mu_\phi$")
     if xlims is not None:
         ax.set_xlim(xlims)
@@ -448,7 +456,7 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
     ax.set_xlabel("Generation")  # , fontweight='bold')
     ax.set_ylabel("$T_m$", fontweight='bold')
     if fig_title:
-        ax.set_title("\n".join(wrap("Stability change for {} randomly generated "
+        ax.set_title("\n".join(wrap("Stability change for {} "
                                     "clones of {} amino acids, "
                                     "mutated over {} generations"
                                     .format(n_clones, clone_size, n_generations), 60)), fontweight='bold')

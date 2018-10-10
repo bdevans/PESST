@@ -485,23 +485,20 @@ def evolve(n_generations, population, fitness_table, omega, sites,
                                                        n_roots)
 
     # population = copy.deepcopy(initial_population)  # current generation
-    fitnesses = calculate_population_fitness(population, fitness_table)
+    phi_stabilities = get_phi_stability_table(population, fitness_table)
     # Record initial population
     record_generation_stability(0, population, sites, fitness_table, omega,
                                 p_mutation, record, out_paths)
     write_fasta_alignment(0, population, out_paths)
 
     # Store each generation along with its fitness
-    Generation = namedtuple('Generation',
-                            ['population', 'fitness', 'final_fitness'])
+    Generation = namedtuple('Generation', ['population', 'stabilities'])
     # Create a list of generations and add initial population and fitness
-    history = [Generation(population=population, fitness=fitnesses,
-                          final_fitness=fitnesses)]
+    history = [Generation(population=population, stabilities=phi_stabilities)]
+
     # TODO: Refactor plot_omega, plot_epsilon
-    stabilities = get_phi_stability_table(population, fitness_table,
-                                          record["invariants"], sites.variant)
-    plot_stability(0, history, stabilities, fitness_table, omega,
-                   plot_omega, plot_epsilon, n_generations, out_paths)
+    plot_stability(0, history, fitness_table, omega, plot_omega, plot_epsilon,
+                   n_generations, out_paths)
 
     for gen in trange(n_generations):  # run evolution for n_generations
 
@@ -516,35 +513,31 @@ def evolve(n_generations, population, fitness_table, omega, sites,
 
         # Mutate population
         # NOTE: Stabilities returned are intermediate to show selection
-        (next_generation, fitnesses) = mutate_population(population,
-                                                         n_mutations_per_gen,
-                                                         tree, p_mutation,
-                                                         LG_matrix,
-                                                         fitness_table, omega)
+        (next_generation, _) = mutate_population(population,
+                                                 n_mutations_per_gen, tree,
+                                                 p_mutation, LG_matrix,
+                                                 fitness_table, omega)
 
         # Allow sequences to die and be replacecd at a predefined rate
         if death_rate > 0:
             next_generation = kill_proteins(next_generation, tree, death_rate,
                                             fitness_table, omega)
 
-        final_fitnesses = calculate_population_fitness(next_generation,
-                                                       fitness_table)
+        phi_stabilities = get_phi_stability_table(population, fitness_table)
         # The population becomes next_generation only if bifurcations (and deaths) were successful
         population = next_generation
         # Record intermediate fitnesses to show existence of unfit proteins
-        history.append(Generation(population=population, fitness=fitnesses,
-                                  final_fitness=final_fitnesses))
+        history.append(Generation(population=population, stabilities=phi_stabilities))
+
         # Write fasta every record["fasta_rate"] generations
         if (gen+1) % record["fasta_rate"] == 0:
             write_fasta_alignment(gen+1, population, out_paths)
         # Record population details at the end of processing
         if (gen+1) % record["rate"] == 0:
-        if (gen+1) % record["rate"] == 0:
-            stabilities = get_phi_stability_table(population, fitness_table,
-                                                  record["invariants"], sites.variant)
-            plot_stability(gen+1, history, stabilities, fitness_table, omega,
             record_generation_stability(gen+1, population, sites, fitness_table,
                                         omega, p_mutation, record, out_paths)
+
+            plot_stability(gen+1, history, fitness_table, omega,
                            plot_omega, plot_epsilon, n_generations, out_paths)
 
     write_final_fasta(population, tree, out_paths)

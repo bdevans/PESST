@@ -278,7 +278,7 @@ def record_generation_stability(generation, population, sites, fitness_table,
     if record["histograms"]:
         # disthistfilename = "generation_{}.png".format(generation)
         # disthistfullname = os.path.join(out_paths["figures"], "histograms", disthistfilename)
-        plot_histogram_of_fitness(generation, fitnesses.ravel(),
+        plot_histogram_of_fitness(generation, stabilities.ravel(),
                                   fitness_table.values.ravel(), omega, out_paths)
 
 

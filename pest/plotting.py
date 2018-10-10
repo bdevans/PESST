@@ -329,6 +329,88 @@ def plot_stability(generation, history, fitness_table, omega,
     return (fig, [ax_phi, ax_evo, ax_aa_g, ax_aa_0, ax_hist])
 
 
+def plot_gamma_distribution(gamma, samples, quartiles, average_medians, out_paths):
+    """Plot the distribution along with the quartiles and medians."""
+    kappa, theta, n_iterations, n_samples = (gamma["shape"],
+                                             gamma["scale"],
+                                             gamma["iterations"],
+                                             gamma["samples"])
+
+    x = np.linspace(0, 6, 1000)
+    # y = x**(kappa - 1) * (np.exp(-x / theta)
+    #                         / (stats.gamma(kappa).pdf(x, kappa)))  # * theta ** kappa))
+    y = stats.gamma.pdf(x, kappa, scale=theta)
+    plt.plot(x, y, linewidth=2, color='k', alpha=0,
+             label="\n".join([r"$\kappa$ = {:.2f}".format(kappa),
+                              r"$\theta$ = {:.2f}".format(theta)]))
+                              #r"$\theta$ = $\frac{{}}{{}}$".format(1, kappa)]))
+    plt.hist(samples, bins=int(np.sqrt(len(samples))), range=(0, 6),
+             density=True, color='g', histtype='step')
+    plt.fill_between(x, y, where=x > quartiles[0], color='#4c4cff')
+    plt.fill_between(x, y, where=x > quartiles[1], color='#7f7fff')
+    plt.fill_between(x, y, where=x > quartiles[2], color='#b2b2ff')
+    plt.fill_between(x, y, where=x > quartiles[3], color='#e5e5ff')
+    plt.axvline(x=average_medians[0], color="#404040", linestyle=":")
+    plt.axvline(x=average_medians[1], color="#404040", linestyle=":")
+    plt.axvline(x=average_medians[2], color="#404040", linestyle=":")
+    plt.axvline(x=average_medians[3], color="#404040", linestyle=":")
+    plt.title("\n".join(wrap("Gamma rate categories calculated as the the "
+                             "average of {} median values of 4 equally likely "
+                             "quartiles of {} randomly sampled vaules"
+                             .format(n_iterations, n_samples), 60)),
+              fontweight='bold', fontsize=10)
+    plt.legend()
+    plt.savefig(os.path.join(out_paths["initial"], "gamma.png"))
+
+
+def plot_fitness_table(fitness_table, out_paths):
+
+    (clone_size, n_amino_acids) = fitness_table.shape
+    fig, ax = plt.subplots(figsize=(8, clone_size/5))
+    sns.heatmap(fitness_table, center=0, annot=True, fmt=".2f", linewidths=.5,
+                cmap="RdBu_r", annot_kws={"size": 5},
+                cbar_kws={"label": r"$\Delta T_m$"}, ax=ax)
+    ax.xaxis.set_ticks_position('top')
+    ax.set_xlabel("Amino Acid")
+    ax.set_ylabel("Location")
+    filename = os.path.join(out_paths["initial"], "fitness_table.png")
+    fig.savefig(filename)
+    plt.close()
+
+
+def plot_LG_matrix(LG_matrix, out_paths):
+
+    fig, ax = plt.subplots(figsize=(10, 8))
+    sns.heatmap(LG_matrix, annot=True, fmt=".2f", linewidths=.5, cmap="cubehelix",
+                square=True, annot_kws={"size": 5},  # vmin=0, vmax=1,
+                cbar_kws={"label": r"$\Delta T_m$"}, ax=ax)
+    ax.xaxis.set_ticks_position('top')
+    ax.set_xlabel("Amino Acid")
+    ax.set_ylabel("Amino Acid")
+    ax.set_title("LG model transition probabilities")
+    filename = os.path.join(out_paths["initial"], "LG_matrix.png")
+    fig.savefig(filename)
+    plt.close()
+
+
+def plot_phi_fitness_table(generation, phi_fitness_table, clims, out_paths):
+    r"""Plot a heatmap of changes in stability (\Delta T_m) for each amino acid
+    in each protein."""
+    (n_proteins, clone_size) = phi_fitness_table.shape
+    fig, ax = plt.subplots(figsize=(clone_size/6, n_proteins/8))
+    sns.heatmap(phi_fitness_table, center=0, annot=False, fmt=".2f",
+                linewidths=.5, cmap="RdBu_r", annot_kws={"size": 5},
+                cbar_kws={"label": r"$\Delta T_m$"}, vmin=clims[0], vmax=clims[1], ax=ax)
+    ax.xaxis.set_ticks_position('top')
+    ax.set_xlabel("Location")
+    ax.set_ylabel("Clone")
+    filename = os.path.join(out_paths["figures"],
+                            "phi_fitness_table_{}.png".format(generation))
+    ax.set_title("Generation {}".format(generation), fontweight="bold")
+    fig.savefig(filename)
+    plt.close()
+
+
 
 
 
@@ -544,86 +626,4 @@ def plot_histogram_of_fitness(generation, distributions, initial, omega, out_pat
     #                               r"$\Omega$ = {}".format(omega)]))
 
     plt.savefig(os.path.join(out_paths["figures"], "histogram_{}.png".format(generation)))
-    plt.close()
-
-
-def plot_gamma_distribution(gamma, samples, quartiles, average_medians, out_paths):
-    """Plot the distribution along with the quartiles and medians."""
-    kappa, theta, n_iterations, n_samples = (gamma["shape"],
-                                             gamma["scale"],
-                                             gamma["iterations"],
-                                             gamma["samples"])
-
-    x = np.linspace(0, 6, 1000)
-    # y = x**(kappa - 1) * (np.exp(-x / theta)
-    #                         / (stats.gamma(kappa).pdf(x, kappa)))  # * theta ** kappa))
-    y = stats.gamma.pdf(x, kappa, scale=theta)
-    plt.plot(x, y, linewidth=2, color='k', alpha=0,
-             label="\n".join([r"$\kappa$ = {:.2f}".format(kappa),
-                              r"$\theta$ = {:.2f}".format(theta)]))
-                              #r"$\theta$ = $\frac{{}}{{}}$".format(1, kappa)]))
-    plt.hist(samples, bins=int(np.sqrt(len(samples))), range=(0, 6),
-             density=True, color='g', histtype='step')
-    plt.fill_between(x, y, where=x > quartiles[0], color='#4c4cff')
-    plt.fill_between(x, y, where=x > quartiles[1], color='#7f7fff')
-    plt.fill_between(x, y, where=x > quartiles[2], color='#b2b2ff')
-    plt.fill_between(x, y, where=x > quartiles[3], color='#e5e5ff')
-    plt.axvline(x=average_medians[0], color="#404040", linestyle=":")
-    plt.axvline(x=average_medians[1], color="#404040", linestyle=":")
-    plt.axvline(x=average_medians[2], color="#404040", linestyle=":")
-    plt.axvline(x=average_medians[3], color="#404040", linestyle=":")
-    plt.title("\n".join(wrap("Gamma rate categories calculated as the the "
-                             "average of {} median values of 4 equally likely "
-                             "quartiles of {} randomly sampled vaules"
-                             .format(n_iterations, n_samples), 60)),
-              fontweight='bold', fontsize=10)
-    plt.legend()
-    plt.savefig(os.path.join(out_paths["initial"], "gamma.png"))
-
-
-def plot_fitness_table(fitness_table, out_paths):
-
-    (clone_size, n_amino_acids) = fitness_table.shape
-    fig, ax = plt.subplots(figsize=(8, clone_size/5))
-    sns.heatmap(fitness_table, center=0, annot=True, fmt=".2f", linewidths=.5,
-                cmap="RdBu_r", annot_kws={"size": 5},
-                cbar_kws={"label": r"$\Delta T_m$"}, ax=ax)
-    ax.xaxis.set_ticks_position('top')
-    ax.set_xlabel("Amino Acid")
-    ax.set_ylabel("Location")
-    filename = os.path.join(out_paths["initial"], "fitness_table.png")
-    fig.savefig(filename)
-    plt.close()
-
-
-def plot_LG_matrix(LG_matrix, out_paths):
-
-    fig, ax = plt.subplots(figsize=(10, 8))
-    sns.heatmap(LG_matrix, annot=True, fmt=".2f", linewidths=.5, cmap="cubehelix",
-                square=True, annot_kws={"size": 5},  # vmin=0, vmax=1,
-                cbar_kws={"label": r"$\Delta T_m$"}, ax=ax)
-    ax.xaxis.set_ticks_position('top')
-    ax.set_xlabel("Amino Acid")
-    ax.set_ylabel("Amino Acid")
-    ax.set_title("LG model transition probabilities")
-    filename = os.path.join(out_paths["initial"], "LG_matrix.png")
-    fig.savefig(filename)
-    plt.close()
-
-
-def plot_phi_fitness_table(generation, phi_fitness_table, clims, out_paths):
-    r"""Plot a heatmap of changes in stability (\Delta T_m) for each amino acid
-    in each protein."""
-    (n_proteins, clone_size) = phi_fitness_table.shape
-    fig, ax = plt.subplots(figsize=(clone_size/6, n_proteins/8))
-    sns.heatmap(phi_fitness_table, center=0, annot=False, fmt=".2f",
-                linewidths=.5, cmap="RdBu_r", annot_kws={"size": 5},
-                cbar_kws={"label": r"$\Delta T_m$"}, vmin=clims[0], vmax=clims[1], ax=ax)
-    ax.xaxis.set_ticks_position('top')
-    ax.set_xlabel("Location")
-    ax.set_ylabel("Clone")
-    filename = os.path.join(out_paths["figures"],
-                            "phi_fitness_table_{}.png".format(generation))
-    ax.set_title("Generation {}".format(generation), fontweight="bold")
-    fig.savefig(filename)
     plt.close()

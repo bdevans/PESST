@@ -58,6 +58,7 @@ record = {"rate": 50,           # write a new fasta file every x generations
           "histograms": False,
           "gif": False}
           # "invariants": True,
+          "data": True,
 
 history = pest(n_generations, stability_start, omega, mu, sigma, skew,
                n_clones, n_roots, clone_size, p_invariant, mutation_rate,

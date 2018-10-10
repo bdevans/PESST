@@ -149,6 +149,46 @@ def plot_initial_amino_acid_stabilities(fitness_table, omega, colours=None, ax=N
     return ax
 
 
+def plot_stability_histograms(aa_stabilities, fitness_table, omega, colours=None, ax=None):
+
+    # TODO: Allow changing of orientation
+    fig = None
+    if ax is None:
+        fig, ax = plt.subplots()  # figsize=(8, 12)
+
+    if colours is None:
+        colours = {"aa_g": "#a6cee3",
+                   "aa_0_mu": "#ff7f00",
+                   "aa_g_mu": "#1f78b4",
+                   "omega": "#e74c3c"}
+
+    mean_stability_0 = np.mean(fitness_table.values)
+    mean_stability = np.mean(aa_stabilities)
+    n, bins, _ = ax.hist(fitness_table.values.ravel(), bins='sqrt',
+                         align='mid', orientation='horizontal',
+                         color=colours["aa_0"], alpha=0.8, density=True,
+                         label="Initial distribution")
+    ax.axhline(y=mean_stability_0, color=colours["aa_0_mu"],
+               linestyle="--", lw=3, zorder=10)
+               # label=r"$\mu_0$ = {:.2f}".format(mean_stability_0))
+    ax.hist(aa_stabilities.ravel(), bins=bins,
+            align='mid', color=colours["aa_g"], alpha=0.8,
+            orientation='horizontal', density=True, label="Present distribution")
+    ax.axhline(y=mean_stability, color=colours["aa_g_mu"], linestyle="--", lw=3, zorder=10)
+               # label=r"$\mu_p$ = {:.2f}".format(mean_stability))
+    ax.axhline(y=omega, color=colours["omega"], linestyle="-", lw=3, zorder=10)
+               # label=r"$\Omega$ = {}".format(omega))
+    ax.legend(loc="upper right", fontsize=6.5)
+    # plt.setp(ax_hist.get_yticklabels(), visible=False)
+    # ax_hist.set_yticklabels([])
+    # ax_hist.set_xticks([])
+    ax.set_xlabel("Distribution density")
+    # Set to 1.5*largest original bin count
+    # ax_arr[1, 1].set_ylim(0, round(1.5*np.amax(n)))
+    ax.set_xbound(0, 0.5)
+    return ax
+
+
 def plot_stability(generation, history, fitness_table, omega,
                    plot_omega, plot_epsilon, n_generations, out_paths):
 
@@ -207,38 +247,15 @@ def plot_stability(generation, history, fitness_table, omega,
     ymin = np.floor(ymin - pad)
     ax_aa_g.set_ylim(ymin, ymax)
 
-
     # Plot initial distribution
     ax_aa_0 = plt.subplot(gs[1, 1], sharey=ax_aa_g)
     plot_initial_amino_acid_stabilities(fitness_table, omega, colours=colours, ax=ax_aa_0)
     plt.setp(ax_aa_0.get_yticklabels(), visible=False)
 
-
     # Plot marginal stability distributions
     ax_hist = plt.subplot(gs[1, -1], sharey=ax_aa_g)
-
-    n, bins, _ = ax_hist.hist(fitness_table.values.ravel(), bins='sqrt',
-                              align='mid', orientation='horizontal',
-                              color=colours["aa_0"], alpha=0.8, density=True,
-                              label="Initial distribution")
-    ax_hist.axhline(y=mean_stability_0, color=colours["aa_0_mu"],
-                    linestyle="--", lw=3, zorder=10)
-                    # label=r"$\mu_0$ = {:.2f}".format(mean_stability_0))
-    ax_hist.hist(aa_stabilities.ravel(), bins=bins,
-                 align='mid', color=colours["aa_g"], alpha=0.8,
-                 orientation='horizontal', density=True, label="Present distribution")
-    ax_hist.axhline(y=mean_stability, color=colours["aa_g_mu"], linestyle="--", lw=3, zorder=10)
-                    # label=r"$\mu_p$ = {:.2f}".format(mean_stability))
-    ax_hist.axhline(y=omega, color=colours["omega"], linestyle="-", lw=3, zorder=10)
-                    # label=r"$\Omega$ = {}".format(omega))
-    ax_hist.legend(loc="upper right", fontsize=6.5)
+    plot_stability_histograms(aa_stabilities, fitness_table, omega, colours=colours, ax=ax_hist)
     plt.setp(ax_hist.get_yticklabels(), visible=False)
-    # ax_hist.set_yticklabels([])
-    # ax_hist.set_xticks([])
-    ax_hist.set_xlabel("Distribution density")
-    # Set to 1.5*largest original bin count
-    # ax_arr[1, 1].set_ylim(0, round(1.5*np.amax(n)))
-    ax_hist.set_xbound(0, 0.5)
 
     # Find and plot all fitness values in the current generation
     # x: proteins within population; y: Fitness for each locus for that protein
@@ -302,6 +319,11 @@ def plot_stability(generation, history, fitness_table, omega,
     plt.close()
     return (fig, [ax_phi, ax_evo, ax_aa_g, ax_aa_0, ax_hist])
 
+
+
+
+
+# TODO: Replace references to these old plots in the code where individual figures are still required
 
 def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
                            omega, out_paths):

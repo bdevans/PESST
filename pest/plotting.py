@@ -53,7 +53,7 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
                    label=r"$\Omega$ = {}".format(omega))
     if plot_epsilon:  # Add theoretical convergence line
         epsilon = clone_size * np.mean(fitness_table.values)
-        ax.axhline(epsilon, color=colours["epsilon"], lw=3, linestyle=":", zorder=10,
+        ax.axhline(epsilon, color=colours["epsilon"], lw=3, linestyle=":", zorder=20,
                    label=r"$\epsilon$ = {:.2f}".format(epsilon))
     ax.legend(title=legend_title)
 
@@ -121,7 +121,7 @@ def plot_initial_amino_acid_stabilities(fitness_table, omega, colours=None, ax=N
     # Plot each column of fitness_table as a separate dataseries against 0..N-1
     ax.plot(fitness_table, "o", color=colours["aa_0"], markersize=1)
     ax.hlines(mean_stability_0, 0, clone_size-1,
-              colors=colours["aa_0_mu"], linestyles="--", lw=3, zorder=10,
+              colors=colours["aa_0_mu"], linestyles="--", lw=3, zorder=20,
               label=r"$\mu_0$ = {:.2f}".format(mean_stability_0))
 
     if omega > -np.inf:
@@ -157,12 +157,13 @@ def plot_stability_histograms(aa_stabilities, fitness_table, omega, colours=None
                          color=colours["aa_0"], alpha=0.8, density=True,
                          label="Initial distribution")
     ax.axhline(y=mean_stability_0, color=colours["aa_0_mu"],
-               linestyle="--", lw=3, zorder=10)
+               linestyle="--", lw=3, zorder=20)
                # label=r"$\mu_0$ = {:.2f}".format(mean_stability_0))
     ax.hist(aa_stabilities.ravel(), bins=bins,
             align='mid', color=colours["aa_g"], alpha=0.8,
             orientation='horizontal', density=True, label="Present distribution")
-    ax.axhline(y=mean_stability, color=colours["aa_g_mu"], linestyle="--", lw=3, zorder=10)
+    ax.axhline(y=mean_stability, color=colours["aa_g_mu"],
+               linestyle="--", lw=3, zorder=20)
                # label=r"$\mu_p$ = {:.2f}".format(mean_stability))
     ax.axhline(y=omega, color=colours["omega"], linestyle="-", lw=3, zorder=10)
                # label=r"$\Omega$ = {}".format(omega))
@@ -191,15 +192,16 @@ def plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon, colou
     protein_indicies = np.arange(n_clones)
     mean_protein_stability = np.mean(protein_stabilities)
 
-    ax.plot(protein_indicies, protein_stabilities, "*", color=colours["phi"], markersize=4)  # , label=r"$\mu_p$")
+    ax.plot(protein_indicies, protein_stabilities, "*",
+            color=colours["phi"], markersize=4)  # , label=r"$\mu_p$")
 
     ax.hlines(mean_protein_stability, 0, n_clones-1,
-              colors=colours["phi_mu"], linestyles="--", lw=3, zorder=10,
+              colors=colours["phi_mu"], linestyles="--", lw=3, zorder=20,
               label=r"$\mu_\phi$ = {:.2f}".format(mean_protein_stability))
 
     if plot_epsilon:
         ax.hlines(epsilon, 0, n_clones-1,
-                  colors=colours["epsilon"], linestyles=":", lw=3, zorder=10,
+                  colors=colours["epsilon"], linestyles=":", lw=3, zorder=20,
                   label=r"$\epsilon$ = {:.2f}".format(epsilon))
     ncol = 2
     if omega > -np.inf:

@@ -87,10 +87,9 @@ def plot_stability(generation, history, fitness_table, omega,
     col_phi_mu = "#34495e"  # Purple
     col_omega = "#e74c3c"  # "k"
     col_epsilon = '#33a02c'  # "#2ecc71"  # Red
-    # population, stabilities = history[-1].population, history[-1].final_fitness
-    # population = history[-1].population
-    (n_clones, clone_size) = history[-1].stabilities.shape
+
     aa_stabilities = history[-1].stabilities
+    (n_clones, clone_size) = aa_stabilities.shape
 
     # Store fitness values for each amino in the dataset for the left subfigure
     (clone_size, n_amino_acids) = fitness_table.shape
@@ -109,7 +108,7 @@ def plot_stability(generation, history, fitness_table, omega,
     fig = plt.figure(figsize=(10, 10))
     # https://matplotlib.org/users/gridspec.html
     gs = mpl.gridspec.GridSpec(nrows=2, ncols=3, width_ratios=[2, 1, 2], height_ratios=[2, 3])
-    gs.update(top=0.95, wspace=0.10, hspace=0.12)  # Leave room for the super title
+    gs.update(top=0.95, wspace=0.10, hspace=0.12)  # Leave room for the title
 
     ax_aa_g = plt.subplot(gs[1, 0])
     # TODO: Move to plot_amino_acid_stabilities
@@ -119,7 +118,7 @@ def plot_stability(generation, history, fitness_table, omega,
                    label=r"$\mu_0$ = {:.2f}".format(mean_initial_aa_stability))
     ax_aa_g.hlines(mean_stability, 0, n_clones-1,
                    colors=col_aa_g_mu, linestyles="--", lw=3, zorder=10,
-                   label=r"$\mu_p$ = {:.2f}".format(mean_stability))  # \mu_\phi ?
+                   label=r"$\mu_p$ = {:.2f}".format(mean_stability))
     ncol = 2
     if omega > -np.inf:
         ax_aa_g.hlines(omega, 0, n_clones-1,
@@ -189,64 +188,41 @@ def plot_stability(generation, history, fitness_table, omega,
     mean_protein_stability = np.mean(protein_stabilities)
     ax_phi.hlines(mean_protein_stability, 0, n_clones-1,
                   colors=col_phi_mu, linestyles="--", lw=3, zorder=10,
-                  label=r"$\mu_\phi$ = {:.2f}".format(mean_stability))  # \mu_\phi ?
+                  label=r"$\mu_\phi$ = {:.2f}".format(mean_stability))
 
     if plot_epsilon:
         ax_phi.hlines(epsilon, 0, n_clones-1,
                       colors=col_epsilon, linestyles=":", lw=3, zorder=10,
                       label=r"$\epsilon$ = {:.2f}".format(epsilon))
-    # ncol = 2
     if omega > -np.inf:
         ax_phi.hlines(omega, 0, n_clones-1,
                       colors=col_omega, linestyles="-", lw=3, zorder=10,
                       label=r"$\Omega$ = {}".format(omega))
-        # ncol += 1
 
     ax_phi.set_ylabel(r"$T_m$")
     plt.setp(ax_phi.get_xticklabels(), visible=False)
     # ax_phi.set_xticklabels([])  # This removes ticks from ax_aa_g due to sharing
     ax_phi.legend(loc="upper left", fontsize=6.5, ncol=ncol)
 
+    # Axis scaling logic
     pad_factor = 0.1
-    # pad_offset = 5
     initial_protein_stabilities = np.sum(history[0].stabilities, axis=1)
     # NOTE: All clones in the initial population are currently identical
     min_s0 = min(initial_protein_stabilities)
     max_s0 = max(initial_protein_stabilities)
-
     ymax = max(epsilon, omega, max_s0)
-    # if ymax < 0:
-    #     ymax = np.ceil(ymax / pad_factor + pad_offset)
-    # else:
-    #     ymax = np.ceil(ymax * pad_factor + pad_offset)
-    # ymax = np.ceil(pad_factor * max(epsilon, omega, max_s0) + pad_offset)
     min_values = [min_s0]
     if omega > -np.inf:
         min_values.append(omega)
     if plot_epsilon:
         min_values.append(epsilon)
-    #     ymin = np.floor(pad_factor * min(epsilon, omega, min_s0) - pad_offset)
-    # else:
-    #     ymin = np.floor(pad_factor * min(epsilon, min_s0) - pad_offset)
-    # ymin = np.floor(pad_factor * min(min_values) - pad_offset)
     ymin = min(min_values)
     pad = pad_factor * abs(ymax - ymin)
-
     ymax = np.ceil(ymax + pad)
     ymin = np.floor(ymin - pad)
-    # print(ymin, ymax, pad, min_s0, max_s0, epsilon, omega)
-    # if ymin < 0:
-    #     ymin = np.floor(ymin * pad_factor - pad_offset)
-    # else:
-    #     ymin = np.floor(ymin / pad_factor - pad_offset)
-    # if np.isclose(ymax, 0):
-    #     ymax = np.ceil(pad_factor * abs(ymin) + pad_offset)
-    # if np.isclose(ymin, 0):
-    #     ymin = np.floor(pad_factor * abs(ymax) - pad_offset)
-    # ax_phi.set_ylim(None, round(T_max * 0.5))
-    # print(ymin, ymax)
     ax_phi.set_ylim(ymin, ymax)
 
+    # Plot evolutionary history
     ax_evo = plt.subplot(gs[0, 1:], sharey=ax_phi)
     xlims = (-5, n_generations+5)
     plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
@@ -257,9 +233,10 @@ def plot_stability(generation, history, fitness_table, omega,
     ax_evo.set_ylabel(None)
 
     # plt.subplots_adjust(top=0.85)
-    fig.suptitle(("Generation {}".format(generation)), fontweight='bold')  # TODO Prevent overlap with spines
+    fig.suptitle(("Generation {}".format(generation)), fontweight='bold')
     # fig.set_tight_layout(True)
-    filename = os.path.join(out_paths["figures"], "pest_gen_{}.png".format(generation))
+    filename = os.path.join(out_paths["figures"],
+                            "pest_gen_{}.png".format(generation))
     fig.savefig(filename)
     plt.close()
     return (fig, [ax_phi, ax_evo, ax_aa_g, ax_aa_0, ax_hist])

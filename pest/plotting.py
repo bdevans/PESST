@@ -441,6 +441,7 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
 
     stabiltiies = np.array([np.sum(history[g].stabilities, axis=1)
                             for g in range(n_generations+1)])
+    fig = None
     if ax is None:
         fig, ax = plt.subplots(figsize=(8, 12))
     # ax.plot(generation_numbers, fitnesses, lw=1)
@@ -469,7 +470,7 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
                    label=r"$\epsilon$ = {:.2f}".format(epsilon))
     ax.legend(title=legend_title)
 
-    if ax is None:
+    if fig is not None:
         evo_fig = "stability_evolution_over_{}_generations.png".format(n_generations)
         fig.savefig(os.path.join(out_paths["figures"], evo_fig))
     return ax

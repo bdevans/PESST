@@ -285,7 +285,7 @@ def plot_stability(generation, history, fitness_table, omega,
     plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega,
                                 colours=colours, ax=ax_aa_g)
     ymin, ymax = np.floor(np.amin(fitness_table.values)), np.ceil(np.amax(fitness_table.values))
-    pad = pad_factor * abs(ymax - ymin)
+    pad = 0.5 * pad_factor * abs(ymax - ymin)
     ymax = np.ceil(ymax + pad)
     ymin = np.floor(ymin - pad)
     ax_aa_g.set_ylim(ymin, ymax)

@@ -9,15 +9,18 @@ from scipy import stats  # gamma
 
 
 def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
-                   out_paths, fig_title=True, legend_title=None, xlims=None, ax=None):
+                   out_paths, fig_title=True, legend_title=None, xlims=None,
+                   colours=None, ax=None):
     """Plot fitness against generation for all clones.
 
     This plots after mutation but before replacement so that subthreshold
     proteins are briefly shown to exist.
     """
-    col_mu_phi = "#34495e"
-    col_omega = "#e74c3c"  # Red
-    col_epsilon = '#33a02c'  # "#2ecc71"  # Green
+    if colours is None:
+        colours = {"phi": "#9b59b6",
+                   "phi_mu": "#34495e",
+                   "epsilon": "#33a02c",
+                   "omega": "#e74c3c"}
     # Create array of fitness values with shape (n_generations, n_clones)
     n_generations = len(history) - 1  # First entry is the initial state
     generation_numbers = np.arange(n_generations+1)  # Skip initial generation
@@ -44,7 +47,7 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
 
     # Average across clones
     ax.plot(generation_numbers, np.mean(stabiltiies, axis=1),
-            "--", color=col_mu_phi, lw=3, zorder=20, label=r"$\mu_\phi$")
+            "--", color=colours["phi_mu"], lw=3, zorder=20, label=r"$\mu_\phi$")
     if xlims is not None:
         ax.set_xlim(xlims)
     else:
@@ -57,11 +60,11 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
                                     "mutated over {} generations"
                                     .format(n_clones, clone_size, n_generations), 60)), fontweight='bold')
     if plot_omega:  # Add fitness threshold
-        ax.axhline(omega, color=col_omega, lw=3, linestyle="-", zorder=10,
+        ax.axhline(omega, color=colours["omega"], lw=3, linestyle="-", zorder=10,
                    label=r"$\Omega$ = {}".format(omega))
     if plot_epsilon:  # Add theoretical convergence line
         epsilon = clone_size * np.mean(fitness_table.values)
-        ax.axhline(epsilon, color=col_epsilon, lw=3, linestyle=":", zorder=10,
+        ax.axhline(epsilon, color=colours["epsilon"], lw=3, linestyle=":", zorder=10,
                    label=r"$\epsilon$ = {:.2f}".format(epsilon))
     ax.legend(title=legend_title)
 
@@ -315,8 +318,9 @@ def plot_stability(generation, history, fitness_table, omega,
     ax_evo = plt.subplot(gs[0, 1:], sharey=ax_phi)
     xlims = (-5, n_generations+5)
     plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
-                   out_paths, fig_title=False, xlims=xlims, ax=ax_evo)
     ax_evo.plot(len(history)-1, mean_protein_stability, '*', color=colours["phi_mu"], markersize=10)
+                   out_paths, fig_title=False, xlims=xlims, colours=colours,
+                   ax=ax_evo)
     plt.setp(ax_evo.get_yticklabels(), visible=False)
     # ax_evo.set_yticklabels([])
     ax_evo.set_ylabel(None)

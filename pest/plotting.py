@@ -142,20 +142,41 @@ def plot_stability(generation, history, stabilities, fitness_table, omega,
     # ax_phi.set_xticklabels([])  # This removes ticks from ax_aa_g due to sharing
     ax_phi.legend(loc="upper left", fontsize=6.5, ncol=ncol)
 
-    pad_factor = 1.2
-    pad_offset = 5
+    pad_factor = 0.1
+    # pad_offset = 5
     initial_stabilities = history[0].fitness
     min_s0 = min(initial_stabilities)
     max_s0 = max(initial_stabilities)
-    ymax = np.ceil(pad_factor * max(epsilon, omega, max_s0) + pad_offset)
+
+    ymax = max(epsilon, omega, max_s0)
+    # if ymax < 0:
+    #     ymax = np.ceil(ymax / pad_factor + pad_offset)
+    # else:
+    #     ymax = np.ceil(ymax * pad_factor + pad_offset)
+    # ymax = np.ceil(pad_factor * max(epsilon, omega, max_s0) + pad_offset)
+    min_values = [min_s0]
     if omega > -np.inf:
-        ymin = np.floor(pad_factor * min(epsilon, omega, min_s0) - pad_offset)
-    else:
-        ymin = np.floor(pad_factor * min(epsilon, min_s0) - pad_offset)
-    if np.isclose(ymax, 0):
-        ymax = np.ceil(pad_factor * abs(ymin) + pad_offset)
-    if np.isclose(ymin, 0):
-        ymin = np.floor(pad_factor * abs(ymax) - pad_offset)
+        min_values.append(omega)
+    if plot_epsilon:
+        min_values.append(epsilon)
+    #     ymin = np.floor(pad_factor * min(epsilon, omega, min_s0) - pad_offset)
+    # else:
+    #     ymin = np.floor(pad_factor * min(epsilon, min_s0) - pad_offset)
+    # ymin = np.floor(pad_factor * min(min_values) - pad_offset)
+    ymin = min(min_values)
+    pad = pad_factor * abs(ymax - ymin)
+
+    ymax = np.ceil(ymax + pad)
+    ymin = np.floor(ymin - pad)
+    # print(ymin, ymax, pad, min_s0, max_s0, epsilon, omega)
+    # if ymin < 0:
+    #     ymin = np.floor(ymin * pad_factor - pad_offset)
+    # else:
+    #     ymin = np.floor(ymin / pad_factor - pad_offset)
+    # if np.isclose(ymax, 0):
+    #     ymax = np.ceil(pad_factor * abs(ymin) + pad_offset)
+    # if np.isclose(ymin, 0):
+    #     ymin = np.floor(pad_factor * abs(ymax) - pad_offset)
     # ax_phi.set_ylim(None, round(T_max * 0.5))
     # print(ymin, ymax)
     ax_phi.set_ylim(ymin, ymax)

@@ -25,24 +25,13 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
     n_generations = len(history) - 1  # First entry is the initial state
     generation_numbers = np.arange(n_generations+1)  # Skip initial generation
     (clone_size, n_amino_acids) = fitness_table.shape
-    # n_clones = len(history[0].population)
     (n_clones, _) = history[0].stabilities.shape
-    # fitnesses = np.array([[history[g].fitness[c] for c in range(n_clones)]
-    #                       for g in range(n_generations+1)])
-    #
-    # final_fitnesses = np.array([[history[g].final_fitness[c]
-    #                              for c in range(n_clones)]
-    #                             for g in range(n_generations+1)])
-
-    # stabiltiies = np.array([[history[g].fitness[c] for c in range(n_clones)]
-    #                         for g in range(n_generations+1)])
 
     stabiltiies = np.array([np.sum(history[g].stabilities, axis=1)
                             for g in range(n_generations+1)])
     fig = None
     if ax is None:
         fig, ax = plt.subplots(figsize=(8, 12))
-    # ax.plot(generation_numbers, fitnesses, lw=1)
     ax.plot(generation_numbers, stabiltiies, lw=1)
 
     # Average across clones
@@ -52,7 +41,7 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
         ax.set_xlim(xlims)
     else:
         ax.set_xlim([-5, n_generations+5])
-    ax.set_xlabel("Generation")  # , fontweight='bold')
+    ax.set_xlabel("Generation")
     ax.set_ylabel("$T_m$", fontweight='bold')
     if fig_title:
         ax.set_title("\n".join(wrap("Stability change for {} "
@@ -178,9 +167,6 @@ def plot_stability_histograms(aa_stabilities, fitness_table, omega, colours=None
     ax.axhline(y=omega, color=colours["omega"], linestyle="-", lw=3, zorder=10)
                # label=r"$\Omega$ = {}".format(omega))
     ax.legend(loc="upper right", fontsize=6.5)
-    # plt.setp(ax_hist.get_yticklabels(), visible=False)
-    # ax_hist.set_yticklabels([])
-    # ax_hist.set_xticks([])
     ax.set_xlabel("Distribution density")
     # Set to 1.5*largest original bin count
     # ax_arr[1, 1].set_ylim(0, round(1.5*np.amax(n)))
@@ -224,9 +210,6 @@ def plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon, colou
 
     ax.set_xlabel("Clone")
     ax.set_ylabel(r"$T_m$")
-
-    # plt.setp(ax.get_xticklabels(), visible=False)
-    # ax_phi.set_xticklabels([])  # This removes ticks from ax_aa_g due to sharing
     ax.legend(loc="upper left", fontsize=6.5, ncol=ncol)
     return ax
 
@@ -234,6 +217,7 @@ def plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon, colou
 def plot_stability(generation, history, fitness_table, omega,
                    plot_omega, plot_epsilon, n_generations, out_paths):
 
+    # TODO: Make COLOURS a global variable
     # pal = sns.color_palette("Paired"); print(pal.as_hex())
     # ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c',
     # '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928']
@@ -258,7 +242,9 @@ def plot_stability(generation, history, fitness_table, omega,
 
     fig = plt.figure(figsize=(10, 10))
     # https://matplotlib.org/users/gridspec.html
-    gs = mpl.gridspec.GridSpec(nrows=2, ncols=3, width_ratios=[2, 1, 2], height_ratios=[2, 3])
+    gs = mpl.gridspec.GridSpec(nrows=2, ncols=3,
+                               width_ratios=[2, 1, 2],
+                               height_ratios=[2, 3])
     gs.update(top=0.95, wspace=0.10, hspace=0.12)  # Leave room for the title
 
     # Plot current generation's amino acid stabilities
@@ -274,14 +260,16 @@ def plot_stability(generation, history, fitness_table, omega,
 
     # Plot initial distribution
     ax_aa_0 = plt.subplot(gs[1, 1], sharey=ax_aa_g)
-    plot_initial_amino_acid_stabilities(fitness_table, omega, colours=colours, ax=ax_aa_0)
+    plot_initial_amino_acid_stabilities(fitness_table, omega,
+                                        colours=colours, ax=ax_aa_0)
     plt.setp(ax_aa_0.get_yticklabels(), visible=False)
     ax_aa_0.set_ylabel(None)
     ax_aa_0.set_title(None)
 
     # Plot marginal stability distributions
     ax_hist = plt.subplot(gs[1, -1], sharey=ax_aa_g)
-    plot_stability_histograms(aa_stabilities, fitness_table, omega, colours=colours, ax=ax_hist)
+    plot_stability_histograms(aa_stabilities, fitness_table, omega,
+                              colours=colours, ax=ax_hist)
     plt.setp(ax_hist.get_yticklabels(), visible=False)
     ax_hist.set_ylabel(None)
     ax_hist.set_title(None)
@@ -289,7 +277,8 @@ def plot_stability(generation, history, fitness_table, omega,
     # Find and plot all fitness values in the current generation
     # x: proteins within population; y: Fitness for each locus for that protein
     ax_phi = plt.subplot(gs[0, 0], sharex=ax_aa_g)
-    plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon, colours=colours, ax=ax_phi)
+    plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon,
+                             colours=colours, ax=ax_phi)
     plt.setp(ax_phi.get_xticklabels(), visible=False)
     ax_phi.set_xlabel(None)
     ax_phi.set_title(None)
@@ -318,13 +307,16 @@ def plot_stability(generation, history, fitness_table, omega,
     ax_evo = plt.subplot(gs[0, 1:], sharey=ax_phi)
     xlims = (-5, n_generations+5)
     plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
-    ax_evo.plot(len(history)-1, mean_protein_stability, '*', color=colours["phi_mu"], markersize=10)
                    out_paths, fig_title=False, xlims=xlims, colours=colours,
                    ax=ax_evo)
+    # Add a marker to show the current mean stability
+    ax_evo.plot(len(history)-1, mean_protein_stability, '*',
+                color=colours["phi_mu"], markersize=10)
     plt.setp(ax_evo.get_yticklabels(), visible=False)
-    # ax_evo.set_yticklabels([])
+    # NOTE: ax.set_xticklabels([]) removes ticks entirely
     ax_evo.set_ylabel(None)
 
+    # Add title and save
     # plt.subplots_adjust(top=0.85)
     fig.suptitle(("Generation {}".format(generation)), fontweight='bold')
     # fig.set_tight_layout(True)

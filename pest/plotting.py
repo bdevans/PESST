@@ -189,6 +189,49 @@ def plot_stability_histograms(aa_stabilities, fitness_table, omega, colours=None
     return ax
 
 
+def plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon, colours=None, ax=None):
+
+    fig = None
+    if ax is None:
+        fig, ax = plt.subplots()  # figsize=(8, 12)
+
+    if colours is None:
+        colours = {"aa_g": "#a6cee3",
+                   "aa_0_mu": "#ff7f00",
+                   "aa_g_mu": "#1f78b4",
+                   "omega": "#e74c3c"}
+
+    (n_clones, clone_size) = aa_stabilities.shape
+    protein_stabilities = np.sum(aa_stabilities, axis=1)
+    protein_indicies = np.arange(n_clones)
+    mean_protein_stability = np.mean(protein_stabilities)
+
+    ax.plot(protein_indicies, protein_stabilities, "*", color=colours["phi"], markersize=4)  # , label=r"$\mu_p$")
+
+    ax.hlines(mean_protein_stability, 0, n_clones-1,
+              colors=colours["phi_mu"], linestyles="--", lw=3, zorder=10,
+              label=r"$\mu_\phi$ = {:.2f}".format(mean_protein_stability))
+
+    if plot_epsilon:
+        ax.hlines(epsilon, 0, n_clones-1,
+                  colors=colours["epsilon"], linestyles=":", lw=3, zorder=10,
+                  label=r"$\epsilon$ = {:.2f}".format(epsilon))
+    ncol = 2
+    if omega > -np.inf:
+        ax.hlines(omega, 0, n_clones-1,
+                  colors=colours["omega"], linestyles="-", lw=3, zorder=10,
+                  label=r"$\Omega$ = {}".format(omega))
+        ncol += 1
+
+    ax.set_xlabel("Clone")
+    ax.set_ylabel(r"$T_m$")
+
+    # plt.setp(ax.get_xticklabels(), visible=False)
+    # ax_phi.set_xticklabels([])  # This removes ticks from ax_aa_g due to sharing
+    ax.legend(loc="upper left", fontsize=6.5, ncol=ncol)
+    return ax
+
+
 def plot_stability(generation, history, fitness_table, omega,
                    plot_omega, plot_epsilon, n_generations, out_paths):
 
@@ -260,28 +303,10 @@ def plot_stability(generation, history, fitness_table, omega,
     # Find and plot all fitness values in the current generation
     # x: proteins within population; y: Fitness for each locus for that protein
     ax_phi = plt.subplot(gs[0, 0], sharex=ax_aa_g)
-    ax_phi.plot(protein_indicies, protein_stabilities, "*", color=colours["phi"], markersize=4)  # , label=r"$\mu_p$")
-
-    mean_protein_stability = np.mean(protein_stabilities)
-    ax_phi.hlines(mean_protein_stability, 0, n_clones-1,
-                  colors=colours["phi_mu"], linestyles="--", lw=3, zorder=10,
-                  label=r"$\mu_\phi$ = {:.2f}".format(mean_stability))
-
-    if plot_epsilon:
-        ax_phi.hlines(epsilon, 0, n_clones-1,
-                      colors=colours["epsilon"], linestyles=":", lw=3, zorder=10,
-                      label=r"$\epsilon$ = {:.2f}".format(epsilon))
-    ncol = 2
-    if omega > -np.inf:
-        ax_phi.hlines(omega, 0, n_clones-1,
-                      colors=colours["omega"], linestyles="-", lw=3, zorder=10,
-                      label=r"$\Omega$ = {}".format(omega))
-        ncol += 1
-
-    ax_phi.set_ylabel(r"$T_m$")
+    plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon, colours=colours, ax=ax_phi)
     plt.setp(ax_phi.get_xticklabels(), visible=False)
-    # ax_phi.set_xticklabels([])  # This removes ticks from ax_aa_g due to sharing
-    ax_phi.legend(loc="upper left", fontsize=6.5, ncol=ncol)
+    ax_phi.set_xlabel(None)
+    ax_phi.set_title(None)
 
     # Axis scaling logic
     initial_protein_stabilities = np.sum(history[0].stabilities, axis=1)
@@ -301,6 +326,9 @@ def plot_stability(generation, history, fitness_table, omega,
     ax_phi.set_ylim(ymin, ymax)
 
     # Plot evolutionary history
+    protein_stabilities = np.sum(aa_stabilities, axis=1)
+    mean_protein_stability = np.mean(protein_stabilities)
+
     ax_evo = plt.subplot(gs[0, 1:], sharey=ax_phi)
     xlims = (-5, n_generations+5)
     plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,

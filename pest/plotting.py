@@ -22,7 +22,8 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
     n_generations = len(history) - 1  # First entry is the initial state
     generation_numbers = np.arange(n_generations+1)  # Skip initial generation
     (clone_size, n_amino_acids) = fitness_table.shape
-    n_clones = len(history[0].population)
+    # n_clones = len(history[0].population)
+    (n_clones, _) = history[0].stabilities.shape
     # fitnesses = np.array([[history[g].fitness[c] for c in range(n_clones)]
     #                       for g in range(n_generations+1)])
     #
@@ -87,7 +88,8 @@ def plot_stability(generation, history, fitness_table, omega,
     col_omega = "#e74c3c"  # "k"
     col_epsilon = '#33a02c'  # "#2ecc71"  # Red
     # population, stabilities = history[-1].population, history[-1].final_fitness
-    population = history[-1].population
+    # population = history[-1].population
+    (n_clones, clone_size) = history[-1].stabilities.shape
     aa_stabilities = history[-1].stabilities
 
     # Store fitness values for each amino in the dataset for the left subfigure
@@ -100,7 +102,7 @@ def plot_stability(generation, history, fitness_table, omega,
     # T_min = sum(np.amin(fitness_table, axis=1))  # Least stable possible protein
     mean_initial_aa_stability = np.mean(fitness_table.values)
     epsilon = clone_size * mean_initial_aa_stability
-    protein_indicies = np.arange(len(population))
+    protein_indicies = np.arange(n_clones)
     protein_stabilities = np.sum(aa_stabilities, axis=1)
     mean_stability = np.mean(aa_stabilities)
 
@@ -112,15 +114,15 @@ def plot_stability(generation, history, fitness_table, omega,
     ax_aa_g = plt.subplot(gs[1, 0])
     # TODO: Move to plot_amino_acid_stabilities
     ax_aa_g.plot(protein_indicies, aa_stabilities, "o", color=col_aa_g, markersize=1)
-    ax_aa_g.hlines(mean_initial_aa_stability, 0, len(population)-1,
+    ax_aa_g.hlines(mean_initial_aa_stability, 0, n_clones-1,
                    colors=col_aa_0_mu, linestyles="--", lw=3, zorder=10,
                    label=r"$\mu_0$ = {:.2f}".format(mean_initial_aa_stability))
-    ax_aa_g.hlines(mean_stability, 0, len(population)-1,
+    ax_aa_g.hlines(mean_stability, 0, n_clones-1,
                    colors=col_aa_g_mu, linestyles="--", lw=3, zorder=10,
                    label=r"$\mu_p$ = {:.2f}".format(mean_stability))  # \mu_\phi ?
     ncol = 2
     if omega > -np.inf:
-        ax_aa_g.hlines(omega, 0, len(population)-1,
+        ax_aa_g.hlines(omega, 0, n_clones-1,
                        colors=col_omega, linestyles="-", lw=3, zorder=10,
                        label=r"$\Omega$ = {}".format(omega))
         ncol += 1
@@ -185,17 +187,17 @@ def plot_stability(generation, history, fitness_table, omega,
     ax_phi.plot(protein_indicies, protein_stabilities, "*", color=col_phi, markersize=4)  # , label=r"$\mu_p$")
 
     mean_protein_stability = np.mean(protein_stabilities)
-    ax_phi.hlines(mean_protein_stability, 0, len(population)-1,
+    ax_phi.hlines(mean_protein_stability, 0, n_clones-1,
                   colors=col_phi_mu, linestyles="--", lw=3, zorder=10,
                   label=r"$\mu_\phi$ = {:.2f}".format(mean_stability))  # \mu_\phi ?
 
     if plot_epsilon:
-        ax_phi.hlines(epsilon, 0, len(population)-1,
+        ax_phi.hlines(epsilon, 0, n_clones-1,
                       colors=col_epsilon, linestyles=":", lw=3, zorder=10,
                       label=r"$\epsilon$ = {:.2f}".format(epsilon))
     # ncol = 2
     if omega > -np.inf:
-        ax_phi.hlines(omega, 0, len(population)-1,
+        ax_phi.hlines(omega, 0, n_clones-1,
                       colors=col_omega, linestyles="-", lw=3, zorder=10,
                       label=r"$\Omega$ = {}".format(omega))
         # ncol += 1

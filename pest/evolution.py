@@ -456,11 +456,12 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
 def kill_proteins(population, tree, death_rate, fitness_table, omega):
     n_clones = len(population)
     # mortals = random.sample(range(n_clones), int(n_clones*death_rate))
-    mortals = np.arange(n_clones)[np.where(np.random.rand(n_clones) < death_rate)]
-    # Recalculate fitnesses after all mutations
-    fitnesses = calculate_population_fitness(population, fitness_table)
-    for pi in mortals:
-        new_index = replace_protein(pi, tree, fitnesses, omega)
+    clones = np.arange(n_clones)
+    condemned = clones[np.where(np.random.rand(n_clones) < death_rate)]
+    # Recalculate stabilities after all mutations
+    stabilities = calculate_population_fitness(population, fitness_table)
+    for pi in condemned:
+        new_index = replace_protein(pi, tree, stabilities, omega)
         if new_index is None:  # Should never happen
             warnings.warn("Unable to kill protein {}!".format(pi))
             raise Exception("No suitable candidates on branch!")

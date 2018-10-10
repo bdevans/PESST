@@ -237,24 +237,24 @@ def get_fit_protein(stability_start, clone_size, sites, fitness_table):
     return protein
 
 
-def record_generation_fitness(generation, population, variant_sites,
-                              fitness_table, omega, p_mutation, record, out_paths):
+def record_generation_stability(generation, population, sites, fitness_table,
+                                omega, p_mutation, record, out_paths):
     """Record the fitness of every protein in the generation and store them in
     dictionary. Optionally generate data and figures about fitness.
     """
 
     # Build distribution of fitness values existing in evolving protein
-    fitnesses = get_phi_stability_table(population, fitness_table,
-                                        record["invariants"], variant_sites)
+    stabilities = get_phi_stability_table(population, fitness_table)
+
     clims = (np.floor(np.amin(fitness_table.values)),
              np.ceil(np.amax(fitness_table.values)))
-    plot_phi_fitness_table(generation, fitnesses, clims, out_paths)
+    plot_phi_fitness_table(generation, stabilities, clims, out_paths)
 
     if record["residues"]:
         # save_dir = os.path.join(out_paths["figures"], "fitnessdotmatrix")
-        plot_threshold_fitness(generation, population, fitnesses,
+        plot_threshold_fitness(generation, population, stabilities,
                                fitness_table, omega, out_paths)
-        plot_fitness_space(generation, population, fitnesses, fitness_table,
+        plot_fitness_space(generation, population, stabilities, fitness_table,
                            omega, out_paths)
 
     if record["statistics"]:
@@ -483,9 +483,8 @@ def evolve(n_generations, population, fitness_table, omega, sites,
     # population = copy.deepcopy(initial_population)  # current generation
     fitnesses = calculate_population_fitness(population, fitness_table)
     # Record initial population
-    record_generation_fitness(0, population, sites.variant,
-                              fitness_table, omega, p_mutation,
-                              record, out_paths)
+    record_generation_stability(0, population, sites, fitness_table, omega,
+                                p_mutation, record, out_paths)
     write_fasta_alignment(0, population, out_paths)
 
     # Store each generation along with its fitness
@@ -536,14 +535,12 @@ def evolve(n_generations, population, fitness_table, omega, sites,
             write_fasta_alignment(gen+1, population, out_paths)
         # Record population details at the end of processing
         if (gen+1) % record["rate"] == 0:
-            record_generation_fitness(gen+1, population, sites.variant,
-                                      fitness_table, omega, p_mutation,
-                                      record, out_paths)
-
         if (gen+1) % record["rate"] == 0:
             stabilities = get_phi_stability_table(population, fitness_table,
                                                   record["invariants"], sites.variant)
             plot_stability(gen+1, history, stabilities, fitness_table, omega,
+            record_generation_stability(gen+1, population, sites, fitness_table,
+                                        omega, p_mutation, record, out_paths)
                            plot_omega, plot_epsilon, n_generations, out_paths)
 
     write_final_fasta(population, tree, out_paths)

@@ -18,7 +18,7 @@ from .dataio import (create_output_folders, write_settings_file, write_tree,
                      write_roots, write_initial_protein, write_protein_fitness,
                      write_fasta_alignment, write_final_fasta, load_LG_matrix,
                      write_histogram_statistics, append_ks_statistics,
-                     create_gif)
+                     create_gif, save_history)
 from .plotting import (plot_stability, plot_evolution, plot_gamma_distribution,
                        plot_threshold_fitness, plot_histogram_of_fitness,
                        plot_fitness_space, plot_fitness_table, plot_LG_matrix,
@@ -497,6 +497,8 @@ def evolve(n_generations, population, fitness_table, omega, sites,
     Generation = namedtuple('Generation', ['population', 'stabilities'])
     # Create a list of generations and add initial population and fitness
     history = [Generation(population=population, stabilities=phi_stabilities)]
+    if record["data"]:
+        save_history(0, history, out_paths)
 
     # TODO: Refactor plot_omega, plot_epsilon
     plot_stability(0, history, fitness_table, omega, plot_omega, plot_epsilon,
@@ -539,6 +541,8 @@ def evolve(n_generations, population, fitness_table, omega, sites,
 
             plot_stability(gen+1, history, fitness_table, omega,
                            plot_omega, plot_epsilon, n_generations, out_paths)
+            if record["data"]:
+                save_history(gen+1, history, out_paths)
 
     write_final_fasta(population, tree, out_paths)
     return history

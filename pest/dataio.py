@@ -14,6 +14,7 @@ import scipy.stats
 import pandas as pd
 import imageio
 
+from .utilities import compact_protein
 # from .evolution import build_generation_fitness_table
 # from .plotting import plot_threshold_fitness, plot_histogram_of_fitness
 
@@ -297,3 +298,19 @@ def create_gif(filenames, duration=0.5):
     # for filename in filenames:
     #     image = imageio.imread(filename)
     #     writer.append_data(image)
+
+
+def save_history(generation, history, out_paths):
+    """Save the last generation to disk."""
+
+    stabilities_file = os.path.join(out_paths["data"],
+                                    "stabilities_{}.csv".format(generation))
+    np.savetxt(stabilities_file, history[-1].stabilities, delimiter=',')
+
+    # Save protein sequences
+    clones_file = os.path.join(out_paths["data"],
+                               "clones_{}.json".format(generation))
+    population = {key: compact_protein(protein)
+                  for key, protein in history[-1].population.items()}
+    with open(clones_file, "w") as gf:
+        json.dump(population, gf, indent=4, sort_keys=True)

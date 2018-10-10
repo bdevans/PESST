@@ -264,7 +264,11 @@ def record_generation_stability(generation, population, sites, fitness_table,
             distributions = fitness_table.values
         else:
             stats_file_name = "normal_distribution_statistics_generation{}.md".format(generation)
-            distributions = fitnesses
+            # Build distribution of stability values excluding invariant sites
+            distributions = get_phi_stability_table(population, fitness_table,
+                                                    exclude_invariants=True,
+                                                    variant_sites=sites.variant)
+                                                    # record["invariants"], sites.variant)
         stats_full_name = os.path.join(out_paths["statistics"], stats_file_name)
         write_histogram_statistics(stats_full_name, distributions)
         if generation > 0:
@@ -278,7 +282,7 @@ def record_generation_stability(generation, population, sites, fitness_table,
                                   fitness_table.values.ravel(), omega, out_paths)
 
 
-def get_phi_stability_table(population, fitness_table, include_invariants=True,
+def get_phi_stability_table(population, fitness_table, exclude_invariants=False,
                             variant_sites=None):
     """Build a fitness table for given generation's population.
 
@@ -289,12 +293,12 @@ def get_phi_stability_table(population, fitness_table, include_invariants=True,
     # Find and plot all fitness values in the current generation
     for pi, protein in list(population.items()):
 
-        if include_invariants:  # record["invariants"]:
-            stabilities = get_amino_acid_stabilities(protein, fitness_table)
-        else:
+        if exclude_invariants:  # record["invariants"]:
             stabilities = [fitness_table.loc[loc, amino_acid]
                            for loc, amino_acid in enumerate(protein)
                            if loc in variant_sites]
+        else:
+            stabilities = get_amino_acid_stabilities(protein, fitness_table)
 
         dist_clone_fitness.append(stabilities)  # Becomes a new row
     return np.asarray(dist_clone_fitness)

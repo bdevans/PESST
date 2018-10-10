@@ -85,7 +85,6 @@ def plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega, colours
 
     (n_clones, clone_size) = aa_stabilities.shape
     protein_indicies = np.arange(n_clones)
-    # mean_stability_0 = np.mean(fitness_table.values)
     mean_stability = np.mean(aa_stabilities)
 
     ax.plot(protein_indicies, aa_stabilities,
@@ -103,12 +102,10 @@ def plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega, colours
                   label=r"$\Omega$ = {}".format(omega))
         ncol += 1
 
-    # ax_aa_g.set_ylim(loc-scale, loc+scale)
-    # ax.set_ylim(np.floor(np.amin(fitness_table.values)), np.ceil(np.amax(fitness_table.values)))
     ax.set_xlabel("Clone")
     ax.set_ylabel(r"$\Delta T_m$")
     ax.legend(loc="upper left", fontsize=6.5, ncol=ncol)
-                   # title=r"$\Omega$ = {}".format(omega))
+              # title=r"$\Omega$ = {}".format(omega))
     ax.set_title("Stability distribution of every amino acid in the population", size=8)
 
     return ax
@@ -132,19 +129,18 @@ def plot_initial_amino_acid_stabilities(fitness_table, omega, colours=None, ax=N
     # Plot each column of fitness_table as a separate dataseries against 0..N-1
     ax.plot(fitness_table, "o", color=colours["aa_0"], markersize=1)
     ax.hlines(mean_stability_0, 0, clone_size-1,
-                   colors=colours["aa_0_mu"], linestyles="--", lw=3, zorder=10,
-                   label=r"$\mu_0$ = {:.2f}".format(mean_stability_0))
+              colors=colours["aa_0_mu"], linestyles="--", lw=3, zorder=10,
+              label=r"$\mu_0$ = {:.2f}".format(mean_stability_0))
+
     if omega > -np.inf:
         ax.hlines(omega, 0, clone_size-1,
-                       colors=colours["omega"], linestyles="-", lw=3, zorder=10,
-                       label=r"$\Omega$ = {}".format(omega))
-    # ax.set_ylim(-scale, scale)
-    # plt.setp(ax.get_yticklabels(), visible=False)
-    # ax.set_yticklabels([])
+                  colors=colours["omega"], linestyles="-", lw=3, zorder=10,
+                  label=r"$\Omega$ = {}".format(omega))
+
     ax.set_xlabel("Amino acid position")
     ax.set_ylabel(r"$\Delta T_m$")
     ax.legend(loc="upper left", fontsize=6.5)
-                   # title=r"$\Omega$ = {}".format(omega))
+              # title=r"$\Omega$ = {}".format(omega))
     ax.set_title(r"Stabiltiy distribution of $\Delta T_m$ matrix", size=8)
     return ax
 
@@ -235,9 +231,7 @@ def plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon, colou
 def plot_stability(generation, history, fitness_table, omega,
                    plot_omega, plot_epsilon, n_generations, out_paths):
 
-    # pal = sns.color_palette("Paired")
-    # sns.palplot(pal)
-    # print(pal.as_hex())
+    # pal = sns.color_palette("Paired"); print(pal.as_hex())
     # ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c',
     # '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928']
     colours = {"aa_0": "#fdbf6f",
@@ -248,32 +242,16 @@ def plot_stability(generation, history, fitness_table, omega,
                "phi_mu": "#34495e",
                "epsilon": "#33a02c",
                "omega": "#e74c3c"}
-    # col_aa_0 = '#fdbf6f'  # "#95a5a6"  # Green
-    # col_aa_0_mu = '#ff7f00'  # "#95a5a6"  # Green
-    # col_aa_g = '#a6cee3'  # "#3498db"  # Blue
-    # col_aa_g_mu = '#1f78b4'  # "#3498db"  # Blue
-    # col_phi = "#9b59b6"
-    # col_phi_mu = "#34495e"  # Purple
-    # col_omega = "#e74c3c"  # "k"
-    # col_epsilon = '#33a02c'  # "#2ecc71"  # Red
+
     pad_factor = 0.1
 
     aa_stabilities = history[-1].stabilities
     (n_clones, clone_size) = aa_stabilities.shape
-
-    # Store fitness values for each amino in the dataset for the left subfigure
     (clone_size, n_amino_acids) = fitness_table.shape
-    # Average across flattened array
-    # mean_initial_fitness = np.mean(fitness_table.values)
-    # scale = round((4 * np.std(fitness_table.values)) + 1)
-    # loc = np.mean(fitness_table.values)
     # T_max = sum(np.amax(fitness_table, axis=1))  # Most stable possible protein
     # T_min = sum(np.amin(fitness_table, axis=1))  # Least stable possible protein
     mean_stability_0 = np.mean(fitness_table.values)
     epsilon = clone_size * mean_stability_0
-    protein_indicies = np.arange(n_clones)
-    protein_stabilities = np.sum(aa_stabilities, axis=1)
-    mean_stability = np.mean(aa_stabilities)
 
     fig = plt.figure(figsize=(10, 10))
     # https://matplotlib.org/users/gridspec.html

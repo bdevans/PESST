@@ -95,13 +95,13 @@ def plot_stability(generation, history, stabilities, fitness_table, omega,
 
     n, bins, _ = ax_hist.hist(fitness_table.values.ravel(), bins='sqrt',
                               align='mid', orientation='horizontal',
-                              color=col_aa_0, alpha=0.6, density=True,
+                              color=col_aa_0, alpha=0.8, density=True,
                               label="Initial distribution")
     ax_hist.axhline(y=mean_initial_aa_stability, color=col_aa_0_mu,
                     linestyle="--", lw=3, zorder=10)
                     # label=r"$\mu_0$ = {:.2f}".format(mean_initial_aa_stability))
     ax_hist.hist(stabilities.ravel(), bins=bins,
-                 align='mid', color=col_aa_g, alpha=0.6,
+                 align='mid', color=col_aa_g, alpha=0.8,
                  orientation='horizontal', density=True, label="Present distribution")
     ax_hist.axhline(y=mean_stability, color=col_aa_g_mu, linestyle="--", lw=3, zorder=10)
                     # label=r"$\mu_p$ = {:.2f}".format(mean_stability))

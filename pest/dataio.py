@@ -1,4 +1,5 @@
 import os
+import shutil
 import json
 import datetime
 import warnings
@@ -271,6 +272,12 @@ def create_output_folders(output_dir=None):
     if output_dir is None:
         output_dir = datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
     run_path = os.path.join("results", output_dir)
+    if os.path.isdir(run_path):
+        response = input("Warning: the output directory '{}' already exists! Delete? [Y/n]: ".format(run_path))
+        if response.lower() == "y" or response.lower() == "":
+            shutil.rmtree(run_path)
+        else:
+            exit()
     os.makedirs(run_path)
     if os.path.isdir(run_path):
         print("Results directory successfully created: {}".format(os.path.join(os.getcwd(), run_path)))

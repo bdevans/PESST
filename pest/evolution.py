@@ -20,7 +20,7 @@ from .dataio import (create_output_folders, write_settings_file, write_tree,
                      write_histogram_statistics, append_ks_statistics,
                      create_gif, save_history)
 from .plotting import (plot_stability, plot_evolution, plot_gamma_distribution,
-                       plot_threshold_fitness, plot_histogram_of_fitness,
+                       plot_threshold_fitness, plot_stability_histograms,
                        plot_fitness_space, plot_stability_table, plot_LG_matrix,
                        plot_phi_fitness_table)
 
@@ -281,8 +281,10 @@ def record_generation_stability(generation, population, sites, fitness_table,
     if record["histograms"]:
         # disthistfilename = "generation_{}.png".format(generation)
         # disthistfullname = os.path.join(out_paths["figures"], "histograms", disthistfilename)
-        plot_histogram_of_fitness(generation, stabilities.ravel(),
-                                  fitness_table.values.ravel(), omega, out_paths)
+        # plot_histogram_of_fitness(generation, stabilities.ravel(),
+        #                           fitness_table.values.ravel(), omega, out_paths)
+        plot_stability_histograms(generation, stabilities, fitness_table,
+                                  omega, out_paths)
 
 
 def get_phi_stability_table(population, fitness_table, exclude_invariants=False,
@@ -660,12 +662,14 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
     # Create animations
     if record["gif"]:
         recorded_generations = list(range(0, n_generations+1, record["rate"]))
-        figures = ["pest_gen_", "phi_fitness_table_"]
+        figures = ["pest_gen", "phi_fitness_table"]
         if record["residues"]:
-            figures.extend(["fit_dist_gen_", "generation_"])
+            figures.extend(["fit_dist_gen", "generation"])
+        if record["histograms"]:
+            figures.append("histogram")
         for fig_base in figures:
             path_root = os.path.join(out_paths["figures"], fig_base)
-            filenames = [path_root+"{}.png".format(gen)
+            filenames = [path_root+"_{}.png".format(gen)
                          for gen in recorded_generations]
             create_gif(filenames, duration=0.25)
 

@@ -117,7 +117,9 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
     # Normality (Shapiro-Wilk)
     stats_file.write("Shapiro-Wilk test of non-normality\n"
                      "----------------------------------\n\n")
-    W_shapiro, p_shapiro = sp.stats.shapiro(fitnesses)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=UserWarning)
+        W_shapiro, p_shapiro = sp.stats.shapiro(fitnesses)
     stats_file.write("The Shapiro-Wilk test of non-normality for the entire "
                      "dataset gives p = {}\n".format(p_shapiro))
     if p_shapiro >= 0.05:
@@ -126,9 +128,15 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
         shapiro = ''
     stats_file.write("Therefore the Shapiro-Wilk test suggests that the whole "
                      "dataset is {}confidently non-normal\n".format(shapiro))
-    stats_file.write("However if there are more than 5000 datapoints this "
-                     "test is inaccurate. This test uses {} datapoints.\n\n"
-                     .format(len(fitnesses)))
+    if len(fitnesses) > 5000:
+        stats_file.write("Warning: There are more than 5000 datapoints ({}) "
+                         "so the p-value may be inaccurate.\n\n"
+                         .format(len(fitnesses)))
+    # stats_file.write("However if there are more than 5000 datapoints this "
+    #                  "test is inaccurate. This test uses {} datapoints.\n\n"
+    #                  .format(len(fitnesses)))
+    else:
+        stats_file.write("\n\n")
     passpercentcalc = []
     for aa in aa_variant_fitnesses:
         (_, p_value) = sp.stats.shapiro(aa)

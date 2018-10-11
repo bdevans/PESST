@@ -264,8 +264,7 @@ def create_output_folders(output_dir=None):
     If no output directory is passed, each run will be saved in a time-stamped
     folder within the run path.
     """
-    paths = ['runsettings', 'start', 'figures', 'data', 'tree', 'fastas', 'fitnessgraph',
-             'fitnessdotmatrix', 'fitnessdistribution', 'treefastas']
+
     paths = ['initial', 'data', 'figures', 'tree', 'fastas', 'treefastas',
              'statistics']
 

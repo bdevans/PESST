@@ -319,7 +319,12 @@ def plot_stability(generation, history, fitness_table, omega,
                    ax=ax_evo)
     # Add a marker to show the current mean stability
     ax_evo.plot(len(history)-1, mean_protein_stability, '*',
-                color=colours["phi_mu"], markersize=10)
+                color=colours["phi_mu"], markersize=10)  # ,
+                # label=r"$\mu_\phi$ = {:.2f}".format(mean_protein_stability))
+    handles, labels = ax_evo.get_legend_handles_labels()
+    mu_text_index = labels.index(r"$\mu_\phi$")
+    new_label = r"$\mu_\phi$ = {:.2f}".format(mean_protein_stability)
+    ax_evo.legend_.get_texts()[mu_text_index].set_text("{: <16}".format(new_label))
     plt.setp(ax_evo.get_yticklabels(), visible=False)
     # NOTE: ax.set_xticklabels([]) removes ticks entirely
     ax_evo.set_ylabel(None)

@@ -154,16 +154,22 @@ def plot_stability_histograms(aa_stabilities, fitness_table, omega, orient='h',
 
     mean_stability_0 = np.mean(fitness_table.values)
     mean_stability = np.mean(aa_stabilities)
+    stats_0 = "\n".join([r"$\sigma$ = {:.2f}".format(np.std(fitness_table.values)),
+                         "skew = {:.2f}".format(stats.skew(fitness_table.values, axis=None)),
+                         "kurtosis = {:.2f}".format(stats.kurtosis(fitness_table.values, axis=None))])
     n, bins, _ = ax.hist(fitness_table.values.ravel(), bins='sqrt',
                          align='mid', orientation='horizontal',
                          color=colours["aa_0"], alpha=0.8, density=True,
-                         label="Initial distribution")
+                         label="Initial distribution\n{}".format(stats_0))
     ax.axhline(y=mean_stability_0, color=colours["aa_0_mu"],
                linestyle="--", lw=3, zorder=20,
                label=r"$\mu_0$ = {:.2f}".format(mean_stability_0))
+    stats_g = "\n".join([r"$\sigma$ = {:.2f}".format(np.std(aa_stabilities)),
+                         "skew = {:.2f}".format(stats.skew(aa_stabilities, axis=None)),
+                         "kurtosis = {:.2f}".format(stats.kurtosis(aa_stabilities, axis=None))])
     ax.hist(aa_stabilities.ravel(), bins=bins,
             align='mid', color=colours["aa_g"], alpha=0.8,
-            orientation='horizontal', density=True, label="Present distribution")
+            orientation='horizontal', density=True, label="Present distribution\n{}".format(stats_g))
     ax.axhline(y=mean_stability, color=colours["aa_g_mu"],
                linestyle="--", lw=3, zorder=20,
                label=r"$\mu_p$ = {:.2f}".format(mean_stability))

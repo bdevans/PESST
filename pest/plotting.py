@@ -35,8 +35,8 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
     ax.plot(generation_numbers, stabiltiies, lw=1)
 
     # Average across clones
-    ax.plot(generation_numbers, np.mean(stabiltiies, axis=1),
-            "--", color=colours["phi_mu"], lw=3, zorder=20, label=r"$\mu_\phi$")
+    ax.plot(generation_numbers, np.mean(stabiltiies, axis=1), "--",
+            color=colours["phi_mu"], lw=3, zorder=20, label=r"$\mu_\phi$")
     if xlims is not None:
         ax.set_xlim(xlims)
     else:
@@ -44,17 +44,16 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
     ax.set_xlabel("Generation")
     ax.set_ylabel("$T_m$", fontweight='bold')
     if fig_title:
-        ax.set_title("\n".join(wrap("Stability change for {} "
-                                    "clones of {} amino acids, "
-                                    "mutated over {} generations"
+        ax.set_title("\n".join(wrap("Stability change for {} clones of {} "
+                                    "amino acids, mutated over {} generations"
                                     .format(n_clones, clone_size, n_generations), 60)), fontweight='bold')
     if plot_omega:  # Add fitness threshold
-        ax.axhline(omega, color=colours["omega"], lw=3, linestyle="-", zorder=10,
-                   label=r"$\Omega$ = {}".format(omega))
+        ax.axhline(omega, color=colours["omega"], lw=3, linestyle="-",
+                   zorder=10, label=r"$\Omega$ = {}".format(omega))
     if plot_epsilon:  # Add theoretical convergence line
         epsilon = clone_size * np.mean(fitness_table.values)
-        ax.axhline(epsilon, color=colours["epsilon"], lw=3, linestyle=":", zorder=20,
-                   label=r"$\epsilon$ = {:.2f}".format(epsilon))
+        ax.axhline(epsilon, color=colours["epsilon"], lw=3, linestyle=":",
+                   zorder=20, label=r"$\epsilon$ = {:.2f}".format(epsilon))
     ax.legend(title=legend_title)
 
     if fig is not None:

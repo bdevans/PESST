@@ -226,13 +226,13 @@ def plot_stability(generation, history, fitness_table, omega,
     # pal = sns.color_palette("Paired"); print(pal.as_hex())
     # ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c',
     # '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928']
-    colours = {"aa_0": "#fdbf6f",
-               "aa_0_mu": "#ff7f00",
+    colours = {"aa_0": "#b2df8a",  # "#fdbf6f",
+               "aa_0_mu": "#33a02c",  # "#ff7f00",
                "aa_g": "#a6cee3",
                "aa_g_mu": "#1f78b4",
                "phi": "#9b59b6",
                "phi_mu": "#34495e",
-               "epsilon": "#33a02c",
+               "epsilon": "#ff7f00",  # "#33a02c",
                "omega": "#e74c3c"}
 
     pad_factor = 0.1

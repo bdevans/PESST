@@ -653,11 +653,12 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
                      sites, p_mutation, mutation_rate, death_rate, tree,
                      LG_matrix, plot_omega, plot_epsilon, record, out_paths)
 
-    legend_title = "; ".join([r"$\mu$ = {}".format(mu),
-                              r"$\sigma$ = {}".format(sigma),
-                              r"$\delta$ = {}".format(mutation_rate)])
+    # legend_title = "; ".join([r"$\mu$ = {}".format(mu),
+    #                           r"$\sigma$ = {}".format(sigma),
+    #                           "skew = {}".format(skew),
+    #                           r"$\delta$ = {}".format(mutation_rate)])
     plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
-                   out_paths, legend_title)
+                   out_paths)  # , legend_title=legend_title)
 
     # Create animations
     if record["gif"]:

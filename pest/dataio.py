@@ -4,6 +4,8 @@ import datetime
 import warnings
 import random
 import pkg_resources
+import glob
+from operator import itemgetter
 
 import numpy as np
 import scipy as sp
@@ -322,3 +324,28 @@ def save_history(generation, history, out_paths):
                   for key, protein in history[-1].population.items()}
     with open(clones_file, "w") as gf:
         json.dump(population, gf, indent=4, sort_keys=True)
+
+
+def load_history(data_dir):
+    """Load data from a previous simulation."""
+    # NOTE: Work in progress!
+    stability_files = glob.glob(os.path.join(data_dir, "stabilities_*.csv"))
+    generations = []
+    for file in stability_files:
+        (root, ext) = os.path.splitext(os.path.basename(file))
+        generations.append(root.split('_')[-1])
+
+    population_files = glob.glob(os.path.join(data_dir, "clones_*.json"))
+    sorted_files = sorted(zip(generations, population_files, stability_files),
+                          key=itemgetter(0))
+    history = []
+    generations = []
+    for (generation, population_file, stability_file) in sorted_files:
+        # TODO: Write a JSON object_hook to expand sequence strings
+        with open(population_file, "r") as pf:
+            population = json.load(pf)
+        with open(stability_file, "r") as sf:
+            stabilities = np.loadtext(sf, delimiter=",")
+        history.append({"population": population, "stabilities": stabilities})
+        generations.append(generation)
+    return (history, generations)

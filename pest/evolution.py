@@ -616,7 +616,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
         else:
             plot_omega, plot_epsilon = True, False
     write_protein_fitness(fitness_table, out_paths)
-    plot_fitness_table(fitness_table, out_paths)
+    plot_stability_table(fitness_table, out_paths)
     T_max = sum(np.amax(fitness_table, axis=1))  # Fittest possible protein
     assert omega < T_max
 

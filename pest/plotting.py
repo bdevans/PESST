@@ -380,7 +380,7 @@ def plot_gamma_distribution(gamma, samples, quartiles, average_medians, out_path
     plt.savefig(os.path.join(out_paths["initial"], "gamma.png"))
 
 
-def plot_fitness_table(fitness_table, out_paths):
+def plot_stability_table(fitness_table, out_paths):
 
     (clone_size, n_amino_acids) = fitness_table.shape
     fig, ax = plt.subplots(figsize=(8, clone_size/5))
@@ -390,7 +390,8 @@ def plot_fitness_table(fitness_table, out_paths):
     ax.xaxis.set_ticks_position('top')
     ax.set_xlabel("Amino Acid")
     ax.set_ylabel("Location")
-    filename = os.path.join(out_paths["initial"], "fitness_table.png")
+    ax.set_title(r"Amino Acid stability contributions ($\Delta T_m$)")
+    filename = os.path.join(out_paths["initial"], "stability_table.png")
     fig.savefig(filename)
     plt.close()
 

@@ -383,7 +383,7 @@ def plot_LG_matrix(LG_matrix, out_paths):
     fig, ax = plt.subplots(figsize=(10, 8))
     sns.heatmap(LG_matrix, annot=True, fmt=".2f", linewidths=.5, cmap="cubehelix_r",
                 square=True, annot_kws={"size": 5},  # vmin=0, vmax=1,
-                cbar_kws={"label": r"$\Delta T_m$"}, ax=ax)
+                ax=ax)  # cbar_kws={"label": "Transition probabiltiy"},
     ax.xaxis.set_ticks_position('top')
     ax.set_xlabel("Amino Acid")
     ax.set_ylabel("Amino Acid")

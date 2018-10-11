@@ -159,8 +159,8 @@ def plot_stability_histograms(aa_stabilities, fitness_table, omega, orient='h',
                          color=colours["aa_0"], alpha=0.8, density=True,
                          label="Initial distribution")
     ax.axhline(y=mean_stability_0, color=colours["aa_0_mu"],
-               linestyle="--", lw=3, zorder=20)
-               # label=r"$\mu_0$ = {:.2f}".format(mean_stability_0))
+               linestyle="--", lw=3, zorder=20,
+               label=r"$\mu_0$ = {:.2f}".format(mean_stability_0))
     ax.hist(aa_stabilities.ravel(), bins=bins,
             align='mid', color=colours["aa_g"], alpha=0.8,
             orientation='horizontal', density=True, label="Present distribution")

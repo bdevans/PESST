@@ -173,11 +173,12 @@ def plot_stability_histograms(aa_stabilities, fitness_table, omega, orient='h',
     ax.set_xlabel("Distribution density")
     # Set to 1.5*largest original bin count
     # ax_arr[1, 1].set_ylim(0, round(1.5*np.amax(n)))
-    ax.set_xbound(0, 0.5)
+    ax.set_xbound(0, 0.6)
     return ax
 
 
-def plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon, colours=None, ax=None):
+def plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon,
+                             colours=None, ax=None):
 
     fig = None
     if ax is None:

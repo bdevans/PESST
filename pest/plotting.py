@@ -63,7 +63,8 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
     return ax
 
 
-def plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega, colours=None, ax=None):
+def plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega,
+                                colours=None, ax=None):
 
     fig = None
     if ax is None:

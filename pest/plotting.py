@@ -138,48 +138,89 @@ def plot_initial_amino_acid_stabilities(fitness_table, omega, colours=None, ax=N
     return ax
 
 
-def plot_stability_histograms(aa_stabilities, fitness_table, omega, orient='h',
-                              colours=None, ax=None):
+def plot_stability_histograms(generation, aa_stabilities, fitness_table, omega,
+                              out_paths, orient='vertical', colours=None, ax=None):
 
-    # TODO: Allow changing of orientation
     fig = None
     if ax is None:
         fig, ax = plt.subplots()  # figsize=(8, 12)
 
     if colours is None:
-        colours = {"aa_g": "#a6cee3",
-                   "aa_0_mu": "#ff7f00",
+        colours = {"aa_0": "#b2df8a",  # "#fdbf6f",
+                   "aa_0_mu": "#33a02c",  # "#ff7f00",
+                   "aa_g": "#a6cee3",
                    "aa_g_mu": "#1f78b4",
+                   "phi": "#9b59b6",
+                   "phi_mu": "#34495e",
+                   "epsilon": "#ff7f00",  # "#33a02c",
                    "omega": "#e74c3c"}
 
     mean_stability_0 = np.mean(fitness_table.values)
     mean_stability = np.mean(aa_stabilities)
+
+    # Plot initial distribution
     stats_0 = "\n".join([r"$\sigma$ = {:.2f}".format(np.std(fitness_table.values)),
                          "skew = {:.2f}".format(stats.skew(fitness_table.values, axis=None)),
                          "kurtosis = {:.2f}".format(stats.kurtosis(fitness_table.values, axis=None))])
     n, bins, _ = ax.hist(fitness_table.values.ravel(), bins='sqrt',
-                         align='mid', orientation='horizontal',
+                         align='mid', orientation=orient,
                          color=colours["aa_0"], alpha=0.8, density=True,
                          label="Initial distribution\n{}".format(stats_0))
-    ax.axhline(y=mean_stability_0, color=colours["aa_0_mu"],
-               linestyle="--", lw=3, zorder=20,
-               label=r"$\mu_0$ = {:.2f}".format(mean_stability_0))
+    # Plot initial distribution mean
+    label = r"$\mu_0$ = {:.2f}".format(mean_stability_0)
+    if orient == 'vertical':
+        ax.axvline(x=mean_stability_0, color=colours["aa_0_mu"],
+                   linestyle="--", lw=3, zorder=20, label=label)
+    elif orient == 'horizontal':
+        ax.axhline(y=mean_stability_0, color=colours["aa_0_mu"],
+                   linestyle="--", lw=3, zorder=20, label=label)
+
+    # Plot current distribution
     stats_g = "\n".join([r"$\sigma$ = {:.2f}".format(np.std(aa_stabilities)),
                          "skew = {:.2f}".format(stats.skew(aa_stabilities, axis=None)),
                          "kurtosis = {:.2f}".format(stats.kurtosis(aa_stabilities, axis=None))])
     ax.hist(aa_stabilities.ravel(), bins=bins,
             align='mid', color=colours["aa_g"], alpha=0.8,
-            orientation='horizontal', density=True, label="Present distribution\n{}".format(stats_g))
-    ax.axhline(y=mean_stability, color=colours["aa_g_mu"],
-               linestyle="--", lw=3, zorder=20,
-               label=r"$\mu_p$ = {:.2f}".format(mean_stability))
-    ax.axhline(y=omega, color=colours["omega"], linestyle="-", lw=3, zorder=10,
-               label=r"$\Omega$ = {}".format(omega))
+            orientation=orient, density=True,
+            label="Present distribution\n{}".format(stats_g))
+    # Plot current distribution mean
+    label = r"$\mu_p$ = {:.2f}".format(mean_stability)
+    if orient == 'vertical':
+        ax.axvline(x=mean_stability, color=colours["aa_g_mu"],
+                   linestyle="--", lw=3, zorder=20, label=label)
+    elif orient == 'horizontal':
+        ax.axhline(y=mean_stability, color=colours["aa_g_mu"],
+                   linestyle="--", lw=3, zorder=20, label=label)
+
+    # Plot Omega
+    label = r"$\Omega$ = {}".format(omega)
+    if orient == 'vertical':
+        ax.axvline(x=omega, color=colours["omega"],
+                   linestyle="-", lw=3, zorder=10, label=label)
+    elif orient == 'horizontal':
+        ax.axhline(y=omega, color=colours["omega"],
+                   linestyle="-", lw=3, zorder=10, label=label)
+    # Add legend
     ax.legend(loc="upper right", fontsize=6.5)
-    ax.set_xlabel("Distribution density")
+
+    if orient == 'vertical':
+        ax.set_xlabel(r"$\Delta T_m$")
+        ax.set_ylabel("Distribution density")
+        ax.set_ybound(0, 0.6)
+    elif orient == 'horizontal':
+        ax.set_ylabel(r"$\Delta T_m$")
+        ax.set_xlabel("Distribution density")
+        ax.set_xbound(0, 0.6)
+
     # Set to 1.5*largest original bin count
-    # ax_arr[1, 1].set_ylim(0, round(1.5*np.amax(n)))
-    ax.set_xbound(0, 0.6)
+    # ax.set_ylim(0, round(1.5*np.amax(n)))
+    if fig is not None:
+        ax.set_title("\n".join(wrap("Initial stability distribution vs. "
+                                    "changing stability distribution across "
+                                    "every evolving clone", 60)),
+                     fontweight='bold')
+        fig.savefig(os.path.join(out_paths["figures"],
+                                 "histogram_{}.png".format(generation)))
     return ax
 
 
@@ -281,8 +322,9 @@ def plot_stability(generation, history, fitness_table, omega,
 
     # Plot marginal stability distributions
     ax_hist = plt.subplot(gs[1, -1], sharey=ax_aa_g)
-    plot_stability_histograms(aa_stabilities, fitness_table, omega,
-                              colours=colours, ax=ax_hist)
+    plot_stability_histograms(generation, aa_stabilities, fitness_table, omega,
+                              out_paths, orient='horizontal', colours=colours,
+                              ax=ax_hist)
     plt.setp(ax_hist.get_yticklabels(), visible=False)
     ax_hist.set_ylabel(None)
     ax_hist.set_title(None)

@@ -55,7 +55,8 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
         ax.axhline(epsilon, color=colours["epsilon"], lw=3, linestyle=":",
                    zorder=20, label=r"$\epsilon$ = {:.2f}".format(epsilon))
 
-    ax.legend(title=legend_title)
+    legend = ax.legend(title=legend_title)
+    legend.set_zorder(100)
 
     if fig is not None:
         evo_fig = "stability_evolution_over_{}_generations.png".format(n_generations)
@@ -97,7 +98,8 @@ def plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega,
 
     ax.set_xlabel("Clone")
     ax.set_ylabel(r"$\Delta T_m$")
-    ax.legend(loc="upper left", fontsize=6.5, ncol=ncol)
+    legend = ax.legend(loc="upper left", fontsize=6.5, ncol=ncol)
+    legend.set_zorder(100)
     ax.set_title("Stability distribution of every amino acid in the population", size=8)
 
     return ax
@@ -131,8 +133,8 @@ def plot_initial_amino_acid_stabilities(fitness_table, omega, colours=None, ax=N
 
     ax.set_xlabel("Amino acid position")
     ax.set_ylabel(r"$\Delta T_m$")
-    ax.legend(loc="upper left", fontsize=6.5)
-              # title=r"$\Omega$ = {}".format(omega))
+    legend = ax.legend(loc="upper left", fontsize=6.5)
+    legend.set_zorder(100)
     ax.set_title(r"Stabiltiy distribution of $\Delta T_m$ matrix", size=8)
     return ax
 
@@ -201,7 +203,8 @@ def plot_stability_histograms(generation, aa_stabilities, fitness_table, omega,
             ax.axhline(y=omega, color=colours["omega"],
                        linestyle="-", lw=3, zorder=10, label=label)
     # Add legend
-    ax.legend(loc="upper right", fontsize=6.5)
+    legend = ax.legend(loc="upper right", fontsize=6.5)
+    legend.set_zorder(100)
 
     if orient == 'vertical':
         ax.set_xlabel(r"$\Delta T_m$")
@@ -262,7 +265,8 @@ def plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon,
 
     ax.set_xlabel("Clone")
     ax.set_ylabel(r"$T_m$")
-    ax.legend(loc="upper left", fontsize=6.5, ncol=ncol)
+    legend = ax.legend(loc="upper left", fontsize=6.5, ncol=ncol)
+    legend.set_zorder(100)
     return ax
 
 

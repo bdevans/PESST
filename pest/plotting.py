@@ -31,7 +31,7 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
                             for g in range(n_generations+1)])
     fig = None
     if ax is None:
-        fig, ax = plt.subplots(figsize=(8, 12))
+        fig, ax = plt.subplots(figsize=(12, 8))
     ax.plot(generation_numbers, stabiltiies, lw=1)
 
     # Average across clones

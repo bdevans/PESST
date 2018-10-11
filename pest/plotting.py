@@ -163,10 +163,10 @@ def plot_stability_histograms(aa_stabilities, fitness_table, omega, colours=None
             align='mid', color=colours["aa_g"], alpha=0.8,
             orientation='horizontal', density=True, label="Present distribution")
     ax.axhline(y=mean_stability, color=colours["aa_g_mu"],
-               linestyle="--", lw=3, zorder=20)
-               # label=r"$\mu_p$ = {:.2f}".format(mean_stability))
-    ax.axhline(y=omega, color=colours["omega"], linestyle="-", lw=3, zorder=10)
-               # label=r"$\Omega$ = {}".format(omega))
+               linestyle="--", lw=3, zorder=20,
+               label=r"$\mu_p$ = {:.2f}".format(mean_stability))
+    ax.axhline(y=omega, color=colours["omega"], linestyle="-", lw=3, zorder=10,
+               label=r"$\Omega$ = {}".format(omega))
     ax.legend(loc="upper right", fontsize=6.5)
     ax.set_xlabel("Distribution density")
     # Set to 1.5*largest original bin count
@@ -259,6 +259,7 @@ def plot_stability(generation, history, fitness_table, omega,
     ymin = np.floor(ymin - pad)
     ax_aa_g.set_ylim(ymin, ymax)
     ax_aa_g.set_title(None)
+    ax_aa_g.legend_.remove()
 
     # Plot initial distribution
     ax_aa_0 = plt.subplot(gs[1, 1], sharey=ax_aa_g)
@@ -267,6 +268,7 @@ def plot_stability(generation, history, fitness_table, omega,
     plt.setp(ax_aa_0.get_yticklabels(), visible=False)
     ax_aa_0.set_ylabel(None)
     ax_aa_0.set_title(None)
+    ax_aa_0.legend_.remove()
 
     # Plot marginal stability distributions
     ax_hist = plt.subplot(gs[1, -1], sharey=ax_aa_g)
@@ -284,6 +286,7 @@ def plot_stability(generation, history, fitness_table, omega,
     plt.setp(ax_phi.get_xticklabels(), visible=False)
     ax_phi.set_xlabel(None)
     ax_phi.set_title(None)
+    ax_phi.legend_.remove()
 
     # Axis scaling logic
     initial_protein_stabilities = np.sum(history[0].stabilities, axis=1)

@@ -193,13 +193,14 @@ def plot_stability_histograms(generation, aa_stabilities, fitness_table, omega,
                    linestyle="--", lw=3, zorder=20, label=label)
 
     # Plot Omega
-    label = r"$\Omega$ = {}".format(omega)
-    if orient == 'vertical':
-        ax.axvline(x=omega, color=colours["omega"],
-                   linestyle="-", lw=3, zorder=10, label=label)
-    elif orient == 'horizontal':
-        ax.axhline(y=omega, color=colours["omega"],
-                   linestyle="-", lw=3, zorder=10, label=label)
+    if omega > -np.inf:
+        label = r"$\Omega$ = {}".format(omega)
+        if orient == 'vertical':
+            ax.axvline(x=omega, color=colours["omega"],
+                       linestyle="-", lw=3, zorder=10, label=label)
+        elif orient == 'horizontal':
+            ax.axhline(y=omega, color=colours["omega"],
+                       linestyle="-", lw=3, zorder=10, label=label)
     # Add legend
     ax.legend(loc="upper right", fontsize=6.5)
 

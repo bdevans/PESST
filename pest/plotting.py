@@ -137,7 +137,8 @@ def plot_initial_amino_acid_stabilities(fitness_table, omega, colours=None, ax=N
     return ax
 
 
-def plot_stability_histograms(aa_stabilities, fitness_table, omega, colours=None, ax=None):
+def plot_stability_histograms(aa_stabilities, fitness_table, omega, orient='h',
+                              colours=None, ax=None):
 
     # TODO: Allow changing of orientation
     fig = None

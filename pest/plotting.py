@@ -54,6 +54,7 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
         epsilon = clone_size * np.mean(fitness_table.values)
         ax.axhline(epsilon, color=colours["epsilon"], lw=3, linestyle=":",
                    zorder=20, label=r"$\epsilon$ = {:.2f}".format(epsilon))
+
     ax.legend(title=legend_title)
 
     if fig is not None:
@@ -67,7 +68,7 @@ def plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega,
 
     fig = None
     if ax is None:
-        fig, ax = plt.subplots()  # figsize=(8, 12)
+        fig, ax = plt.subplots()
 
     if colours is None:
         colours = {"aa_g": "#a6cee3",
@@ -97,7 +98,6 @@ def plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega,
     ax.set_xlabel("Clone")
     ax.set_ylabel(r"$\Delta T_m$")
     ax.legend(loc="upper left", fontsize=6.5, ncol=ncol)
-              # title=r"$\Omega$ = {}".format(omega))
     ax.set_title("Stability distribution of every amino acid in the population", size=8)
 
     return ax

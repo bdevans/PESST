@@ -37,9 +37,9 @@ def load_LG_matrix(full_file_name=None):
     return LG_matrix
 
 
-def write_protein_fitness(fitness_table, out_paths):
+def write_stability_table(fitness_table, out_paths):
     """Write matrix of stability changes."""
-    fitness_file_name = os.path.join(out_paths["initial"], "fitnesslibrary.csv")
+    fitness_file_name = os.path.join(out_paths["initial"], "stability_table.csv")
     fitness_table.to_csv(fitness_file_name, index_label="Position")
 
 

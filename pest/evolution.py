@@ -15,13 +15,13 @@ import pandas as pd
 from tqdm import trange
 
 from .dataio import (create_output_folders, write_settings_file, write_tree,
-                     write_roots, write_initial_protein, write_protein_fitness,
+                     write_roots, write_initial_protein, write_stability_table,
                      write_fasta_alignment, write_final_fasta, load_LG_matrix,
                      write_histogram_statistics, append_ks_statistics,
                      create_gif, save_history)
 from .plotting import (plot_stability, plot_evolution, plot_gamma_distribution,
                        plot_threshold_fitness, plot_histogram_of_fitness,
-                       plot_fitness_space, plot_fitness_table, plot_LG_matrix,
+                       plot_fitness_space, plot_stability_table, plot_LG_matrix,
                        plot_phi_fitness_table)
 
 
@@ -615,7 +615,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
             plot_omega, plot_epsilon = True, True
         else:
             plot_omega, plot_epsilon = True, False
-    write_protein_fitness(fitness_table, out_paths)
+    write_stability_table(fitness_table, out_paths)
     plot_stability_table(fitness_table, out_paths)
     T_max = sum(np.amax(fitness_table, axis=1))  # Fittest possible protein
     assert omega < T_max

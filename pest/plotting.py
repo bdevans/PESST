@@ -40,7 +40,7 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
     if xlims is not None:
         ax.set_xlim(xlims)
     else:
-        ax.set_xlim([-5, n_generations+5])
+        ax.set_xlim([-0.05*n_generations, 1.05*n_generations])
     ax.set_xlabel("Generation")
     ax.set_ylabel("$T_m$", fontweight='bold')
     if fig_title:

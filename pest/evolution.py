@@ -555,8 +555,8 @@ def evolve(n_generations, population, fitness_table, omega, sites,
 
 def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, skew=0,
          n_clones=52, n_roots=4, clone_size=100, p_invariant=0.1,
-         mutation_rate=0.001, death_rate=0.02, seed=None,
-         gamma=None, output_dir=None, record=None):
+         mutation_rate=0.001, death_rate=0.02,
+         gamma_kwargs=None, record_kwargs=None, output_dir=None, seed=None):
 
     # Validate arguments
     assert 1 < clone_size
@@ -579,21 +579,23 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
     np.random.seed(seed)
     random.seed(seed)
 
-    if gamma is None:
-        gamma = {"shape": 1.9,
-                 "scale": 1/1.9,  # theta = 1/beta NOTE: 1/gamma_shape
-                 "iterations": 50,
-                 "samples": 10000}
+    gamma = {"shape": 1.9,
+             "scale": 1/1.9,  # theta = 1/beta NOTE: 1/gamma_shape
+             "iterations": 50,
+             "samples": 10000}
+    if gamma_kwargs is not None:
+        gamma.update(gamma_kwargs)
 
     # TODO: Put run_path (and subdirs) in record dict
-    if record is None:
-        record = {"rate": 50,
-                  "fasta_rate": 50,
-                  "residues": False,
-                  "statistics": True,
-                  "histograms": True,
-                  "data": True,
-                  "gif": True}
+    record = {"rate": 50,
+              "fasta_rate": 50,
+              "residues": False,
+              "statistics": True,
+              "histograms": True,
+              "data": True,
+              "gif": True}
+    if record_kwargs is not None:
+        record.update(record_kwargs)
 
     # Create output folder and subfolders
     # PWD = os.path.dirname(__file__)

@@ -435,6 +435,7 @@ def plot_gamma_distribution(gamma, samples, quartiles, average_medians, out_path
               fontweight='bold', fontsize=10)
     plt.legend()
     plt.savefig(os.path.join(out_paths["initial"], "gamma.png"))
+    plt.close()
 
 
 def plot_stability_table(fitness_table, out_paths):

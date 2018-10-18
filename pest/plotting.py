@@ -91,18 +91,18 @@ def plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega,
 
     ax.plot(protein_indicies, aa_stabilities,
             "o", color=colours["aa_g"], markersize=1)
-    ax.hlines(mean_stability_0, 0, n_clones-1,
-              colors=colours["aa_0_mu"], linestyles="--", lw=3, zorder=20,
-              label=r"$\mu_0$ = {:.2f}".format(mean_stability_0))
+    # ax.hlines(mean_stability_0, 0, n_clones-1,
+    #           colors=colours["aa_0_mu"], linestyles="--", lw=3, zorder=20,
+    #           label=r"$\mu_0$ = {:.2f}".format(mean_stability_0))
     ax.hlines(mean_stability, 0, n_clones-1,
               colors=colours["aa_g_mu"], linestyles="--", lw=3, zorder=20,
               label=r"$\mu_p$ = {:.2f}".format(mean_stability))
     ncol = 2
-    if omega > -np.inf:
-        ax.hlines(omega, 0, n_clones-1,
-                  colors=colours["omega"], linestyles="-", lw=3, zorder=10,
-                  label=r"$\Omega$ = {}".format(omega))
-        ncol += 1
+    # if omega > -np.inf:
+    #     ax.hlines(omega, 0, n_clones-1,
+    #               colors=colours["omega"], linestyles="-", lw=3, zorder=10,
+    #               label=r"$\Omega$ = {}".format(omega))
+    #     ncol += 1
 
     ax.set_xlabel("Clone")
     ax.set_ylabel(r"$\Delta T_m$")
@@ -134,10 +134,10 @@ def plot_initial_amino_acid_stabilities(fitness_table, omega, colours=None, ax=N
               colors=colours["aa_0_mu"], linestyles="--", lw=3, zorder=20,
               label=r"$\mu_0$ = {:.2f}".format(mean_stability_0))
 
-    if omega > -np.inf:
-        ax.hlines(omega, 0, clone_size-1,
-                  colors=colours["omega"], linestyles="-", lw=3, zorder=10,
-                  label=r"$\Omega$ = {}".format(omega))
+    # if omega > -np.inf:
+    #     ax.hlines(omega, 0, clone_size-1,
+    #               colors=colours["omega"], linestyles="-", lw=3, zorder=10,
+    #               label=r"$\Omega$ = {}".format(omega))
 
     ax.set_xlabel("Amino acid position")
     ax.set_ylabel(r"$\Delta T_m$")
@@ -201,15 +201,15 @@ def plot_stability_histograms(generation, aa_stabilities, fitness_table, omega,
         ax.axhline(y=mean_stability, color=colours["aa_g_mu"],
                    linestyle="--", lw=3, zorder=20, label=label)
 
-    # Plot Omega
-    if omega > -np.inf:
-        label = r"$\Omega$ = {}".format(omega)
-        if orient == 'vertical':
-            ax.axvline(x=omega, color=colours["omega"],
-                       linestyle="-", lw=3, zorder=10, label=label)
-        elif orient == 'horizontal':
-            ax.axhline(y=omega, color=colours["omega"],
-                       linestyle="-", lw=3, zorder=10, label=label)
+    # # Plot Omega
+    # if omega > -np.inf:
+    #     label = r"$\Omega$ = {}".format(omega)
+    #     if orient == 'vertical':
+    #         ax.axvline(x=omega, color=colours["omega"],
+    #                    linestyle="-", lw=3, zorder=10, label=label)
+    #     elif orient == 'horizontal':
+    #         ax.axhline(y=omega, color=colours["omega"],
+    #                    linestyle="-", lw=3, zorder=10, label=label)
     # Add legend
     legend = ax.legend(loc="upper right", fontsize=6.5)
     legend.set_zorder(100)

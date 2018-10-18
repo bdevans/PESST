@@ -8,6 +8,14 @@ import seaborn as sns
 from scipy import stats  # gamma
 
 
+def remove_inner_ticklabels(fig):
+    for ax in fig.axes:
+        try:
+            ax.label_outer()
+        except:
+            pass
+
+
 def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
                    out_paths, fig_title=True, legend_title=None, xlims=None,
                    colours=None, ax=None):

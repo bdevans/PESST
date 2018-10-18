@@ -9,10 +9,10 @@ import shutil
 #fasta = '/Users/Adam/Documents/PhD/PhDyear2/Modelling/test.fasta'
 
 # /Users/Adam/Documents/PhD/PhDyear2/Modelling/XXXXXXXX/start/fitnesslibrary.csv
-# /Users/Adam/Documents/PhD/PhDyear2/Modelling/Modellingpaper/XXXXXXXX/sequences_of_the_marginal_reconstruction_without_reconstruction_of_indels.fas
+# /Users/Adam/Documents/PhD/PhDyear2/Modelling/XXXXXXXX/sequences_of_the_marginal_reconstruction_without_reconstruction_of_indels.fas
 
-# /Users/Adam/Documents/GitHub/PEST/pest/results/run18-09-30-17-19/start/fitnesslibrary.csv
-# /Users/Adam/Documents/PhD/PhDyear2/Modelling/Modellingpaper/test/test1results
+# /Users/Adam/Documents/PhD/PhDyear2/Modelling/mildfitness_ancescon/mildfitnessrun1/start/fitnesslibrary.csv
+# /Users/Adam/Documents/PhD/PhDyear2/Modelling/mildfitness_ancescon/mildfitnessrun1/FastML_full_dataset_reconstruction.fas
 
 fitnessmatrix = input("Fitness matrix location (must be CSV from previous evolution run): ")
 fasta = input("input fasta file location (must be a sequence or list of sequences in fasta format): ")

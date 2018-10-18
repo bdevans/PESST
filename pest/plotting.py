@@ -299,7 +299,7 @@ def plot_stability(generation, history, fitness_table, omega,
     aa_stabilities = history[-1].stabilities
     (n_clones, clone_size) = aa_stabilities.shape
     (clone_size, n_amino_acids) = fitness_table.shape
-    # T_max = sum(np.amax(fitness_table, axis=1))  # Most stable possible protein
+    T_max = sum(np.amax(fitness_table, axis=1))  # Most stable possible protein
     # T_min = sum(np.amin(fitness_table, axis=1))  # Least stable possible protein
     mean_stability_0 = np.mean(fitness_table.values)
     epsilon = clone_size * mean_stability_0
@@ -356,7 +356,10 @@ def plot_stability(generation, history, fitness_table, omega,
     # NOTE: All clones in the initial population are currently identical
     min_s0 = min(initial_protein_stabilities)
     max_s0 = max(initial_protein_stabilities)
-    ymax = max(epsilon, omega, max_s0)
+    max_values = [epsilon, omega, max_s0]
+    ymax = max(max_values)
+    if np.argmax(max_values) == 0:  # need to extend the range beyond epsilon
+        ymax = T_max/4
     min_values = [min_s0]
     if omega > -np.inf:
         min_values.append(omega)

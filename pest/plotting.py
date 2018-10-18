@@ -91,9 +91,9 @@ def plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega,
 
     ax.plot(protein_indicies, aa_stabilities,
             "o", color=colours["aa_g"], markersize=1)
-    ax.hlines(mean_stability_0, 0, n_clones-1,
-              colors=colours["aa_0_mu"], linestyles="--", lw=3, zorder=20,
-              label=r"$\mu_0$ = {:.2f}".format(mean_stability_0))
+    # ax.hlines(mean_stability_0, 0, n_clones-1,
+    #           colors=colours["aa_0_mu"], linestyles="--", lw=3, zorder=20,
+    #           label=r"$\mu_0$ = {:.2f}".format(mean_stability_0))
     ax.hlines(mean_stability, 0, n_clones-1,
               colors=colours["aa_g_mu"], linestyles="--", lw=3, zorder=20,
               label=r"$\mu_p$ = {:.2f}".format(mean_stability))

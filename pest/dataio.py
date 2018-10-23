@@ -342,13 +342,13 @@ def save_history(generation, history, out_paths):
 def load_history(data_dir):
     """Load data from a previous simulation."""
     # NOTE: Work in progress!
-    stability_files = glob.glob(os.path.join(data_dir, "stabilities_*.csv"))
+    stability_files = glob.glob(os.path.join("results", data_dir, "stabilities_*.csv"))
     generations = []
     for file in stability_files:
         (root, ext) = os.path.splitext(os.path.basename(file))
         generations.append(root.split('_')[-1])
 
-    population_files = glob.glob(os.path.join(data_dir, "clones_*.json"))
+    population_files = glob.glob(os.path.join("results", data_dir, "clones_*.json"))
     sorted_files = sorted(zip(generations, population_files, stability_files),
                           key=itemgetter(0))
     history = []

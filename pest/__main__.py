@@ -1,5 +1,6 @@
 import matplotlib as mpl
 from matplotlib import pyplot as plt
+import numpy as np
 
 from pest.evolution import pest
 
@@ -20,13 +21,13 @@ death_rate = 0.05  # Set to 0 to turn off protein deaths
 clone_size = 100  # number of amino acids in the protein including the start methionine
 p_invariant = 0.1  # amount of invariant sites in a generation (not including root)
 
-omega = 0  # arbitrary number for fitness threshold
-stability_start = (omega + 10, omega + 20)  # high, (x, y) or low
+omega = 0  # -np.inf  # arbitrary number for fitness threshold
+stability_start = 'low' #(omega + 10, omega + 20)  # high, (x, y) or low
 # parameters for normal distribution used to select fitness values
-mu = -1.2
+mu = -3 #-1.2
 sigma = 2.5
 skew = 3  # skewnorm.pdf(x, skew) = 2 * norm.pdf(x) * norm.cdf(skew*x)
-mutation_rate = 0.001  # Proportion of the total amino acids in mutating in the population each gnereation - should be small!
+mutation_rate = 0.002  # Proportion of the total amino acids in mutating in the population each generation - should be small!
 
 seed = None  # Maximum seed: 2**32 - 1
 output_dir = None

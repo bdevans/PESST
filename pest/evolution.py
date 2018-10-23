@@ -564,7 +564,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
     assert 0.0 <= mutation_rate <= 1.0
     assert 0.0 <= death_rate <= 1.0
     assert 0.0 <= p_invariant < 1.0  # Must be less than 1 for evolution
-    n_invariants = int(0.1 * clone_size)
+    n_invariants = int(p_invariant * clone_size)
     assert 0 <= n_invariants < clone_size
 
     # TODO: Add rerun flag to load settings (and seed)

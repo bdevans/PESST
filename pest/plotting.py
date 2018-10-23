@@ -430,7 +430,7 @@ def plot_gamma_distribution(gamma, samples, quartiles, average_medians, out_path
     plt.axvline(x=average_medians[3], color="#404040", linestyle=":")
     plt.title("\n".join(wrap("Gamma rate categories calculated as the the "
                              "average of {} median values of 4 equally likely "
-                             "quartiles of {} randomly sampled vaules"
+                             "quartiles of {:,} randomly sampled vaules"
                              .format(n_iterations, n_samples), 60)),
               fontweight='bold', fontsize=10)
     plt.legend()

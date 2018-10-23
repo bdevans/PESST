@@ -217,6 +217,8 @@ def get_fit_protein(stability_start, clone_size, sites, stability_table):
             (protein, stability) = twist_protein(initial_protein, chosen_sites, stability_table)
             counter = 0
             # while not lower_bound < stability < upper_bound and counter <= 100:
+            #     # Revert to initial protein
+            #     # ...
             #     # Continue to mutate until better than initial_protein
             #     (protein, stability) = twist_protein(initial_protein, chosen_sites, stability_table)
             #     counter += 1
@@ -553,7 +555,8 @@ def evolve(n_generations, population, fitness_table, omega, sites,
     return history
 
 
-def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, skew=0,
+def pest(n_generations=2000, stability_start='high', omega=0,
+         mu=0, sigma=2.5, skew=0,
          n_clones=52, n_roots=4, clone_size=100, p_invariant=0.1,
          mutation_rate=0.001, death_rate=0.02,
          gamma_kwargs=None, record_kwargs=None, output_dir=None, seed=None):

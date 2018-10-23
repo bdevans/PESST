@@ -301,6 +301,13 @@ def save_settings(settings, out_paths):
         json.dump(settings, sf, indent=4)
 
 
+def load_settings(out_paths):
+    settingsfullname = os.path.join(out_paths["initial"], "settings.json")
+    with open(settingsfullname, "w") as sf:  # open file
+        settings = json.load(sf)
+    return settings
+
+
 def create_gif(filenames, duration=0.5):
     basename, ext = os.path.splitext(filenames[0])  # os.path.basename(filenames[0])
     output_file, _ = basename.rsplit('_', 1)

@@ -295,7 +295,7 @@ def create_output_folders(output_dir=None):
     return out_paths
 
 
-def write_settings_file(settings, out_paths):
+def save_settings(settings, out_paths):
     settingsfullname = os.path.join(out_paths["initial"], "settings.json")
     with open(settingsfullname, "w") as sf:  # open file
         json.dump(settings, sf, indent=4)

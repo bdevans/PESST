@@ -14,7 +14,7 @@ import pandas as pd
 # import matplotlib as mpl
 from tqdm import trange
 
-from .dataio import (create_output_folders, write_settings_file, write_tree,
+from .dataio import (create_output_folders, save_settings, write_tree,
                      write_roots, write_initial_protein, write_stability_table,
                      write_fasta_alignment, write_final_fasta, load_LG_matrix,
                      write_histogram_statistics, append_ks_statistics,
@@ -616,7 +616,7 @@ def pest(n_generations=2000, stability_start='high', omega=0, mu=0, sigma=2.5, s
                        "seed": seed,
                        "gamma": gamma,
                        "record": record}
-    write_settings_file(settings_kwargs, out_paths)  # record run settings
+    save_settings(settings_kwargs, out_paths)  # record run settings
     LG_matrix = load_LG_matrix()  # Load LG matrix
     plot_LG_matrix(LG_matrix, out_paths)
     # Make fitness table of Delta T_m values

@@ -362,3 +362,9 @@ def load_history(data_dir):
         history.append({"population": population, "stabilities": stabilities})
         generations.append(generation)
     return (history, generations)
+
+
+def load_stability_table(out_paths):
+    return pd.read_csv(os.path.join(out_paths["initial"],
+                                    'stability_table.csv'),
+                       index_label="Position")

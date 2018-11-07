@@ -303,7 +303,7 @@ def save_settings(settings, out_paths):
 
 def load_settings(out_paths):
     settingsfullname = os.path.join(out_paths["initial"], "settings.json")
-    with open(settingsfullname, "w") as sf:  # open file
+    with open(settingsfullname, "r") as sf:  # open file
         settings = json.load(sf)
     return settings
 

@@ -403,8 +403,14 @@ def plot_stability(generation, history, fitness_table, omega,
     return (fig, [ax_phi, ax_evo, ax_aa_g, ax_aa_0, ax_hist])
 
 
-def plot_gamma_distribution(gamma, samples, quartiles, average_medians, out_paths):
+def plot_gamma_distribution(gamma, samples, quartiles, average_medians,
+                            out_paths, ax=None):
     """Plot the distribution along with the quartiles and medians."""
+
+    fig = None
+    if ax is None:
+        fig, ax = plt.subplots()  # figsize=(8, 12)
+
     kappa, theta, n_iterations, n_samples = (gamma["shape"],
                                              gamma["scale"],
                                              gamma["iterations"],
@@ -414,28 +420,30 @@ def plot_gamma_distribution(gamma, samples, quartiles, average_medians, out_path
     # y = x**(kappa - 1) * (np.exp(-x / theta)
     #                         / (stats.gamma(kappa).pdf(x, kappa)))  # * theta ** kappa))
     y = stats.gamma.pdf(x, kappa, scale=theta)
-    plt.plot(x, y, linewidth=2, color='k', alpha=0,
-             label="\n".join([r"$\kappa$ = {:.2f}".format(kappa),
-                              r"$\theta$ = {:.2f}".format(theta)]))
-                              #r"$\theta$ = $\frac{{}}{{}}$".format(1, kappa)]))
-    plt.hist(samples, bins=int(np.sqrt(len(samples))), range=(0, 6),
-             density=True, color='g', histtype='step')
-    plt.fill_between(x, y, where=x > quartiles[0], color='#4c4cff')
-    plt.fill_between(x, y, where=x > quartiles[1], color='#7f7fff')
-    plt.fill_between(x, y, where=x > quartiles[2], color='#b2b2ff')
-    plt.fill_between(x, y, where=x > quartiles[3], color='#e5e5ff')
-    plt.axvline(x=average_medians[0], color="#404040", linestyle=":")
-    plt.axvline(x=average_medians[1], color="#404040", linestyle=":")
-    plt.axvline(x=average_medians[2], color="#404040", linestyle=":")
-    plt.axvline(x=average_medians[3], color="#404040", linestyle=":")
-    plt.title("\n".join(wrap("Gamma rate categories calculated as the the "
-                             "average of {} median values of 4 equally likely "
-                             "quartiles of {:,} randomly sampled vaules"
-                             .format(n_iterations, n_samples), 60)),
-              fontweight='bold', fontsize=10)
-    plt.legend()
-    plt.savefig(os.path.join(out_paths["initial"], "gamma.png"))
-    plt.close()
+    ax.plot(x, y, linewidth=2, color='k', alpha=0,
+            label="\n".join([r"$\kappa$ = {:.2f}".format(kappa),
+                             r"$\theta$ = {:.2f}".format(theta)]))
+    ax.hist(samples, bins=int(np.sqrt(len(samples))), range=(0, 6),
+            density=True, color='g', histtype='step')
+    ax.fill_between(x, y, where=x > quartiles[0], color='#4c4cff')
+    ax.fill_between(x, y, where=x > quartiles[1], color='#7f7fff')
+    ax.fill_between(x, y, where=x > quartiles[2], color='#b2b2ff')
+    ax.fill_between(x, y, where=x > quartiles[3], color='#e5e5ff')
+    ax.axvline(x=average_medians[0], color="#404040", linestyle=":")
+    ax.axvline(x=average_medians[1], color="#404040", linestyle=":")
+    ax.axvline(x=average_medians[2], color="#404040", linestyle=":")
+    ax.axvline(x=average_medians[3], color="#404040", linestyle=":")
+    ax.set_title("\n".join(wrap("Gamma rate categories calculated as the the "
+                                "average of {} median values of 4 equally likely "
+                                "quartiles of {:,} randomly sampled vaules"
+                                .format(n_iterations, n_samples), 60)),
+                 fontweight='bold', fontsize=10)
+    legend = ax.legend()
+    legend.set_zorder(100)
+
+    if fig:
+        fig.savefig(os.path.join(out_paths["initial"], "gamma.png"))
+        plt.close()
 
 
 def plot_stability_table(fitness_table, out_paths):

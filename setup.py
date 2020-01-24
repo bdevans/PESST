@@ -19,11 +19,11 @@ def read(*parts):
 
 
 setup_kwargs = {
-    "name": "PEST",
+    "name": "PESST",
     "version": "1.0",  # https://packaging.python.org/guides/single-sourcing-package-version/
     "author": "Benjamin Evans and Adam Thomas",
     "author_email": "ben.d.evans@gmail.com",
-    "description": ("A Python module for evolving proteins."),
+    "description": ("Protein Evolution Simulation with Stability Tracking. A Python module for evolving proteins."),
     "license": "BSD",
     "keywords": "example documentation tutorial",
     "url": "http://packages.python.org/pest",

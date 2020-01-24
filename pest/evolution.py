@@ -25,7 +25,7 @@ from .plotting import (plot_stability, plot_evolution, plot_gamma_distribution,
                        plot_phi_fitness_table)
 
 
-def get_fitness_table(clone_size, mu, sigma, skew, amino_acids):
+def get_stability_table(clone_size, mu, sigma, skew, amino_acids):
     """Generate a dictionary describing list of fitness values at each position
     of the generated protein.
     """
@@ -623,7 +623,7 @@ def pest(n_generations=2000, stability_start='high', omega=0,
     LG_matrix = load_LG_matrix()  # Load LG matrix
     plot_LG_matrix(LG_matrix, out_paths)
     # Make fitness table of Delta T_m values
-    fitness_table = get_fitness_table(clone_size, mu, sigma, skew, LG_matrix.columns)
+    fitness_table = get_stability_table(clone_size, mu, sigma, skew, LG_matrix.columns)
     if isinstance(stability_start, str) and stability_start.lower() == "low":
         warnings.warn("With 'low' starting fitness selected Omega is ignored.")
                       # "If the run fails, please check your fitness threshold,"

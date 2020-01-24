@@ -12,6 +12,7 @@ dependencies:
   - pandas
   - seaborn
   - imageio
+  - biopython
   # - dill
   # - joblib
   # - h5py

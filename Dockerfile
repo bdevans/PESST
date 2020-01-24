@@ -30,7 +30,7 @@ WORKDIR /usr/pest
 RUN mkdir -p /root/.config/matplotlib
 RUN echo "backend : Agg" > /root/.config/matplotlib/matplotlibrc
 
-COPY data /usr/pest/data/
+# COPY data /usr/pest/data/
 # COPY *.py /usr/pest/pest/
 # VOLUME /usr/pest/results
 ENV PYTHONPATH "${PYTONPATH}:/usr/pest"
@@ -38,3 +38,4 @@ ENV PYTHONPATH "${PYTONPATH}:/usr/pest"
 # explicitly call /bin/bash
 # CMD [ "source activate pest && exec python pest/evolution.py" ]
 CMD [ "exec python pest" ]
+# CMD [ "exec python paper_figs.py" ]

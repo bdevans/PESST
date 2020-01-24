@@ -185,6 +185,7 @@ def plot_stability_histograms(generation, aa_stabilities, fitness_table, omega,
                    linestyle="--", lw=3, zorder=20, label=label)
 
     # Plot current distribution
+    # TODO: Make "Intial/Present Distribution" bold or titles of extra legends
     stats_g = "\n".join([r"$\sigma$ = {:.2f}".format(np.std(aa_stabilities)),
                          "skew = {:.2f}".format(stats.skew(aa_stabilities, axis=None)),
                          "kurtosis = {:.2f}".format(stats.kurtosis(aa_stabilities, axis=None))])
@@ -356,10 +357,11 @@ def plot_stability(generation, history, fitness_table, omega,
     # NOTE: All clones in the initial population are currently identical
     min_s0 = min(initial_protein_stabilities)
     max_s0 = max(initial_protein_stabilities)
-    max_values = [epsilon, omega, max_s0]
+    max_values = [epsilon, omega, max_s0, T_max * 0.1]
     ymax = max(max_values)
-    if np.argmax(max_values) == 0:  # need to extend the range beyond epsilon
-        ymax = T_max/4
+    # print(ymax, T_max)
+    # if np.argmax(max_values) == 0:  # need to extend the range beyond epsilon
+    #     ymax = T_max * 0.1
     min_values = [min_s0]
     if omega > -np.inf:
         min_values.append(omega)

@@ -36,7 +36,6 @@ setup_kwargs = {
                     "Topic :: Scientific/Engineering :: Artificial Life",
                     "Topic :: Scientific/Engineering :: Bio-Informatics",
                     "Programming Language :: Python :: 3 :: Only",
-                    "Programming Language :: Python :: 3.5",  # TODO: Check
                     "Programming Language :: Python :: 3.6",
                     "Programming Language :: Python :: 3.7",
                     "License :: OSI Approved :: BSD License"],

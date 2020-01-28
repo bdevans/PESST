@@ -202,14 +202,25 @@ def get_fit_protein(stability_start, clone_size, sites, stability_table):
         # TODO: Also pass omega to check against?
         assert lower_bound < upper_bound
         # TODO: This is slightly different to the original algorithm (below)
-        # stability = initial_stability
-        # counter = 0
-        # while not lower_bound < stability < upper_bound and counter <= 100:
-        #     # Mutate the new protein (sample without replacement)
-        #     chosen_sites = random.sample(sites.variant, n_variant_sites)
-        #     (protein, stability) = twist_protein(initial_protein, chosen_sites,
-        #                                        stability_table)
-        #     counter += 1
+        stability = initial_stability
+        protein = initial_protein
+        sites_count = 0
+        # lowest_found, highest_found = -np.inf, np.inf
+        # range = upper_bound - lower_bound
+        # error = abs(initial_stability - lower_bound + range/2)  # Calculate distance
+
+        while not lower_bound < stability < upper_bound and sites_count <= 100:
+            # Mutate the new protein (sample without replacement)
+            chosen_sites = random.sample(sites.variant, n_variant_sites)
+            print("Trying set of sites: {}".format(sites_count))
+            twist_count = 0
+            prev_protein = protein
+            while not lower_bound < stability < upper_bound and twist_count < 100:
+                (protein, stability) = twist_protein(initial_protein,
+                                                     chosen_sites,
+                                                     stability_table)
+                twist_count += 1
+            sites_count += 1
 
         while not lower_bound < initial_stability < upper_bound:
             # Mutate the new protein (sample without replacement)
@@ -222,15 +233,18 @@ def get_fit_protein(stability_start, clone_size, sites, stability_table):
             #     # Continue to mutate until better than initial_protein
             #     (protein, stability) = twist_protein(initial_protein, chosen_sites, stability_table)
             #     counter += 1
+            previous_stability = initial_stability
 
             if initial_stability < lower_bound:  # setting lower bounds of medium stability
-                while stability < initial_stability and counter <= 100:
+                while stability < previous_stability and counter <= 100:
                     # Continue to mutate until better than initial_protein
+                    previous_stability = stability
                     (protein, stability) = twist_protein(initial_protein, chosen_sites, stability_table)
                     counter += 1
 
             elif initial_stability > upper_bound:  # set upper bounds of medium stability
-                while stability > initial_stability and counter <= 100:
+                while stability > previous_stability and counter <= 100:
+                    previous_stability = stability
                     # Continue to mutate until better than initial_protein
                     (protein, stability) = twist_protein(initial_protein, chosen_sites, stability_table)
                     counter += 1

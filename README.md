@@ -9,10 +9,12 @@ Tenets of the Survivor Bias Hypothesis
 3. Contemporary proteins contain fewer significantly destabilizing amino acids than ancestral proteins.
 4. The sequence space of contemporary proteins is positively biased for stabilizing mutations, despite its mutational landscape.
 
-PESST evolutionary algorithm pseudocode
+*PESST evolutionary algorithm pseudocode*
+
 ![algorithm](algorithm.png)
 
-Default parameters in PESST
+*Default parameters in PESST*
+
 ![parameters](parameters.png)
 
 ## Longer description

@@ -596,23 +596,43 @@ def pest(n_generations=2000, stability_start='high', omega=0,
     np.random.seed(seed)
     random.seed(seed)
 
-    gamma = {"shape": 1.9,
-             "scale": 1/1.9,  # theta = 1/beta NOTE: 1/gamma_shape
-             "iterations": 50,
-             "samples": 10000}
-    if gamma_kwargs is not None:
-        gamma.update(gamma_kwargs)
+    # Default keyword arguments
+    # TODO: Refactor kwargs like seaborn? e.g.
+    # n_boot = kwargs.get("n_boot", 10000)
+    # https://github.com/mwaskom/seaborn/blob/3a3ec75befab52c02650c62772a90f8c23046038/seaborn/algorithms.py
+
+    # gamma = {"shape": 1.9,
+    #          "scale": 1/1.9,  # theta = 1/beta NOTE: 1/gamma_shape
+    #          "iterations": 50,
+    #          "samples": 10000}
+    # gamma = {}
+    # if gamma_kwargs is not None:
+    #     gamma.update(gamma_kwargs)
+    # Populate gamma with default values for each key if not already given
+    gamma_kwargs.setdefault('shape', 1.9)
+    gamma_kwargs.setdefault('scale', 1/1.9)  # theta = 1/beta NOTE: 1/gamma_shape
+    gamma_kwargs.setdefault('iterations', 50)
+    gamma_kwargs.setdefault('samples', 10000)
+    gamma = gamma_kwargs  # TODO: Remove after renaming args and below
 
     # TODO: Put run_path (and subdirs) in record dict
-    record = {"rate": 50,
-              "fasta_rate": 50,
-              "residues": False,
-              "statistics": True,
-              "histograms": True,
-              "data": True,
-              "gif": True}
-    if record_kwargs is not None:
-        record.update(record_kwargs)
+    # record = {"rate": 50,
+    #           "fasta_rate": 50,
+    #           "residues": False,
+    #           "statistics": True,
+    #           "histograms": True,
+    #           "data": True,
+    #           "gif": True}
+    # if record_kwargs is not None:
+    #     record.update(record_kwargs)
+    record_kwargs.setdefault('rate', 50)
+    record_kwargs.setdefault('fasta_rate', 50)
+    record_kwargs.setdefault('residues', False)
+    record_kwargs.setdefault('statistics', True)
+    record_kwargs.setdefault('histograms', True)
+    record_kwargs.setdefault('data', True)
+    record_kwargs.setdefault('gif', True)
+    record = record_kwargs  # TODO: Remove after renaming args and below
 
     # Create output folder and subfolders
     # PWD = os.path.dirname(__file__)

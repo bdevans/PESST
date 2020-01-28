@@ -332,13 +332,27 @@ def create_tree(n_proteins, n_roots):
 
 
 def calc_bifurcation_interval(n_generations, n_clones, n_roots):
-    # TODO: Rewrite with logs
-    pool = n_clones - n_roots
-    n_phases = 1  # n_bifurations + 1
-    while pool > 5:  # stop when there are 3, 4 or 5 leaves per branch
-        pool //= 2  # Floor division
-        n_phases += 1
-    return int(n_generations/n_phases)  # number of generations per bifurcation
+    # Original iterative algorithm
+    # pool = n_clones - n_roots
+    # n_phases = 1  # n_bifurations + 1
+    # while pool > 5:  # stop when there are 3, 4 or 5 leaves per branch
+    #     pool //= 2  # Floor division
+    #     n_phases += 1
+    # return int(n_generations/n_phases)  # number of generations per bifurcation
+
+    # Reasoning
+    # I_B := floor(G / n_phases)
+    # n_phases := n_B + 1
+    # 3 <= floor(pool / 2**n_B) < 6
+    # floor(pool / 2**(n_B-1)) = 6
+    # floor(pool / 2**n_B) = 3
+    # pool / 3 = 2**n_B
+    # log2(pool / 3) = n_B
+    # n_B = floor(log2(pool / 3))
+    # pool := n_clones - n_roots
+    # n_phases = floor(log2(n_clones - n_roots / 3)) + 1
+    # I_B = floor(G / floor(log2((n_clones - n_roots) / 3)) + 1)
+    return int(n_generations / (1 + int(np.log2(n_clones-n_roots)-np.log2(3))))
 
 
 def bifurcate_branches(branches):

@@ -8,7 +8,7 @@ try:
 except ImportError:
     raise ImportError("This module requires Biopython!")
 
-from pest.evolution import calculate_fitness
+from pesst.evolution import calculate_fitness
 
 
 def process_fasta(stability_matrix, fasta_file, output_path):

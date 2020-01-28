@@ -569,11 +569,11 @@ def evolve(n_generations, population, fitness_table, omega, sites,
     return history
 
 
-def pest(n_generations=2000, stability_start='high', omega=0,
-         mu=0, sigma=2.5, skew=0,
-         n_clones=52, n_roots=4, clone_size=100, p_invariant=0.1,
-         mutation_rate=0.001, death_rate=0.02,
-         gamma_kwargs=None, record_kwargs=None, output_dir=None, seed=None):
+def pesst(n_generations=2000, stability_start='high', omega=0,
+          mu=0, sigma=2.5, skew=0,
+          n_clones=52, n_roots=4, clone_size=100, p_invariant=0.1,
+          mutation_rate=0.001, death_rate=0.02,
+          gamma_kwargs=None, record_kwargs=None, output_dir=None, seed=None):
 
     # Validate arguments
     assert 1 < clone_size
@@ -717,7 +717,7 @@ def pest(n_generations=2000, stability_start='high', omega=0,
     # Create animations
     if record["gif"]:
         recorded_generations = list(range(0, n_generations+1, record["rate"]))
-        figures = ["pest_gen", "phi_fitness_table"]
+        figures = ["pesst_gen", "phi_fitness_table"]
         if record["residues"]:
             figures.extend(["fit_dist_gen", "generation"])
         if record["histograms"]:

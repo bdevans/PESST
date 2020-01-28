@@ -35,7 +35,7 @@ def load_LG_matrix(full_file_name=None):
     # TODO: Check: p(lambda) x = Qxy / lambda
     if full_file_name is None:
         resource = os.path.join("data", "LGaa.csv")
-        full_file_name = pkg_resources.resource_filename("pest", resource)
+        full_file_name = pkg_resources.resource_filename("pesst", resource)
     LG_matrix = pd.read_csv(full_file_name, index_col="Original")
     return LG_matrix
 

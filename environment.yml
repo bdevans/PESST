@@ -1,5 +1,5 @@
 
-name: pest
+name: pesst
 channels:
   - conda-forge
 dependencies:

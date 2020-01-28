@@ -2,7 +2,7 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 import numpy as np
 
-from pest.evolution import pest
+from pesst.evolution import pesst
 
 # NOTE: __path__ is initialized to be a list containing the name of the directory holding the package’s __init__.py
 # mpl.use('TkAgg')
@@ -61,6 +61,6 @@ record = {"rate": 50,           # write a new fasta file every x generations
           "data": True,
           "gif": True}
 
-history = pest(n_generations, stability_start, omega, mu, sigma, skew,
-               n_clones, n_roots, clone_size, p_invariant, mutation_rate,
-               death_rate, seed, gamma, output_dir, record)
+history = pesst(n_generations, stability_start, omega, mu, sigma, skew,
+                n_clones, n_roots, clone_size, p_invariant, mutation_rate,
+                death_rate, seed, gamma, output_dir, record)

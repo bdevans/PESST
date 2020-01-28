@@ -399,7 +399,7 @@ def plot_stability(generation, history, fitness_table, omega,
     fig.suptitle(("Generation {}".format(generation)), fontweight='bold')
     # fig.set_tight_layout(True)
     filename = os.path.join(out_paths["figures"],
-                            "pest_gen_{}.png".format(generation))
+                            "pesst_gen_{}.png".format(generation))
     fig.savefig(filename)
     plt.close()
     return (fig, [ax_phi, ax_evo, ax_aa_g, ax_aa_0, ax_hist])

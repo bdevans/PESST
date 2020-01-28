@@ -23,9 +23,9 @@ setup_kwargs = {
     "version": "1.0",  # https://packaging.python.org/guides/single-sourcing-package-version/
     "author": "Benjamin Evans and Adam Thomas",
     "author_email": "ben.d.evans@gmail.com",
-    "description": ("Protein Evolution Simulation with Stability Tracking. A Python module for evolving proteins."),
+    "description": ("Protein Evolution Simulator with Stability Tracking."),
     "license": "BSD",
-    "keywords": "example documentation tutorial",
+    "keywords": "protein evolution simulator",
     "url": "http://packages.python.org/pesst",
     "packages": ['pesst'],
     "extras_require": {"process":  ["biopython"]},

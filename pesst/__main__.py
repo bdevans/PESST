@@ -29,21 +29,21 @@ sigma = 2.5
 skew = 3  # skewnorm.pdf(x, skew) = 2 * norm.pdf(x) * norm.cdf(skew*x)
 mutation_rate = 0.002  # Proportion of the total amino acids in mutating in the population each generation - should be small!
 
-seed = None  # Maximum seed: 2**32 - 1
 output_dir = None
+seed = None  # Maximum seed: 2**32 - 1
 
 # TODO: Put into dictionary
-population = {"n_proteins": n_clones,
-              "n_roots": n_roots,
-              "death_rate": death_rate,
-              "bifurcate": True}
+# population = {"n_proteins": n_clones,
+#               "n_roots": n_roots,
+#               "death_rate": death_rate,
+#               "bifurcate": True}
 
-stability = {"start": stability_start,
-             "omega": omega,  # Stability threshold
-             "mu": mu,
-             "sigma": sigma,
-             "skew": skew,
-             "delta": mutation_rate}
+# stability = {"start": stability_start,
+#              "omega": omega,  # Stability threshold
+#              "mu": mu,
+#              "sigma": sigma,
+#              "skew": skew,
+#              "delta": mutation_rate}
 
 # parameters for forming discrete gamma distribution used for evolution of protein
 gamma = {"shape": 1.9,  # Most phylogenetic systems that use gamma only let you set kappa (often called shape alpha) and calculate theta as 1/kappa giving mean of 1
@@ -63,4 +63,4 @@ record = {"rate": 50,           # write a new fasta file every x generations
 
 history = pesst(n_generations, stability_start, omega, mu, sigma, skew,
                 n_clones, n_roots, clone_size, p_invariant, mutation_rate,
-                death_rate, seed, gamma, output_dir, record)
+                death_rate, gamma, record, output_dir, seed)

@@ -593,6 +593,8 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     if seed is None:
         # Get a random integer to seed both
         seed = random.randrange(2**32)
+    assert isinstance(seed, int)
+    assert 0 <= seed < 2**32
     np.random.seed(seed)
     random.seed(seed)
 

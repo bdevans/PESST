@@ -50,7 +50,7 @@ def write_initial_protein(initial_protein, out_paths):
     protein_full_name = os.path.join(out_paths["initial"], "firstprotein.fas")
     with open(protein_full_name, "w") as ipf:  # open file
         ipf.write('>firstprotein\n')
-        ipf.write(''.join(initial_protein))
+        ipf.write(compact_protein(initial_protein))
 
 
 def write_roots(root_keys, out_paths):
@@ -230,7 +230,7 @@ def write_fasta_alignment(generation, population, out_paths):
         # TODO: This should be an ordered dict or list to preserve the order...
         for p, protein in list(population.items()):
             fastafile.write(">clone_{}\n".format(p+1))
-            fastafile.write("".join(protein)+"\n")
+            fastafile.write(compact_protein(protein)+"\n")
 
 
 def write_final_fasta(population, tree, out_paths):
@@ -250,12 +250,12 @@ def write_final_fasta(population, tree, out_paths):
         # Write fasta header followed by residue in generation string
         for pi in selection:
             treefastafile.write(">clone_{}\n".format(pi+1))
-            treefastafile.write(''.join(population[pi]))
+            treefastafile.write(compact_protein(population[pi]))
             treefastafile.write('\n')
         # Choose a random root to write
         root = population[random.choice(tree["roots"])]
         treefastafile.write(">root\n")
-        treefastafile.write(''.join(root))
+        treefastafile.write(compact_protein(root))
 
 
 def create_output_folders(output_dir=None):

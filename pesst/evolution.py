@@ -101,7 +101,7 @@ def gamma_ray(clone_size, sites, gamma, out_paths):
 
     gamma_categories = np.random.choice(average_medians, size=clone_size)
     gamma_categories[sites.invariant] = 0
-    return gamma_categories/sum(gamma_categories)  # p_mutation
+    return gamma_categories / sum(gamma_categories)  # p_mutation
 
 
 def mutate_protein(protein, p_mutation, LG_matrix):

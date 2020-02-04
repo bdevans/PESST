@@ -1,5 +1,5 @@
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 import codecs
 
 # Utility function to read the README file.
@@ -26,10 +26,16 @@ setup_kwargs = {
     "description": ("Protein Evolution Simulator with Stability Tracking."),
     "license": "BSD",
     "keywords": "protein evolution simulator",
-    "url": "http://packages.python.org/pesst",
-    "packages": ['pesst'],
+    # "url": "https://pypi.org/pesst",
+    "url": "https://github.com/bdevans/PESST",
+    # "packages": ['pesst'],
+    "packages": find_packages(),
+    "python_requires": '>=3.6',
+    "install_requires": ['numpy', 'scipy', 'pandas', 'tqdm', 'matplotlib', 'seaborn', 'imageio']
     "extras_require": {"process":  ["biopython"]},
-    "long_description": read('README'),
+    "include_package_data": True,
+    "long_description": read('README.md'),
+    "long_description_content_type": "text/markdown",
     "classifiers": ["Development Status :: 5 - Production/Stable",
                     "Intended Audience :: Science/Research",
                     "Topic :: Scientific/Engineering",

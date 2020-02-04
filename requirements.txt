@@ -1,0 +1,8 @@
+numpy>1.15
+scipy>=1.1
+pandas>0.23
+tqdm
+matplotlib>=2.2
+seaborn
+imageio
+biopython

@@ -11,11 +11,11 @@ Tenets of the Survivor Bias Hypothesis
 
 *PESST evolutionary algorithm pseudocode*
 
-![algorithm](algorithm.png)
+![algorithm](images/algorithm.png)
 
 *Default parameters in PESST*
 
-![parameters](parameters.png)
+![parameters](images/parameters.png)
 
 ## Longer description
 

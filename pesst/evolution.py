@@ -19,9 +19,9 @@ from .dataio import (create_output_folders, save_settings, write_tree,
                      write_fasta_alignment, write_final_fasta, load_LG_matrix,
                      write_histogram_statistics, append_ks_statistics,
                      create_gif, save_history)
-from .plotting import (plot_stability, plot_evolution, plot_gamma_distribution,
-                       plot_threshold_fitness, plot_stability_histograms,
-                       plot_fitness_space, plot_stability_table, plot_LG_matrix,
+from .plotting import (plot_simulation, plot_evolution, plot_gamma_distribution,
+                       plot_stability_histograms, plot_all_stabilities,
+                       plot_stability_table, plot_LG_matrix,
                        plot_phi_fitness_table)
 
 
@@ -519,7 +519,7 @@ def evolve(n_generations, population, fitness_table, omega, sites,
         save_history(0, history, out_paths)
 
     # TODO: Refactor plot_omega, plot_epsilon
-    plot_stability(0, history, fitness_table, omega, plot_omega, plot_epsilon,
+    plot_simulation(0, history, fitness_table, omega, plot_omega, plot_epsilon,
                    n_generations, out_paths)
 
     for gen in trange(n_generations):  # run evolution for n_generations
@@ -557,7 +557,8 @@ def evolve(n_generations, population, fitness_table, omega, sites,
             record_generation_stability(gen+1, population, sites, fitness_table,
                                         omega, p_mutation, record, out_paths)
 
-            plot_stability(gen+1, history, fitness_table, omega,
+            plot_simulation(gen+1, history, fitness_table, omega,
+                            plot_omega, plot_epsilon, n_generations, out_paths)
                            plot_omega, plot_epsilon, n_generations, out_paths)
             if record["data"]:
                 save_history(gen+1, history, out_paths)

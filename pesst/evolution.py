@@ -660,7 +660,8 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     # Make fitness table of Delta T_m values
     fitness_table = get_stability_table(clone_size, mu, sigma, skew, LG_matrix.columns)
     if isinstance(stability_start, str) and stability_start.lower() == "low":
-        warnings.warn("With 'low' starting fitness selected Omega is ignored.")
+        print("NOTE: With 'low' starting fitness selected Omega is ignored.")
+        # warnings.warn("With 'low' starting fitness selected Omega is ignored.")
                       # "If the run fails, please check your fitness threshold,"
                       # "omega, is low enough: {}".format(omega))
         plot_omega, plot_epsilon = False, True

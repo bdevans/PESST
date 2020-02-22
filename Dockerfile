@@ -23,19 +23,21 @@ RUN conda env update -n root -f /tmp/environment.yml
 
 # Use bash to source our new environment for setting up private dependencies
 # Note that /bin/bash is called in exec mode directly
-WORKDIR /usr/pesst
+# WORKDIR /usr/pesst
+WORKDIR /workspaces/PESST
 #RUN [ "/bin/bash", "-c", "source activate pesst && python setup.py develop" ]
 
 # matplotlib config
-RUN mkdir -p /root/.config/matplotlib
-RUN echo "backend : Agg" > /root/.config/matplotlib/matplotlibrc
+# RUN mkdir -p /root/.config/matplotlib
+# RUN echo "backend : Agg" > /root/.config/matplotlib/matplotlibrc
 
 # COPY data /usr/pesst/data/
 # COPY *.py /usr/pesst/pesst/
 # VOLUME /usr/pesst/results
-ENV PYTHONPATH "${PYTONPATH}:/usr/pesst"
+# ENV PYTHONPATH "${PYTONPATH}:/usr/pesst"
+ENV PYTHONPATH "${PYTONPATH}:/workspaces/PESST"
 # We set ENTRYPOINT, so while we still use exec mode, we don’t
 # explicitly call /bin/bash
 # CMD [ "source activate pesst && exec python pesst/evolution.py" ]
-CMD [ "exec python pesst" ]
-# CMD [ "exec python paper_figs.py" ]
+# CMD [ "exec python pesst" ]
+# CMD [ "exec python examples/paper_figs.py" ]

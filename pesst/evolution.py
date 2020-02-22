@@ -86,9 +86,6 @@ def gamma_ray(clone_size, sites, gamma, out_paths):
         # Define quartiles in that data with equal probability
         quartiles = np.percentile(samples, (0, 25, 50, 75, 100),
                                   interpolation='midpoint')
-        # TODO: Remove warnings filter when scipy is updated
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=FutureWarning)
             # Find the median of each quartile
             medians[i, :], _, _ = sp.stats.binned_statistic(samples, samples,
                                                             statistic='median',

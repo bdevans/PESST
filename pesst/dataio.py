@@ -120,9 +120,7 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
     # Normality (Shapiro-Wilk)
     stats_file.write("Shapiro-Wilk test of non-normality\n"
                      "----------------------------------\n\n")
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=UserWarning)
-        W_shapiro, p_shapiro = sp.stats.shapiro(fitnesses)
+    W_shapiro, p_shapiro = sp.stats.shapiro(fitnesses)
     stats_file.write("The Shapiro-Wilk test of non-normality for the entire "
                      "dataset gives p = {}\n".format(p_shapiro))
     if p_shapiro >= 0.05:

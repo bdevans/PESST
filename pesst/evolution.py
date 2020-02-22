@@ -631,6 +631,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     record_kwargs.setdefault('histograms', True)
     record_kwargs.setdefault('data', True)
     record_kwargs.setdefault('gif', True)
+    record_kwargs.setdefault('gif_rate', 0.25)
     record = record_kwargs  # TODO: Remove after renaming args and below
 
     # Create output folder and subfolders
@@ -725,7 +726,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
             path_root = os.path.join(out_paths["figures"], fig_base)
             filenames = [path_root+"_{}.png".format(gen)
                          for gen in recorded_generations]
-            create_gif(filenames, duration=0.25)
+            create_gif(filenames, duration=record["gif_rate"])
 
         # if record["statistics"]:
         #     path_root = os.path.join(out_paths["figures"], "generation_")

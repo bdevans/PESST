@@ -59,7 +59,8 @@ record = {"rate": 50,           # write a new fasta file every x generations
           "histograms": True,
           # "invariants": True,
           "data": True,
-          "gif": True}
+          "gif": True,
+          "gif_rate": 0.25}
 
 history = pesst(n_generations, stability_start, omega, mu, sigma, skew,
                 n_clones, n_roots, clone_size, p_invariant, mutation_rate,

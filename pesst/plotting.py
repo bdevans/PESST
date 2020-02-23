@@ -403,6 +403,10 @@ def plot_all_stabilities(generation, history, fitness_table, omega,
                   color=colours["epsilon"], linestyle=":", lw=3, zorder=20,
                   label=rf"$\epsilon$ = {epsilon:.2f}")
 
+    if plot_omega:
+        ax_phi_hist.axhline(y=omega, color=colours['omega'], linestyle="-", lw=3, zorder=10,
+                            label=rf"$\Omega$ = {omega}")
+
     ax_phi_hist.legend(loc="upper right", fontsize=6.5)
 
     # Add title and save

@@ -253,7 +253,7 @@ def plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon,
     mean_protein_stability = np.mean(protein_stabilities)
 
     ax.plot(protein_indicies, protein_stabilities, "*",
-            color=colours["phi"], markersize=4)  # , label=r"$\mu_p$")
+            color=colours["phi"], markersize=4)
 
     ax.hlines(mean_protein_stability, 0, n_clones-1,
               colors=colours["phi_mu"], linestyles="--", lw=3, zorder=20,
@@ -530,7 +530,8 @@ def plot_simulation(generation, history, fitness_table, omega,
                             "pesst_gen_{}.png".format(generation))
     fig.savefig(filename)
     plt.close()
-    return (fig, [ax_phi, ax_evo, ax_aa_g, ax_aa_0, ax_hist])
+    return (fig, [ax_phi, ax_evo, 
+                  ax_aa_g, ax_aa_0, ax_hist])
 
 
 def plot_gamma_distribution(gamma, samples, quartiles, average_medians,

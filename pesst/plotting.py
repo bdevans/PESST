@@ -402,7 +402,7 @@ def plot_all_stabilities(generation, history, fitness_table, omega,
         ax_phi_hist.axhline(epsilon,
                   color=colours["epsilon"], linestyle=":", lw=3, zorder=20,
                   label=rf"$\epsilon$ = {epsilon:.2f}")
-
+    
     if plot_omega:
         ax_phi_hist.axhline(y=omega, color=colours['omega'], linestyle="-", lw=3, zorder=10,
                             label=rf"$\Omega$ = {omega}")
@@ -584,14 +584,20 @@ def plot_gamma_distribution(gamma, samples, quartiles, average_medians,
 def plot_stability_table(fitness_table, out_paths):
 
     (clone_size, n_amino_acids) = fitness_table.shape
-    fig, ax = plt.subplots(figsize=(8, clone_size/5))
+    fraction = 0.1
+    pad = 0.05
+    cpi = 4  # cells per inch
+    w_leg = (fraction + pad) * n_amino_acids / cpi  # legend width
+    fig, ax = plt.subplots(figsize=(w_leg + n_amino_acids/cpi, clone_size/(cpi+3)))
     sns.heatmap(fitness_table, center=0, annot=True, fmt=".2f", linewidths=.5,
                 cmap="RdBu_r", annot_kws={"size": 5},
-                cbar_kws={"label": r"$\Delta T_m$"}, ax=ax)
+                cbar_kws={"label": r"$\Delta T_m$", "fraction": fraction, "pad": pad}, 
+                ax=ax)
     ax.xaxis.set_ticks_position('top')
     ax.set_xlabel("Amino Acid")
     ax.set_ylabel("Location")
     ax.set_title(r"Amino Acid stability contributions ($\Delta T_m$)")
+    fig.set_tight_layout(True)
     filename = os.path.join(out_paths["initial"], "stability_table.png")
     fig.savefig(filename)
     plt.close()
@@ -599,7 +605,7 @@ def plot_stability_table(fitness_table, out_paths):
 
 def plot_LG_matrix(LG_matrix, out_paths):
 
-    fig, ax = plt.subplots(figsize=(10, 8))
+    fig, ax = plt.subplots(figsize=(6, 5))
     sns.heatmap(LG_matrix, annot=True, fmt=".2f", linewidths=.5, cmap="cubehelix_r",
                 square=True, annot_kws={"size": 5},  # vmin=0, vmax=1,
                 ax=ax)  # cbar_kws={"label": "Transition probabiltiy"},
@@ -607,6 +613,7 @@ def plot_LG_matrix(LG_matrix, out_paths):
     ax.set_xlabel("Amino Acid")
     ax.set_ylabel("Amino Acid")
     ax.set_title("LG model transition probabilities")
+    fig.set_tight_layout(True)
     filename = os.path.join(out_paths["initial"], "LG_matrix.png")
     fig.savefig(filename)
     plt.close()
@@ -616,16 +623,23 @@ def plot_phi_fitness_table(generation, phi_fitness_table, clims, out_paths):
     r"""Plot a heatmap of changes in stability (\Delta T_m) for each amino acid
     in each protein."""
     (n_proteins, clone_size) = phi_fitness_table.shape
-    fig, ax = plt.subplots(figsize=(clone_size/6, n_proteins/8))
+    fraction = 0.1
+    pad = 0.05
+    cpi = 8  # cells per inch
+    w_leg = (fraction + pad) * clone_size / (cpi+2)  # legend width
+    # width, height = clone_size/(cpi+2), n_proteins/cpi
+    fig, ax = plt.subplots(figsize=(w_leg + clone_size/(cpi+2), n_proteins/cpi))
     sns.heatmap(phi_fitness_table, center=0, annot=False, fmt=".2f",
                 linewidths=.5, cmap="RdBu_r", annot_kws={"size": 5},
-                cbar_kws={"label": r"$\Delta T_m$"}, vmin=clims[0], vmax=clims[1], ax=ax)
+                cbar_kws={"label": r"$\Delta T_m$", "fraction": fraction, "pad": pad}, 
+                vmin=clims[0], vmax=clims[1], ax=ax)
     ax.xaxis.set_ticks_position('top')
     ax.set_xlabel("Location")
     ax.set_ylabel("Clone")
     filename = os.path.join(out_paths["figures"],
                             f"phi_fitness_table_{generation}.png")
     ax.set_title(f"Generation {generation}", fontweight="bold")
+    fig.set_tight_layout(True)
     fig.savefig(filename)
     plt.close()
 

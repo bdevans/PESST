@@ -299,7 +299,7 @@ def plot_all_stabilities(generation, history, stability_table, omega,
     fig = plt.figure(figsize=(12, 8))  # (width, height)
     # https://matplotlib.org/users/gridspec.html
     gs = mpl.gridspec.GridSpec(nrows=2, ncols=3,
-                               width_ratios=[1, 2, 1],  # [Left, Middle, Right]
+                               width_ratios=[1, 1.618, 1],  # [Left, Middle, Right]
                                height_ratios=[2, 2])  # [Top, Bottom]
     gs.update(top=0.95, wspace=0.10, hspace=0.12)  # Leave room for the title
 
@@ -440,7 +440,7 @@ def plot_simulation(generation, history, stability_table, omega,
     fig = plt.figure(figsize=(12, 9))  # (width, height)
     # https://matplotlib.org/users/gridspec.html
     gs = mpl.gridspec.GridSpec(nrows=2, ncols=3,
-                               width_ratios=[3, 2, 2],  # [Left, Middle, Right]
+                               width_ratios=[1.618, 1, 1],  # [Left, Middle, Right]
                                height_ratios=[2, 2])  # [Top, Bottom]
     gs.update(top=0.95, wspace=0.08, hspace=0.16)  # Leave room for the title
 

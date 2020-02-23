@@ -397,7 +397,7 @@ def plot_all_stabilities(generation, history, fitness_table, omega,
                         label=rf"$\mu_\phi$ = {mean_protein_stability:.2f}")
     mean_protein_stability_0 = np.mean(initial_protein_stabilities)
     ax_phi_hist.axhline(y=mean_protein_stability_0, color=colours['phi_0_mu'], linestyle="-", lw=3, zorder=10,
-                        label=rf"$\mu_{{\phi_0}}$ = {omega}")
+                        label=rf"$\mu_{{\phi_0}}$ = {mean_protein_stability_0:.2f}")
     if plot_epsilon:
         ax_phi_hist.axhline(epsilon,
                   color=colours["epsilon"], linestyle=":", lw=3, zorder=20,

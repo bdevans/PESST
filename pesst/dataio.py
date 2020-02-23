@@ -144,7 +144,7 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
             passpercentcalc.append(1)
         else:
             passpercentcalc.append(0)
-    stats_file.write("According to Shapiro-Wilk test, the proportion of "
+    stats_file.write("According to the Shapiro-Wilk test, the proportion of "
                      "individual positions that are not confidently "
                      f"non-normal is: {sum(passpercentcalc) / len(passpercentcalc):.2%}\n\n\n")
 

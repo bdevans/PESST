@@ -8,11 +8,11 @@ try:
 except ImportError:
     raise ImportError("This module requires Biopython!")
 
-from pesst.evolution import calculate_fitness
+from pesst.evolution import calculate_stability
 
 
 def process_fasta(stability_matrix, fasta_file, output_path):
-    # fitnessmatrix = input("Fitness matrix location (must be CSV from previous evolution run): ")
+    # stabilitymatrix = input("stability matrix location (must be CSV from previous evolution run): ")
     # fasta = input("input fasta file location (must be a sequence or list of sequences in fasta format): ")
 
     stability_df = pd.read_csv(stability_matrix, index_col="Position")
@@ -20,7 +20,7 @@ def process_fasta(stability_matrix, fasta_file, output_path):
     # records = list(SeqIO.parse("example.fasta", "fasta"))
     seqlib = SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta"))
 
-    stabilities = {id: [calculate_fitness(list(seq), stability_df), seq]
+    stabilities = {id: [calculate_stability(list(seq), stability_df), seq]
                    for id, seq in seqlib.items()}
 
     base_name, _ = os.path.splitext(os.path.basename(fasta_file))

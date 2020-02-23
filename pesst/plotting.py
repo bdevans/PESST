@@ -29,10 +29,10 @@ def remove_inner_ticklabels(fig):
             pass
 
 
-def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
+def plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
                    out_paths, fig_title=True, legend_title=None, xlims=None,
                    colours=None, ax=None):
-    """Plot fitness against generation for all clones.
+    """Plot stability against generation for all clones.
 
     This plots after mutation but before replacement so that subthreshold
     proteins are briefly shown to exist.
@@ -40,10 +40,10 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
     if colours is None:
         colours = default_colours
 
-    # Create array of fitness values with shape (n_generations, n_clones)
+    # Create array of stability values with shape (n_generations, n_clones)
     n_generations = len(history) - 1  # First entry is the initial state
     generation_numbers = np.arange(n_generations+1)  # Skip initial generation
-    (clone_size, n_amino_acids) = fitness_table.shape
+    (clone_size, n_amino_acids) = stability_table.shape
     (n_clones, _) = history[0].stabilities.shape
 
     stabiltiies = np.array([np.sum(history[g].stabilities, axis=1)
@@ -70,11 +70,11 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
                                     f"of {clone_size} amino acids, mutated "
                                     f"over {n_generations} generations", 60)), 
                      fontweight='bold')
-    if plot_omega:  # Add fitness threshold
+    if plot_omega:  # Add stability threshold
         ax.axhline(omega, color=colours["omega"], lw=3, linestyle="-",
                    zorder=10, label=rf"$\Omega$ = {omega}")
     if plot_epsilon:  # Add theoretical convergence line
-        epsilon = clone_size * np.mean(fitness_table.values)
+        epsilon = clone_size * np.mean(stability_table.values)
         ax.axhline(epsilon, color=colours["epsilon"], lw=3, linestyle=":",
                    zorder=20, label=rf"$\epsilon$ = {epsilon:.2f}")
 
@@ -125,7 +125,7 @@ def plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega,
     return ax
 
 
-def plot_initial_amino_acid_stabilities(fitness_table, omega, colours=None, ax=None):
+def plot_initial_amino_acid_stabilities(stability_table, omega, colours=None, ax=None):
 
     fig = None
     if ax is None:
@@ -134,11 +134,11 @@ def plot_initial_amino_acid_stabilities(fitness_table, omega, colours=None, ax=N
     if colours is None:
         colours = default_colours
 
-    clone_size = fitness_table.shape[0]
-    mean_stability_0 = np.mean(fitness_table.values)
+    clone_size = stability_table.shape[0]
+    mean_stability_0 = np.mean(stability_table.values)
 
-    # Plot each column of fitness_table as a separate dataseries against 0..N-1
-    ax.plot(fitness_table, "o", color=colours["aa_0"], markersize=1)
+    # Plot each column of stability_table as a separate dataseries against 0..N-1
+    ax.plot(stability_table, "o", color=colours["aa_0"], markersize=1)
     ax.hlines(mean_stability_0, 0, clone_size-1,
               colors=colours["aa_0_mu"], linestyles="--", lw=3, zorder=20,
               label=rf"$\mu_0$ = {mean_stability_0:.2f}")
@@ -156,7 +156,7 @@ def plot_initial_amino_acid_stabilities(fitness_table, omega, colours=None, ax=N
     return ax
 
 
-def plot_stability_histograms(generation, aa_stabilities, fitness_table, omega,
+def plot_stability_histograms(generation, aa_stabilities, stability_table, omega,
                               out_paths, orient='vertical', colours=None, ax=None):
 
     fig = None
@@ -166,14 +166,14 @@ def plot_stability_histograms(generation, aa_stabilities, fitness_table, omega,
     if colours is None:
         colours = default_colours
 
-    mean_stability_0 = np.mean(fitness_table.values)
+    mean_stability_0 = np.mean(stability_table.values)
     mean_stability = np.mean(aa_stabilities)
 
     # Plot initial distribution
-    stats_0 = "\n".join([rf"$\sigma$ = {np.std(fitness_table.values):.2f}",
-                         f"skew = {stats.skew(fitness_table.values, axis=None):.2f}",
-                         f"kurtosis = {stats.kurtosis(fitness_table.values, axis=None):.2f}"])
-    n, bins, _ = ax.hist(fitness_table.values.ravel(), bins='sqrt',
+    stats_0 = "\n".join([rf"$\sigma$ = {np.std(stability_table.values):.2f}",
+                         f"skew = {stats.skew(stability_table.values, axis=None):.2f}",
+                         f"kurtosis = {stats.kurtosis(stability_table.values, axis=None):.2f}"])
+    n, bins, _ = ax.hist(stability_table.values.ravel(), bins='sqrt',
                          align='mid', orientation=orient,
                          color=colours["aa_0"], alpha=0.8, density=True,
                          label=f"Initial distribution\n{stats_0}")
@@ -279,7 +279,7 @@ def plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon,
 
 
 
-def plot_all_stabilities(generation, history, fitness_table, omega,
+def plot_all_stabilities(generation, history, stability_table, omega,
                          plot_omega, plot_epsilon, n_generations, out_paths, 
                          colours=None):
 
@@ -290,10 +290,10 @@ def plot_all_stabilities(generation, history, fitness_table, omega,
 
     aa_stabilities = history[-1].stabilities
     (n_clones, clone_size) = aa_stabilities.shape
-    (clone_size, n_amino_acids) = fitness_table.shape
-    T_max = sum(np.amax(fitness_table, axis=1))  # Most stable possible protein
-    # T_min = sum(np.amin(fitness_table, axis=1))  # Least stable possible protein
-    mean_stability_0 = np.mean(fitness_table.values)
+    (clone_size, n_amino_acids) = stability_table.shape
+    T_max = sum(np.amax(stability_table, axis=1))  # Most stable possible protein
+    # T_min = sum(np.amin(stability_table, axis=1))  # Least stable possible protein
+    mean_stability_0 = np.mean(stability_table.values)
     epsilon = clone_size * mean_stability_0
 
     fig = plt.figure(figsize=(12, 8))  # (width, height)
@@ -305,12 +305,12 @@ def plot_all_stabilities(generation, history, fitness_table, omega,
 
     # Plot initial distribution
     ax_aa_0 = plt.subplot(gs[1, 0])
-    ymin, ymax = np.floor(np.amin(fitness_table.values)), np.ceil(np.amax(fitness_table.values))
+    ymin, ymax = np.floor(np.amin(stability_table.values)), np.ceil(np.amax(stability_table.values))
     pad = 0.5 * pad_factor * abs(ymax - ymin)
     ymax = np.ceil(ymax + pad)
     ymin = np.floor(ymin - pad)
     ax_aa_0.set_ylim(ymin, ymax)
-    plot_initial_amino_acid_stabilities(fitness_table, omega,
+    plot_initial_amino_acid_stabilities(stability_table, omega,
                                         colours=colours, ax=ax_aa_0)
     # plt.setp(ax_aa_0.get_yticklabels(), visible=False)
     # ax_aa_0.set_ylabel(None)
@@ -328,7 +328,7 @@ def plot_all_stabilities(generation, history, fitness_table, omega,
 
     # Plot marginal stability distributions
     ax_hist = plt.subplot(gs[1, -1], sharey=ax_aa_0)
-    plot_stability_histograms(generation, aa_stabilities, fitness_table, omega,
+    plot_stability_histograms(generation, aa_stabilities, stability_table, omega,
                               out_paths, orient='horizontal', colours=colours,
                               ax=ax_hist)
     plt.setp(ax_hist.get_yticklabels(), visible=False)
@@ -420,7 +420,7 @@ def plot_all_stabilities(generation, history, fitness_table, omega,
                   ax_aa_0, ax_aa_g, ax_hist])
 
 
-def plot_simulation(generation, history, fitness_table, omega,
+def plot_simulation(generation, history, stability_table, omega,
                     plot_omega, plot_epsilon, n_generations, out_paths, 
                     colours=None):
 
@@ -431,10 +431,10 @@ def plot_simulation(generation, history, fitness_table, omega,
 
     aa_stabilities = history[-1].stabilities
     (n_clones, clone_size) = aa_stabilities.shape
-    (clone_size, n_amino_acids) = fitness_table.shape
-    T_max = sum(np.amax(fitness_table, axis=1))  # Most stable possible protein
-    # T_min = sum(np.amin(fitness_table, axis=1))  # Least stable possible protein
-    mean_stability_0 = np.mean(fitness_table.values)
+    (clone_size, n_amino_acids) = stability_table.shape
+    T_max = sum(np.amax(stability_table, axis=1))  # Most stable possible protein
+    # T_min = sum(np.amin(stability_table, axis=1))  # Least stable possible protein
+    mean_stability_0 = np.mean(stability_table.values)
     epsilon = clone_size * mean_stability_0
 
     fig = plt.figure(figsize=(12, 9))  # (width, height)
@@ -448,7 +448,7 @@ def plot_simulation(generation, history, fitness_table, omega,
     ax_aa_g = plt.subplot(gs[1, 0])
     plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega,
                                 colours=colours, ax=ax_aa_g)
-    ymin, ymax = np.floor(np.amin(fitness_table.values)), np.ceil(np.amax(fitness_table.values))
+    ymin, ymax = np.floor(np.amin(stability_table.values)), np.ceil(np.amax(stability_table.values))
     pad = 0.5 * pad_factor * abs(ymax - ymin)
     ymax = np.ceil(ymax + pad)
     ymin = np.floor(ymin - pad)
@@ -458,7 +458,7 @@ def plot_simulation(generation, history, fitness_table, omega,
 
     # Plot initial distribution
     ax_aa_0 = plt.subplot(gs[1, 1], sharey=ax_aa_g)
-    plot_initial_amino_acid_stabilities(fitness_table, omega,
+    plot_initial_amino_acid_stabilities(stability_table, omega,
                                         colours=colours, ax=ax_aa_0)
     plt.setp(ax_aa_0.get_yticklabels(), visible=False)
     ax_aa_0.set_ylabel(None)
@@ -467,15 +467,15 @@ def plot_simulation(generation, history, fitness_table, omega,
 
     # Plot marginal stability distributions
     ax_hist = plt.subplot(gs[1, -1], sharey=ax_aa_g)
-    plot_stability_histograms(generation, aa_stabilities, fitness_table, omega,
+    plot_stability_histograms(generation, aa_stabilities, stability_table, omega,
                               out_paths, orient='horizontal', colours=colours,
                               ax=ax_hist)
     plt.setp(ax_hist.get_yticklabels(), visible=False)
     ax_hist.set_ylabel(None)
     ax_hist.set_title(None)
 
-    # Find and plot all fitness values in the current generation
-    # x: proteins within population; y: Fitness for each locus for that protein
+    # Find and plot all stability values in the current generation
+    # x: proteins within population; y: stability for each locus for that protein
     ax_phi = plt.subplot(gs[0, 0], sharex=ax_aa_g)
     plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon,
                              colours=colours, ax=ax_phi)
@@ -511,7 +511,7 @@ def plot_simulation(generation, history, fitness_table, omega,
 
     ax_evo = plt.subplot(gs[0, 1:], sharey=ax_phi)
     xlims = (-5, n_generations+5)
-    plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
+    plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
                    out_paths, fig_title=False, xlims=xlims, colours=colours,
                    ax=ax_evo)
     # Add a marker to show the current mean stability
@@ -581,15 +581,15 @@ def plot_gamma_distribution(gamma, samples, quartiles, average_medians,
         plt.close()
 
 
-def plot_stability_table(fitness_table, out_paths):
+def plot_stability_table(stability_table, out_paths):
 
-    (clone_size, n_amino_acids) = fitness_table.shape
+    (clone_size, n_amino_acids) = stability_table.shape
     fraction = 0.1
     pad = 0.05
     cpi = 4  # cells per inch
     w_leg = (fraction + pad) * n_amino_acids / cpi  # legend width
     fig, ax = plt.subplots(figsize=(w_leg + n_amino_acids/cpi, clone_size/(cpi+3)))
-    sns.heatmap(fitness_table, center=0, annot=True, fmt=".2f", linewidths=.5,
+    sns.heatmap(stability_table, center=0, annot=True, fmt=".2f", linewidths=.5,
                 cmap="RdBu_r", annot_kws={"size": 5},
                 cbar_kws={"label": r"$\Delta T_m$", "fraction": fraction, "pad": pad}, 
                 ax=ax)
@@ -619,17 +619,17 @@ def plot_LG_matrix(LG_matrix, out_paths):
     plt.close()
 
 
-def plot_phi_fitness_table(generation, phi_fitness_table, clims, out_paths):
+def plot_phi_stability_table(generation, phi_stability_table, clims, out_paths):
     r"""Plot a heatmap of changes in stability (\Delta T_m) for each amino acid
     in each protein."""
-    (n_proteins, clone_size) = phi_fitness_table.shape
+    (n_proteins, clone_size) = phi_stability_table.shape
     fraction = 0.1
     pad = 0.05
     cpi = 8  # cells per inch
     w_leg = (fraction + pad) * clone_size / (cpi+2)  # legend width
     # width, height = clone_size/(cpi+2), n_proteins/cpi
     fig, ax = plt.subplots(figsize=(w_leg + clone_size/(cpi+2), n_proteins/cpi))
-    sns.heatmap(phi_fitness_table, center=0, annot=False, fmt=".2f",
+    sns.heatmap(phi_stability_table, center=0, annot=False, fmt=".2f",
                 linewidths=.5, cmap="RdBu_r", annot_kws={"size": 5},
                 cbar_kws={"label": r"$\Delta T_m$", "fraction": fraction, "pad": pad}, 
                 vmin=clims[0], vmax=clims[1], ax=ax)
@@ -637,7 +637,7 @@ def plot_phi_fitness_table(generation, phi_fitness_table, clims, out_paths):
     ax.set_xlabel("Location")
     ax.set_ylabel("Clone")
     filename = os.path.join(out_paths["figures"],
-                            f"phi_fitness_table_{generation}.png")
+                            f"phi_stability_table_{generation}.png")
     ax.set_title(f"Generation {generation}", fontweight="bold")
     fig.set_tight_layout(True)
     fig.savefig(filename)
@@ -649,21 +649,21 @@ def plot_phi_fitness_table(generation, phi_fitness_table, clims, out_paths):
 
 # TODO: Replace references to these old plots in the code where individual figures are still required
 
-# def plot_threshold_fitness(generation, population, fitnesses, fitness_table,
+# def plot_threshold_stability(generation, population, stabilities, stability_table,
 #                            omega, out_paths):
-#     # Store fitness values for each amino in the dataset for the left subfigure
-#     (clone_size, n_amino_acids) = fitness_table.shape
+#     # Store stability values for each amino in the dataset for the left subfigure
+#     (clone_size, n_amino_acids) = stability_table.shape
 #     # Average across flattened array
-#     mean_initial_fitness = np.mean(fitness_table.values)
-#     scale = round((4 * np.std(fitness_table.values)) + 1)
+#     mean_initial_stability = np.mean(stability_table.values)
+#     scale = round((4 * np.std(stability_table.values)) + 1)
 
 #     fig, (ax1, ax2) = plt.subplots(1, 2, sharey=True,
 #                                    gridspec_kw={'width_ratios': [1, 2]})
-#     # Plot each column of fitness_table as a separate dataseries against 0..N-1
-#     ax1.plot(fitness_table, "o", color='k', markersize=1)
-#     ax1.hlines(mean_initial_fitness, 0, clone_size-1,
+#     # Plot each column of stability_table as a separate dataseries against 0..N-1
+#     ax1.plot(stability_table, "o", color='k', markersize=1)
+#     ax1.hlines(mean_initial_stability, 0, clone_size-1,
 #                colors="r", linestyles="--", lw=4, zorder=10,
-#                label=r"$\mu_0$ = {:.2f}".format(mean_initial_fitness))
+#                label=r"$\mu_0$ = {:.2f}".format(mean_initial_stability))
 #     if omega > -np.inf:
 #         ax1.hlines(omega, 0, clone_size-1,
 #                    colors="k", linestyles="-", lw=4, zorder=10,
@@ -673,17 +673,17 @@ def plot_phi_fitness_table(generation, phi_fitness_table, clims, out_paths):
 #     ax1.set_xlabel("Amino acid position")
 #     ax1.legend(loc="upper left", fontsize=6.5)
 #                # title=r"$\Omega$ = {}".format(omega))
-#     ax1.set_title(r"Fitness distribution of $\Delta T_m$ matrix", size=8)
+#     ax1.set_title(r"stability distribution of $\Delta T_m$ matrix", size=8)
 
-#     # Find and plot all fitness values in the current generation
-#     mean_fitness = np.mean(fitnesses)
-#     # x: proteins within population; y: Fitness for each locus for that protein
+#     # Find and plot all stability values in the current generation
+#     mean_stability = np.mean(stabilities)
+#     # x: proteins within population; y: stability for each locus for that protein
 #     # TODO: Swap colour to a particular protein not locus or make monochrome
-#     ax2.plot(np.arange(len(population)), fitnesses, "o", markersize=1)
-#     # ax2.plot(np.arange(len(population)), np.sum(fitnesses, axis=1), "*k", markersize=4, label=r"$\mu_p$")
-#     ax2.hlines(mean_fitness, 0, len(population)-1,
+#     ax2.plot(np.arange(len(population)), stabilities, "o", markersize=1)
+#     # ax2.plot(np.arange(len(population)), np.sum(stabilities, axis=1), "*k", markersize=4, label=r"$\mu_p$")
+#     ax2.hlines(mean_stability, 0, len(population)-1,
 #                colors="r", linestyles="--", lw=4, zorder=10,
-#                label=r"$\mu_p$ = {:.2f}".format(mean_fitness))  # \mu_\phi ?
+#                label=r"$\mu_p$ = {:.2f}".format(mean_stability))  # \mu_\phi ?
 #     if omega > -np.inf:
 #         ax2.hlines(omega, 0, len(population)-1,
 #                    colors="k", linestyles="-", lw=4, zorder=10,
@@ -692,9 +692,9 @@ def plot_phi_fitness_table(generation, phi_fitness_table, clims, out_paths):
 #     ax2.set_xlabel("Clone")
 #     ax2.legend(loc="upper left", fontsize=6.5)
 #                # title=r"$\Omega$ = {}".format(omega))
-#     # ax2.set_title("\n".join(wrap("Fitness distribution of every sequence in "
+#     # ax2.set_title("\n".join(wrap("stability distribution of every sequence in "
 #     #                              "the evolving dataset", 40)), size=8)
-#     ax2.set_title("Fitness distribution of every protein in the population",
+#     ax2.set_title("stability distribution of every protein in the population",
 #                   size=8)
 
 #     # plt.subplots_adjust(top=0.85)
@@ -705,7 +705,7 @@ def plot_phi_fitness_table(generation, phi_fitness_table, clims, out_paths):
 #     plt.close()
 
 
-# def plot_fitness_space(generation, population, fitnesses, fitness_table,
+# def plot_stability_space(generation, population, stabilities, stability_table,
 #                        omega, out_paths):
 
 #     col_aa_g = "#3498db"  # Blue
@@ -715,22 +715,22 @@ def plot_phi_fitness_table(generation, phi_fitness_table, clims, out_paths):
 #     col_omega = "#e74c3c"  # "k"
 #     col_epsilon = "#2ecc71"  # Red
 
-#     # Store fitness values for each amino in the dataset for the left subfigure
-#     (clone_size, n_amino_acids) = fitness_table.shape
+#     # Store stability values for each amino in the dataset for the left subfigure
+#     (clone_size, n_amino_acids) = stability_table.shape
 #     # Average across flattened array
-#     # mean_initial_fitness = np.mean(fitness_table.values)
-#     scale = round((4 * np.std(fitness_table.values)) + 1)
-#     loc = np.mean(fitness_table.values)
-#     T_max = sum(np.amax(fitness_table, axis=1))  # Fittest possible protein
+#     # mean_initial_stability = np.mean(stability_table.values)
+#     scale = round((4 * np.std(stability_table.values)) + 1)
+#     loc = np.mean(stability_table.values)
+#     T_max = sum(np.amax(stability_table, axis=1))  # Fittest possible protein
 
 #     fig, (ax_arr) = plt.subplots(2, 2, sharey='row', #  sharex='col',
 #                                  gridspec_kw={'width_ratios': [4, 1],
 #                                               'height_ratios': [1, 3]})
-#     # Plot each column of fitness_table as a separate dataseries against 0..N-1
-#     # ax1.plot(fitness_table, "o", color='k', markersize=1)
-#     # ax1.hlines(mean_initial_fitness, 0, clone_size-1,
+#     # Plot each column of stability_table as a separate dataseries against 0..N-1
+#     # ax1.plot(stability_table, "o", color='k', markersize=1)
+#     # ax1.hlines(mean_initial_stability, 0, clone_size-1,
 #     #            colors="r", linestyles="--", lw=2,
-#     #            label=r"$\mu_1$ = {:.2f}".format(mean_initial_fitness))
+#     #            label=r"$\mu_1$ = {:.2f}".format(mean_initial_stability))
 #     # if omega > -np.inf:
 #     #     ax1.hlines(omega, 0, clone_size-1,
 #     #                colors="k", linestyles="-", lw=2,
@@ -740,25 +740,25 @@ def plot_phi_fitness_table(generation, phi_fitness_table, clims, out_paths):
 #     # ax1.set_xlabel("Amino acid position")
 #     # ax1.legend(loc="upper left", fontsize=6.5,)
 #                # title=r"$\Omega$ = {}".format(omega))
-#     # ax1.set_title(r"Fitness distribution of $\Delta T_m$ matrix", size=8)
+#     # ax1.set_title(r"stability distribution of $\Delta T_m$ matrix", size=8)
 
-#     # Find and plot all fitness values in the current generation
-#     mean_fitness = np.mean(fitnesses)
-#     # x: proteins within population; y: Fitness for each locus for that protein
+#     # Find and plot all stability values in the current generation
+#     mean_stability = np.mean(stabilities)
+#     # x: proteins within population; y: stability for each locus for that protein
 #     # TODO: Swap colour to a particular protein not locus or make monochrome
 #     protein_indicies = np.arange(len(population))
-#     protein_fitnesses = np.sum(fitnesses, axis=1)
-#     ax_arr[0, 0].plot(protein_indicies, protein_fitnesses, "*", color=col_phi, markersize=4)  # , label=r"$\mu_p$")
-#     ax_arr[0, 1].hist(protein_fitnesses, bins=int(np.sqrt(len(population))),
+#     protein_stabilities = np.sum(stabilities, axis=1)
+#     ax_arr[0, 0].plot(protein_indicies, protein_stabilities, "*", color=col_phi, markersize=4)  # , label=r"$\mu_p$")
+#     ax_arr[0, 1].hist(protein_stabilities, bins=int(np.sqrt(len(population))),
 #                       align='mid', orientation='horizontal', density=True)
 #     # plt.setp(ax_arr[0, 1].get_xticklabels(), visible=False)
 #     ax_arr[0, 1].set_xticks([])
-#     mean_protein_fitness = np.mean(protein_fitnesses)
-#     ax_arr[0, 0].hlines(mean_protein_fitness, 0, len(population)-1,
+#     mean_protein_stability = np.mean(protein_stabilities)
+#     ax_arr[0, 0].hlines(mean_protein_stability, 0, len(population)-1,
 #                         colors=col_mu_phi, linestyles="--", lw=3, zorder=10,
-#                         label=r"$\mu_\phi$ = {:.2f}".format(mean_fitness))  # \mu_\phi ?
-#     mean_initial_amino_acid_fitness = np.mean(fitness_table.values)
-#     epsilon = clone_size * mean_initial_amino_acid_fitness
+#                         label=r"$\mu_\phi$ = {:.2f}".format(mean_stability))  # \mu_\phi ?
+#     mean_initial_amino_acid_stability = np.mean(stability_table.values)
+#     epsilon = clone_size * mean_initial_amino_acid_stability
 #     ax_arr[0, 0].hlines(epsilon, 0, len(population)-1,
 #                         colors=col_epsilon, linestyles=":", lw=3, zorder=10,
 #                         label=r"$\epsilon$ = {:.2f}".format(epsilon))
@@ -773,20 +773,20 @@ def plot_phi_fitness_table(generation, phi_fitness_table, clims, out_paths):
 #     plt.setp(ax_arr[0, 0].get_xticklabels(), visible=False)
 #     ax_arr[0, 0].legend(loc="upper left", fontsize=6.5, ncol=ncol)
 
-#     ax_arr[1, 0].plot(protein_indicies, fitnesses, "o", color=col_aa_g, markersize=1)
-#     n, bins, _ = ax_arr[1, 1].hist(fitness_table.values.ravel(),
-#                                    bins='sqrt',  # int(np.sqrt(fitnesses.size))
+#     ax_arr[1, 0].plot(protein_indicies, stabilities, "o", color=col_aa_g, markersize=1)
+#     n, bins, _ = ax_arr[1, 1].hist(stability_table.values.ravel(),
+#                                    bins='sqrt',  # int(np.sqrt(stabilities.size))
 #                                    color=col_aa_0, alpha=0.4, align='mid',
 #                                    orientation='horizontal', density=True,
 #                                    label="Initial dist.")
-#     ax_arr[1, 1].axhline(y=mean_initial_amino_acid_fitness, color=col_aa_0,
+#     ax_arr[1, 1].axhline(y=mean_initial_amino_acid_stability, color=col_aa_0,
 #                          linestyle="--", lw=3, zorder=10)
-#                          # label=r"$\mu_0$ = {:.2f}".format(mean_initial_amino_acid_fitness))
-#     ax_arr[1, 1].hist(fitnesses.ravel(), bins=bins,  # int(np.sqrt(fitnesses.size))
+#                          # label=r"$\mu_0$ = {:.2f}".format(mean_initial_amino_acid_stability))
+#     ax_arr[1, 1].hist(stabilities.ravel(), bins=bins,  # int(np.sqrt(stabilities.size))
 #                       align='mid', color=col_aa_g, alpha=0.4,
 #                       orientation='horizontal', density=True, label="Present dist.")
-#     ax_arr[1, 1].axhline(y=mean_fitness, color=col_aa_g, linestyle="--", lw=3, zorder=10)
-#                          # label=r"$\mu_p$ = {:.2f}".format(mean_fitness))
+#     ax_arr[1, 1].axhline(y=mean_stability, color=col_aa_g, linestyle="--", lw=3, zorder=10)
+#                          # label=r"$\mu_p$ = {:.2f}".format(mean_stability))
 #     ax_arr[1, 1].axhline(y=omega, color=col_omega, linestyle="-", lw=3, zorder=10)
 #                          # label=r"$\Omega$ = {}".format(omega))
 #     ax_arr[1, 1].legend(loc="upper left", fontsize=6.5)
@@ -796,12 +796,12 @@ def plot_phi_fitness_table(generation, phi_fitness_table, clims, out_paths):
 #     # ax_arr[1, 1].set_ylim(0, round(1.5*np.amax(n)))
 #     ax_arr[1, 1].set_ybound(0, 0.5)
 
-#     ax_arr[1, 0].hlines(mean_initial_amino_acid_fitness, 0, len(population)-1,
+#     ax_arr[1, 0].hlines(mean_initial_amino_acid_stability, 0, len(population)-1,
 #                         colors=col_aa_0, linestyles="--", lw=3, zorder=10,
-#                         label=r"$\mu_0$ = {:.2f}".format(mean_initial_amino_acid_fitness))
-#     ax_arr[1, 0].hlines(mean_fitness, 0, len(population)-1,
+#                         label=r"$\mu_0$ = {:.2f}".format(mean_initial_amino_acid_stability))
+#     ax_arr[1, 0].hlines(mean_stability, 0, len(population)-1,
 #                         colors=col_aa_g, linestyles="--", lw=3, zorder=10,
-#                         label=r"$\mu_p$ = {:.2f}".format(mean_fitness))  # \mu_\phi ?
+#                         label=r"$\mu_p$ = {:.2f}".format(mean_stability))  # \mu_\phi ?
 #     if omega > -np.inf:
 #         ax_arr[1, 0].hlines(omega, 0, len(population)-1,
 #                             colors=col_omega, linestyles="-", lw=3, zorder=10,
@@ -815,7 +815,7 @@ def plot_phi_fitness_table(generation, phi_fitness_table, clims, out_paths):
 #     ax_arr[1, 0].legend(loc="upper left", fontsize=6.5, ncol=ncol)
 #                # title=r"$\Omega$ = {}".format(omega))
 
-#     # ax_arr[1, 0].set_title("Fitness distribution of every protein in the population",
+#     # ax_arr[1, 0].set_title("stability distribution of every protein in the population",
 #     #               size=8)
 
 #     # plt.subplots_adjust(top=0.85)
@@ -827,24 +827,24 @@ def plot_phi_fitness_table(generation, phi_fitness_table, clims, out_paths):
 #     return (fig, ax_arr)
 
 
-# def plot_histogram_of_fitness(generation, distributions, initial, omega, out_paths):
+# def plot_histogram_of_stability(generation, distributions, initial, omega, out_paths):
 #     plt.figure()
 #     # plt.axis([-10, 8, 0, 0.5])  # generate attractive figure
 
-#     # Plot normal distribution of the original fitness space
+#     # Plot normal distribution of the original stability space
 #     mu1distspace = sum(initial) / len(initial)
 #     plt.hist(initial, 50, density=True, color='k', alpha=0.4)
-#     # plt.title("\n".join(wrap('Fitness distribution of the total fitness space',
+#     # plt.title("\n".join(wrap('stability distribution of the total stability space',
 #     #                          60)), fontweight='bold')
 #     # plt.axvline(x=mu1distspace, color="#404040", linestyle=":")
 #     plt.axvline(x=mu1distspace, color="k", linestyle=":",
 #                 label=r"$\mu_0$ = {:.3}".format(mu1distspace))
 
-#     # Plot normal distribution of the current generation's fitness space
+#     # Plot normal distribution of the current generation's stability space
 #     mu2distspace = sum(distributions) / len(distributions)
 #     plt.hist(distributions, 50, density=True, color='r', alpha=0.4)
-#     plt.title("\n".join(wrap("Fitness distribution of the total fitness space "
-#                              "vs. changing fitness distribution across every "
+#     plt.title("\n".join(wrap("stability distribution of the total stability space "
+#                              "vs. changing stability distribution across every "
 #                              "evolving clone", 60)), fontweight='bold')
 #     # plt.axvline(x=mu2distspace, color="#404040", linestyle=":")
 #     plt.axvline(x=mu2distspace, color="r", linestyle=":",

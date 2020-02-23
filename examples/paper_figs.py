@@ -67,7 +67,7 @@ fig.savefig(os.path.join(paper_dir, "paper_low.png"))
 #
 # (history, out_paths) = pesst(seed=42)
 
-# (fig, ax_arr) = plot_stability(generation, history, fitness_table, omega,
+# (fig, ax_arr) = plot_stability(generation, history, stability_table, omega,
 #                    plot_omega, plot_epsilon, n_generations, out_paths)
 # [ax_phi, ax_evo, ax_aa_g, ax_aa_0, ax_hist] = ax_arr
 # ax_phi.set_ylim()

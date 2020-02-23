@@ -18,8 +18,6 @@ import pandas as pd
 import imageio
 
 from .utilities import compact_protein
-# from .evolution import build_generation_fitness_table
-# from .plotting import plot_threshold_fitness, plot_histogram_of_fitness
 
 
 def load_LG_matrix(full_file_name=None):
@@ -40,10 +38,10 @@ def load_LG_matrix(full_file_name=None):
     return LG_matrix
 
 
-def write_stability_table(fitness_table, out_paths):
+def write_stability_table(stability_table, out_paths):
     """Write matrix of stability changes."""
-    fitness_file_name = os.path.join(out_paths["initial"], "stability_table.csv")
-    fitness_table.to_csv(fitness_file_name, index_label="Position")
+    stability_file_name = os.path.join(out_paths["initial"], "stability_table.csv")
+    stability_table.to_csv(stability_file_name, index_label="Position")
 
 
 def write_initial_protein(initial_protein, out_paths):
@@ -70,52 +68,52 @@ def write_tree(generation, tree, out_paths):
             bf.write(f"Branch {b}: {branch}\n")
 
 
-def append_ks_statistics(stats_full_name, distribution_fitness, initial_fitness):
+def append_ks_statistics(stats_full_name, distribution_stability, initial_stability):
     with open(stats_full_name, "a") as stats_file:  # Append to file
         # Kolmogorov-Smirnov test of similarity to original distributuion
-        ksdata = sp.stats.ks_2samp(distribution_fitness, initial_fitness)
+        ksdata = sp.stats.ks_2samp(distribution_stability, initial_stability)
         stats_file.write("\n\n\n2-sided Kolmogorov-Smirnov test of similarity "
-                         "between the fitness space and evolving protein\n"
+                         "between the stability space and evolving protein\n"
                          "----------------------------------------------"
                          "----------------------------------------------\n\n")
-        stats_file.write("The Kolmogorov-Smirnov test between the fitness "
+        stats_file.write("The Kolmogorov-Smirnov test between the stability "
                          "space and the evolving protein gives a p-value of: "
                          f"{ksdata.pvalue}\n")
 
         if ksdata.pvalue < 0.05:
             stats_file.write("Therefore, as the p-value is smaller than 0.05 "
-                             "we can reject the hypothesis that the fitness "
+                             "we can reject the hypothesis that the stability "
                              "space distribution and the evolving sequence "
                              "distribution are the same.")
         else:
             stats_file.write("Therefore, as the p-value is larger than 0.05 "
-                             "we cannot reject the hypothesis that the fitness "
+                             "we cannot reject the hypothesis that the stability "
                              "space distribution and the evolving sequence "
                              "distribution are the same.")
 
 
-def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
-    """Write the results of 5 statistical tests on the global fitness space."""
+def write_histogram_statistics(stats_full_name, aa_variant_stabilities):
+    """Write the results of 5 statistical tests on the global stability space."""
 
     stats_file = open(stats_full_name, "w")  # open file
 
-    stats_file.write("Tests for normality on the amino acid fitnesses\n"
+    stats_file.write("Tests for normality on the amino acid stabilities\n"
                      "===============================================\n\n\n")
 
     # TODO: Check that the ordering is correct (default: row major)
-    fitnesses = aa_variant_fitnesses.ravel()
+    stabilities = aa_variant_stabilities.ravel()
 
     # Skewness
     stats_file.write("Skewness\n"
                      "--------\n\n"
                      "The skewness of the data is: "
-                     f"{sp.stats.skew(fitnesses)}\n\n\n")
+                     f"{sp.stats.skew(stabilities)}\n\n\n")
 
     # Kurtosis
     stats_file.write("Kurtosis\n"
                      "--------\n\n"
                      "The kurtosis of the data is: "
-                     f"{sp.stats.kurtosis(fitnesses)}\n\n\n")
+                     f"{sp.stats.kurtosis(stabilities)}\n\n\n")
 
     # Normality (Shapiro-Wilk)
     stats_file.write("Shapiro-Wilk test of non-normality\n"
@@ -123,7 +121,7 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
     with warnings.catch_warnings():
         # warnings.simplefilter("ignore", category=UserWarning)
         warnings.filterwarnings("ignore", message="p-value may not be accurate for N > 5000.")
-        W_shapiro, p_shapiro = sp.stats.shapiro(fitnesses)
+        W_shapiro, p_shapiro = sp.stats.shapiro(stabilities)
     stats_file.write("The Shapiro-Wilk test of non-normality for the entire "
                      f"dataset gives p = {p_shapiro}\n")
     if p_shapiro >= 0.05:
@@ -132,16 +130,16 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
         shapiro = ''
     stats_file.write("Therefore the Shapiro-Wilk test suggests that the whole "
                      f"dataset is {shapiro}confidently non-normal\n")
-    if len(fitnesses) > 5000:
+    if len(stabilities) > 5000:
         stats_file.write("Warning: There are more than 5,000 datapoints "
-                         f"({len(fitnesses)}) so the p-value may be inaccurate.\n\n")
+                         f"({len(stabilities)}) so the p-value may be inaccurate.\n\n")
     # stats_file.write("However if there are more than 5000 datapoints this "
     #                  "test is inaccurate. This test uses {} datapoints.\n\n"
-    #                  .format(len(fitnesses)))
+    #                  .format(len(stabilities)))
     else:
         stats_file.write("\n\n")
     passpercentcalc = []
-    for aa in aa_variant_fitnesses:
+    for aa in aa_variant_stabilities:
         with warnings.catch_warnings():
             # warnings.simplefilter("ignore", category=UserWarning)
             warnings.filterwarnings("ignore", message="p-value may not be accurate for N > 5000.")
@@ -159,7 +157,7 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
     significance_levels = (15, 10, 5, 2.5, 1)
     stats_file.write("Anderson-Darling test of normality\n"
                      "----------------------------------\n\n")
-    anderson_results = sp.stats.anderson(fitnesses)
+    anderson_results = sp.stats.anderson(stabilities)
     stats_file.write("The Anderson-Darling test of normality for the entire "
                      f"dataset gives a test statistic of {anderson_results.statistic} "
                      f"and critical values of {anderson_results.critical_values}\n")
@@ -177,12 +175,12 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
 
     # Set up output for significance levels - final bin represents "reject"
     hypothesis_tally = np.zeros(len(significance_levels) + 1)
-    for aa in aa_variant_fitnesses:
+    for aa in aa_variant_stabilities:
         result = sp.stats.anderson(aa)
         level_index = np.searchsorted(anderson_results.critical_values,
                                       result.statistic, side="left")
         hypothesis_tally[level_index] += 1
-    hypothesis_tally /= aa_variant_fitnesses.shape[0]  # Normalise
+    hypothesis_tally /= aa_variant_stabilities.shape[0]  # Normalise
     stats_file.write("According to the Anderson-Darling test, "
                      "the hypothesis of normality is not rejected for each "
                      "position in the dataset for: \n")
@@ -194,7 +192,7 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
     # Normality (Skewness-Kurtosis)
     stats_file.write("Skewness-kurtosis all test of difference from normality\n"
                      "-------------------------------------------------------\n\n")
-    skewkurtall = sp.stats.normaltest(fitnesses)
+    skewkurtall = sp.stats.normaltest(stabilities)
 
     stats_file.write("According to the skewness-kurtosis all test, the whole "
                      f"dataset gives p = {skewkurtall.pvalue}.")
@@ -206,7 +204,7 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
                          "a normal distribution.\n\n")
 
     skewkurtpass = []
-    for aa in aa_variant_fitnesses:
+    for aa in aa_variant_stabilities:
         distskewkurt = sp.stats.normaltest(aa)
         if distskewkurt.pvalue >= 0.05:
             skewkurtpass.append(1)
@@ -287,7 +285,7 @@ def create_output_folders(output_dir=None):
 
     # innerpaths = ['statistics', 'histograms']
     # for innerpath in innerpaths:
-    #     os.makedirs(os.path.join(run_path, "fitnessdistribution", innerpath))
+    #     os.makedirs(os.path.join(run_path, "stabilitydistribution", innerpath))
 
     out_paths = {path: os.path.join(run_path, path) for path in paths}
     out_paths["results"] = run_path

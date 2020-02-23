@@ -22,7 +22,7 @@ from .dataio import (create_output_folders, save_settings, write_tree,
 from .plotting import (plot_simulation, plot_evolution, plot_gamma_distribution,
                        plot_stability_histograms, plot_all_stabilities,
                        plot_stability_table, plot_LG_matrix,
-                       plot_phi_fitness_table)
+                       plot_phi_stability_table)
 
 
 def get_stability_table(clone_size, amino_acids, distributions):
@@ -157,22 +157,22 @@ def mutate_protein(protein, p_mutation, LG_matrix):
     return mutant
 
 
-def get_amino_acid_stabilities(protein, fitness_table):
+def get_amino_acid_stabilities(protein, stability_table):
     """Collate the individual stability contributions of each amino acid in a
     protein."""
-    return [fitness_table.loc[loc, aa] for loc, aa in enumerate(protein)]
+    return [stability_table.loc[loc, aa] for loc, aa in enumerate(protein)]
 
 
-def calculate_stability(protein, fitness_table):
-    """Calculate stability of a protein given the sequence and fitness values."""
-    return sum(get_amino_acid_stabilities(protein, fitness_table))
+def calculate_stability(protein, stability_table):
+    """Calculate stability of a protein given the sequence and stability values."""
+    return sum(get_amino_acid_stabilities(protein, stability_table))
 
 
-def get_random_protein(clone_size, fitness_table, start_amino_acid="M"):
+def get_random_protein(clone_size, stability_table, start_amino_acid="M"):
     """Generate an original starting protein clone_size long with a start
     amino acid set to methionine.
     """
-    protein = random.choices(fitness_table.columns.values.tolist(),
+    protein = random.choices(stability_table.columns.values.tolist(),
                              k=clone_size-1)
     # protein = [random.choice(RESIDUES) for _ in range(clone_size)] # < 3.6
     protein.insert(0, start_amino_acid)  # Start with methionine
@@ -181,14 +181,14 @@ def get_random_protein(clone_size, fitness_table, start_amino_acid="M"):
     return protein
 
 
-def twist_protein(protein, mutation_sites, fitness_table):
-    """Randomly change one variant site and calculate new fitness."""
+def twist_protein(protein, mutation_sites, stability_table):
+    """Randomly change one variant site and calculate new stability."""
     mutant = protein[:]
-    amino_acids = fitness_table.columns.values.tolist()
+    amino_acids = stability_table.columns.values.tolist()
     for ai in mutation_sites:
         mutant[ai] = random.choice(amino_acids)
-    fitness = calculate_stability(mutant, fitness_table)
-    return (mutant, fitness)
+    stability = calculate_stability(mutant, stability_table)
+    return (mutant, stability)
 
 
 def get_fit_protein(stability_start, clone_size, sites, stability_table):
@@ -284,35 +284,35 @@ def get_fit_protein(stability_start, clone_size, sites, stability_table):
     return protein
 
 
-def record_generation_stability(generation, population, sites, fitness_table,
+def record_generation_stability(generation, population, sites, stability_table,
                                 omega, p_mutation, record, out_paths):
-    """Record the fitness of every protein in the generation and store them in
-    dictionary. Optionally generate data and figures about fitness.
+    """Record the stability of every protein in the generation and store them in
+    dictionary. Optionally generate data and figures about stability.
     """
 
-    # Build distribution of fitness values existing in evolving protein
-    stabilities = get_phi_stability_table(population, fitness_table)
+    # Build distribution of stability values existing in evolving protein
+    stabilities = get_phi_stability_table(population, stability_table)
 
-    clims = (np.floor(np.amin(fitness_table.values)),
-             np.ceil(np.amax(fitness_table.values)))
-    plot_phi_fitness_table(generation, stabilities, clims, out_paths)
+    clims = (np.floor(np.amin(stability_table.values)),
+             np.ceil(np.amax(stability_table.values)))
+    plot_phi_stability_table(generation, stabilities, clims, out_paths)
 
     # if record["residues"]:
-    #     # save_dir = os.path.join(out_paths["figures"], "fitnessdotmatrix")
-    #     plot_threshold_fitness(generation, population, stabilities,
-    #                            fitness_table, omega, out_paths)
-    #     plot_fitness_space(generation, population, stabilities, fitness_table,
+    #     # save_dir = os.path.join(out_paths["figures"], "stabilitydotmatrix")
+    #     plot_threshold_stability(generation, population, stabilities,
+    #                            stability_table, omega, out_paths)
+    #     plot_stability_space(generation, population, stabilities, stability_table,
     #                        omega, out_paths)
 
     if record["statistics"]:
-        # Record 5 statistical tests on the protein fitness space
+        # Record 5 statistical tests on the protein stability space
         if generation == 0:
-            stats_file_name = "normal_distribution_statistics_fitness_space.md"
-            distributions = fitness_table.values
+            stats_file_name = "normal_distribution_statistics_stability_space.md"
+            distributions = stability_table.values
         else:
             stats_file_name = f"normal_distribution_statistics_generation{generation}.md"
             # Build distribution of stability values excluding invariant sites
-            distributions = get_phi_stability_table(population, fitness_table,
+            distributions = get_phi_stability_table(population, stability_table,
                                                     exclude_invariants=True,
                                                     variant_sites=sites.variant)
                                                     # record["invariants"], sites.variant)
@@ -320,42 +320,42 @@ def record_generation_stability(generation, population, sites, fitness_table,
         write_histogram_statistics(stats_full_name, distributions)
         if generation > 0:
             append_ks_statistics(stats_full_name, distributions.ravel(),
-                                 fitness_table.values.ravel())
+                                 stability_table.values.ravel())
 
     if record["histograms"]:
         # disthistfilename = "generation_{}.png".format(generation)
         # disthistfullname = os.path.join(out_paths["figures"], "histograms", disthistfilename)
-        # plot_histogram_of_fitness(generation, stabilities.ravel(),
-        #                           fitness_table.values.ravel(), omega, out_paths)
-        plot_stability_histograms(generation, stabilities, fitness_table,
+        # plot_histogram_of_stability(generation, stabilities.ravel(),
+        #                           stability_table.values.ravel(), omega, out_paths)
+        plot_stability_histograms(generation, stabilities, stability_table,
                                   omega, out_paths)
 
 
-def get_phi_stability_table(population, fitness_table, exclude_invariants=False,
+def get_phi_stability_table(population, stability_table, exclude_invariants=False,
                             variant_sites=None):
-    """Build a fitness table for given generation's population.
+    """Build a stability table for given generation's population.
 
-    The array has one row for each protein in the population and the fitness
+    The array has one row for each protein in the population and the stability
     value for each amino acid in its position.
     """
-    dist_clone_fitness = []
-    # Find and plot all fitness values in the current generation
+    dist_clone_stability = []
+    # Find and plot all stability values in the current generation
     for pi, protein in list(population.items()):
 
         if exclude_invariants:  # record["invariants"]:
-            stabilities = [fitness_table.loc[loc, amino_acid]
+            stabilities = [stability_table.loc[loc, amino_acid]
                            for loc, amino_acid in enumerate(protein)
                            if loc in variant_sites]
         else:
-            stabilities = get_amino_acid_stabilities(protein, fitness_table)
+            stabilities = get_amino_acid_stabilities(protein, stability_table)
 
-        dist_clone_fitness.append(stabilities)  # Becomes a new row
-    return np.asarray(dist_clone_fitness)
+        dist_clone_stability.append(stabilities)  # Becomes a new row
+    return np.asarray(dist_clone_stability)
 
 
-def calculate_population_fitness(population, fitness_table):
+def calculate_population_stability(population, stability_table):
     """Calculate the total stability of every protein in a population."""
-    return np.sum(get_phi_stability_table(population, fitness_table), axis=1)
+    return np.sum(get_phi_stability_table(population, stability_table), axis=1)
 
 
 def create_tree(n_proteins, n_roots):
@@ -407,10 +407,10 @@ def bifurcate_branches(branches):
     return new_bifurcations[:]
 
 
-def select_from_pool(protein_index, candidates, fitnesses, omega):
-    """Filter out original protein and those below the fitness threshold."""
+def select_from_pool(protein_index, candidates, stabilities, omega):
+    """Filter out original protein and those below the stability threshold."""
     pool = [c for c in candidates
-            if c != protein_index and fitnesses[c] >= omega]
+            if c != protein_index and stabilities[c] >= omega]
     if len(pool) > 0:
         new_protein_index = random.choice(pool)
     else:
@@ -418,15 +418,15 @@ def select_from_pool(protein_index, candidates, fitnesses, omega):
     return new_protein_index
 
 
-def replace_protein(protein_index, tree, fitnesses, omega):
+def replace_protein(protein_index, tree, stabilities, omega):
 
     if protein_index in tree["roots"]:
-        new_index = select_from_pool(protein_index, tree["roots"], fitnesses,
+        new_index = select_from_pool(protein_index, tree["roots"], stabilities,
                                      omega)
     else:  # Protein is in one of the branches
         for branch in tree["branches"]:
             if protein_index in branch:
-                new_index = select_from_pool(protein_index, branch, fitnesses,
+                new_index = select_from_pool(protein_index, branch, stabilities,
                                              omega)
     return new_index
 
@@ -434,7 +434,7 @@ def replace_protein(protein_index, tree, fitnesses, omega):
 # TODO: Refactor for efficiency?
 # def mutate_population(current_generation, n_mutations_per_gen, tree,
 #                       variant_sites, p_mutation, LG_matrix,
-#                       fitness_table, omega):
+#                       stability_table, omega):
 #     """Mutate a set of sequences based on the LG+I+G model of amino acid
 #     substitution.
 #     """
@@ -442,7 +442,7 @@ def replace_protein(protein_index, tree, fitnesses, omega):
 #     next_generation = copy.deepcopy(current_generation)
 #     for q in range(n_mutations_per_gen):  # impliment gamma
 #
-#         fitnesses = calculate_generation_fitness(next_generation, fitness_table)
+#         stabilities = calculate_generation_stability(next_generation, stability_table)
 #         counter = 0
 #         successful_mutation = False
 #         while not successful_mutation:  # Mutate until all branches have fit proteins
@@ -453,16 +453,16 @@ def replace_protein(protein_index, tree, fitnesses, omega):
 #             mutant = mutate_protein(protein, p_mutation, LG_matrix)
 #
 #             # next_generation[pi] = mutant  # update with new sequence
-#             fitness = calculate_stability(mutant, fitness_table)
+#             stability = calculate_stability(mutant, stability_table)
 #
-#             if fitness < omega:  # if fitness is less than threshold clone a random sequence in its place.
-#                 mutant_index = replace_protein(pi, tree, fitnesses,
+#             if stability < omega:  # if stability is less than threshold clone a random sequence in its place.
+#                 mutant_index = replace_protein(pi, tree, stabilities,
 #                                                omega)
 #                 # If no suitable clones are available, re-mutate the generation and start again
 #                 if mutant_index is None:
 #                     successful_mutation = False
-#                     fitnesses[pi] = fitness  # Save last unsuccessful fitness
-#                     # break  # out of loop over fitnesses
+#                     stabilities[pi] = stability  # Save last unsuccessful stability
+#                     # break  # out of loop over stabilities
 #                 else:
 #                     next_generation[pi] = next_generation[mutant_index]  # swap out unfit clone for fit clone
 #             counter += 1
@@ -472,11 +472,11 @@ def replace_protein(protein_index, tree, fitnesses, omega):
 #                                 "The mutation rate is too high, mu is too low "
 #                                 "or sigma is too small.")
 #
-#     return next_generation, fitnesses
+#     return next_generation, stabilities
 
 
 def mutate_population(current_generation, n_mutations_per_gen, tree,
-                      p_mutation, LG_matrix, fitness_table, omega):
+                      p_mutation, LG_matrix, stability_table, omega):
     """Mutate a set of sequences based on the LG+I+G model of amino acid
     substitution.
     """
@@ -493,8 +493,8 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
             mutant = mutate_protein(protein, p_mutation, LG_matrix)
             next_generation[pi] = mutant  # update with new sequence
 
-        stabilities = calculate_population_fitness(next_generation,
-                                                   fitness_table)
+        stabilities = calculate_population_stability(next_generation,
+                                                   stability_table)
 
         for pi in range(len(stabilities)):
             if stabilities[pi] < omega:  # clone a random sequence
@@ -516,13 +516,13 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
     return next_generation
 
 
-def kill_proteins(population, tree, death_rate, fitness_table, omega):
+def kill_proteins(population, tree, death_rate, stability_table, omega):
     n_clones = len(population)
     # mortals = random.sample(range(n_clones), int(n_clones*death_rate))
     clones = np.arange(n_clones)
     condemned = clones[np.where(np.random.rand(n_clones) < death_rate)]
     # Recalculate stabilities after all mutations
-    stabilities = calculate_population_fitness(population, fitness_table)
+    stabilities = calculate_population_stability(population, stability_table)
     for pi in condemned:
         new_index = replace_protein(pi, tree, stabilities, omega)
         if new_index is None:  # Should never happen
@@ -533,7 +533,7 @@ def kill_proteins(population, tree, death_rate, fitness_table, omega):
     return population
 
 
-def evolve(n_generations, population, fitness_table, omega, sites,
+def evolve(n_generations, population, stability_table, omega, sites,
            p_mutation, mutation_rate, death_rate, tree, LG_matrix,
            plot_omega, plot_epsilon, record, out_paths):
     """Generation generator - mutate a protein for a defined number of
@@ -550,23 +550,23 @@ def evolve(n_generations, population, fitness_table, omega, sites,
                                                        n_roots)
 
     # population = copy.deepcopy(initial_population)  # current generation
-    phi_stabilities = get_phi_stability_table(population, fitness_table)
+    phi_stabilities = get_phi_stability_table(population, stability_table)
     # Record initial population
-    record_generation_stability(0, population, sites, fitness_table, omega,
+    record_generation_stability(0, population, sites, stability_table, omega,
                                 p_mutation, record, out_paths)
     write_fasta_alignment(0, population, out_paths)
 
-    # Store each generation along with its fitness
+    # Store each generation along with its stability
     Generation = namedtuple('Generation', ['population', 'stabilities'])
-    # Create a list of generations and add initial population and fitness
+    # Create a list of generations and add initial population and stability
     history = [Generation(population=population, stabilities=phi_stabilities)]
     if record["data"]:
         save_history(0, history, out_paths)
 
     # TODO: Refactor plot_omega, plot_epsilon
-    plot_simulation(0, history, fitness_table, omega, plot_omega, plot_epsilon,
+    plot_simulation(0, history, stability_table, omega, plot_omega, plot_epsilon,
                    n_generations, out_paths)
-    plot_all_stabilities(0, history, fitness_table, omega,
+    plot_all_stabilities(0, history, stability_table, omega,
                          plot_omega, plot_epsilon, n_generations, out_paths)
 
     for gen in trange(n_generations):  # run evolution for n_generations
@@ -583,17 +583,17 @@ def evolve(n_generations, population, fitness_table, omega, sites,
         # Mutate population
         next_generation = mutate_population(population, n_mutations_per_gen,
                                             tree, p_mutation, LG_matrix,
-                                            fitness_table, omega)
+                                            stability_table, omega)
 
         # Allow sequences to die and be replacecd at a predefined rate
         if death_rate > 0:
             next_generation = kill_proteins(next_generation, tree, death_rate,
-                                            fitness_table, omega)
+                                            stability_table, omega)
 
-        phi_stabilities = get_phi_stability_table(population, fitness_table)
+        phi_stabilities = get_phi_stability_table(population, stability_table)
         # The population becomes next_generation only if bifurcations (and deaths) were successful
         population = next_generation
-        # Record intermediate fitnesses to show existence of unfit proteins
+        # Record intermediate stabilities to show existence of unfit proteins
         history.append(Generation(population=population, stabilities=phi_stabilities))
 
         # Write fasta every record["fasta_rate"] generations
@@ -601,12 +601,12 @@ def evolve(n_generations, population, fitness_table, omega, sites,
             write_fasta_alignment(gen+1, population, out_paths)
         # Record population details at the end of processing
         if (gen+1) % record["rate"] == 0:
-            record_generation_stability(gen+1, population, sites, fitness_table,
+            record_generation_stability(gen+1, population, sites, stability_table,
                                         omega, p_mutation, record, out_paths)
 
-            plot_simulation(gen+1, history, fitness_table, omega,
+            plot_simulation(gen+1, history, stability_table, omega,
                             plot_omega, plot_epsilon, n_generations, out_paths)
-            plot_all_stabilities(gen+1, history, fitness_table, omega,
+            plot_all_stabilities(gen+1, history, stability_table, omega,
                            plot_omega, plot_epsilon, n_generations, out_paths)
             if record["data"]:
                 save_history(gen+1, history, out_paths)
@@ -726,27 +726,26 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     LG_matrix = load_LG_matrix()  # Load LG matrix
     plot_LG_matrix(LG_matrix, out_paths)
 
-    # Make fitness table of Delta T_m values
-    fitness_table = get_stability_table(clone_size, LG_matrix.columns, distributions)
-    write_stability_table(fitness_table, out_paths)
+    # Make stability table of Delta T_m values
+    stability_table = get_stability_table(clone_size, LG_matrix.columns, distributions)
+    write_stability_table(stability_table, out_paths)
 
     if isinstance(stability_start, str) and stability_start.lower() == "low":
-        print("NOTE: With 'low' starting fitness selected Omega is ignored.")
-        # warnings.warn("With 'low' starting fitness selected Omega is ignored.")
-                      # "If the run fails, please check your fitness threshold,"
+        print("NOTE: With 'low' starting stability selected Omega is ignored.")
+        # warnings.warn("With 'low' starting stability selected Omega is ignored.")
+                      # "If the run fails, please check your stability threshold,"
                       # "omega, is low enough: {}".format(omega))
         plot_omega, plot_epsilon = False, True
         omega = -np.inf
     else:
-        # epsilon = clone_size * np.mean(fitness_table.values)
-        epsilon = clone_size * np.mean(fitness_table.values)  # mu
+        epsilon = clone_size * np.mean(stability_table.values)  # mu
         if omega < epsilon:
             plot_omega, plot_epsilon = True, True
         else:
             plot_omega, plot_epsilon = True, False
-    plot_stability_table(fitness_table, out_paths)
+    plot_stability_table(stability_table, out_paths)
 
-    T_max = sum(np.amax(fitness_table, axis=1))  # Fittest possible protein
+    T_max = sum(np.amax(stability_table, axis=1))  # Fittest possible protein
     assert omega < T_max
 
     # Generate variant/invariant sites
@@ -755,28 +754,28 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     # Generate mutation probabilities for every site
     p_mutation = gamma_ray(clone_size, sites, gamma, out_paths)  # TODO: Move plotting out
 
-    # Generate a protein of specified fitness taking into account the invariant
+    # Generate a protein of specified stability taking into account the invariant
     # sites created (calling variables in this order stops the evolutionary
     # process being biased by superfit invariant sites.)
     # phi
     initial_protein = get_fit_protein(stability_start, clone_size, sites,
-                                      fitness_table)
+                                      stability_table)
     # print_protein(initial_protein)
     write_initial_protein(initial_protein, out_paths)  # Record initial protein
-    initial_fitness = calculate_stability(initial_protein, fitness_table)
-    if initial_fitness < omega:
-        raise Exception("The fitness threshold is too high!")
-    # assert initial_fitness < T_max
+    initial_stability = calculate_stability(initial_protein, stability_table)
+    if initial_stability < omega:
+        raise Exception("The stability threshold is too high!")
+    # assert initial_stability < T_max
 
     initial_population = clone_protein(initial_protein, n_clones)  # copy
-    # Population = namedtuple('Population', ['proteins', 'sites', 'fitnesses'])
+    # Population = namedtuple('Population', ['proteins', 'sites', 'stabilities'])
 
     # Generate list of clone keys for bifurication
     tree = create_tree(n_clones, n_roots)
     write_roots(tree["roots"], out_paths)
     write_tree(0, tree, out_paths)
 
-    history = evolve(n_generations, initial_population, fitness_table, omega,
+    history = evolve(n_generations, initial_population, stability_table, omega,
                      sites, p_mutation, mutation_rate, death_rate, tree,
                      LG_matrix, plot_omega, plot_epsilon, record, out_paths)
 
@@ -784,13 +783,13 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     #                           r"$\sigma$ = {}".format(sigma),
     #                           "skew = {}".format(skew),
     #                           r"$\delta$ = {}".format(mutation_rate)])
-    plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
+    plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
                    out_paths)  # , legend_title=legend_title)
 
     # Create animations
     if record["gif"]:
         recorded_generations = list(range(0, n_generations+1, record["rate"]))
-        figures = ["pesst_gen", "phi_fitness_table", "stabilities_gen"]
+        figures = ["pesst_gen", "phi_stability_table", "stabilities_gen"]
         # if record["residues"]:
         #     figures.extend(["OLD_fit_dist_gen", "OLD_generation"])
         if record["histograms"]:

@@ -24,7 +24,7 @@ def process_fasta(stability_matrix, fasta_file, output_path):
                    for id, seq in seqlib.items()}
 
     base_name, _ = os.path.splitext(os.path.basename(fasta_file))
-    calcs_path = os.path.join(output_path, "fitcalc_{}".format(base_name))
+    calcs_path = os.path.join(output_path, f"fitcalc_{base_name}")
     if not os.path.exists(calcs_path):
         os.makedirs(calcs_path)
     else:

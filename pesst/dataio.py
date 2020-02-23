@@ -58,16 +58,16 @@ def write_roots(root_keys, out_paths):
     with open(os.path.join(out_paths["initial"], "roots.txt"), "w") as rootsfile:  # open file
         rootsfile.write("Roots:")
         for k in root_keys:
-            rootsfile.write("\nClone {}".format(str(k+1)))
+            rootsfile.write(f"\nClone {str(k+1)}")
 
 
 def write_tree(generation, tree, out_paths):
     """Write the roots and branches created by bifurcations."""
     with open(os.path.join(out_paths["tree"], "tree.txt"), "a") as bf:
-        bf.write("Generation {}\n".format(generation))
-        bf.write("Roots: {}\n".format(tree["roots"]))
-        for b, branch in enumerate(tree["branches"]):
-            bf.write("Branch {}: {}\n".format(b, branch))
+        bf.write(f"Generation {generation}\n")
+        bf.write(f"Roots: {tree['roots']}\n")
+        for b, branch in enumerate(tree['branches']):
+            bf.write(f"Branch {b}: {branch}\n")
 
 
 def append_ks_statistics(stats_full_name, distribution_fitness, initial_fitness):
@@ -80,7 +80,7 @@ def append_ks_statistics(stats_full_name, distribution_fitness, initial_fitness)
                          "----------------------------------------------\n\n")
         stats_file.write("The Kolmogorov-Smirnov test between the fitness "
                          "space and the evolving protein gives a p-value of: "
-                         "{}\n".format(ksdata.pvalue))
+                         f"{ksdata.pvalue}\n")
 
         if ksdata.pvalue < 0.05:
             stats_file.write("Therefore, as the p-value is smaller than 0.05 "
@@ -109,30 +109,29 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
     stats_file.write("Skewness\n"
                      "--------\n\n"
                      "The skewness of the data is: "
-                     "{}\n\n\n".format(sp.stats.skew(fitnesses)))
+                     f"{sp.stats.skew(fitnesses)}\n\n\n")
 
     # Kurtosis
     stats_file.write("Kurtosis\n"
                      "--------\n\n"
                      "The kurtosis of the data is: "
-                     "{}\n\n\n".format(sp.stats.kurtosis(fitnesses)))
+                     f"{sp.stats.kurtosis(fitnesses)}\n\n\n")
 
     # Normality (Shapiro-Wilk)
     stats_file.write("Shapiro-Wilk test of non-normality\n"
                      "----------------------------------\n\n")
     W_shapiro, p_shapiro = sp.stats.shapiro(fitnesses)
     stats_file.write("The Shapiro-Wilk test of non-normality for the entire "
-                     "dataset gives p = {}\n".format(p_shapiro))
+                     f"dataset gives p = {p_shapiro}\n")
     if p_shapiro >= 0.05:
         shapiro = 'not '
     else:
         shapiro = ''
     stats_file.write("Therefore the Shapiro-Wilk test suggests that the whole "
-                     "dataset is {}confidently non-normal\n".format(shapiro))
+                     f"dataset is {shapiro}confidently non-normal\n")
     if len(fitnesses) > 5000:
-        stats_file.write("Warning: There are more than 5000 datapoints ({}) "
-                         "so the p-value may be inaccurate.\n\n"
-                         .format(len(fitnesses)))
+        stats_file.write("Warning: There are more than 5,000 datapoints "
+                         f"({len(fitnesses)}) so the p-value may be inaccurate.\n\n")
     # stats_file.write("However if there are more than 5000 datapoints this "
     #                  "test is inaccurate. This test uses {} datapoints.\n\n"
     #                  .format(len(fitnesses)))
@@ -147,8 +146,7 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
             passpercentcalc.append(0)
     stats_file.write("According to Shapiro-Wilk test, the proportion of "
                      "individual positions that are not confidently "
-                     "non-normal is: {:.2%}\n\n\n"
-                     .format(sum(passpercentcalc) / len(passpercentcalc)))
+                     f"non-normal is: {sum(passpercentcalc) / len(passpercentcalc):.2%}\n\n\n")
 
     # Normality (Anderson-Darling)
     # Significance levels (percentages) for normal distributions
@@ -157,10 +155,8 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
                      "----------------------------------\n\n")
     anderson_results = sp.stats.anderson(fitnesses)
     stats_file.write("The Anderson-Darling test of normality for the entire "
-                     "dataset gives a test statistic of {} "
-                     "and critical values of {}\n"
-                     .format(anderson_results.statistic,
-                             anderson_results.critical_values))
+                     f"dataset gives a test statistic of {anderson_results.statistic} "
+                     f"and critical values of {anderson_results.critical_values}\n")
     if anderson_results.statistic > anderson_results.critical_values[-1]:
         stats_file.write("Therefore according to the Anderson-Darling test, "
                          "the hypothesis of normality is rejected for the "
@@ -170,8 +166,8 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
                                       anderson_results.statistic, side="left")
         stats_file.write("Therefore according to the Anderson-Darling test, "
                          "the hypothesis of normality is not rejected at the "
-                         "{}% significance level for the entire dataset.\n\n"
-                         .format(significance_levels[level_index]))
+                         f"{significance_levels[level_index]}% significance "
+                         "level for the entire dataset.\n\n")
 
     # Set up output for significance levels - final bin represents "reject"
     hypothesis_tally = np.zeros(len(significance_levels) + 1)
@@ -185,10 +181,9 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
                      "the hypothesis of normality is not rejected for each "
                      "position in the dataset for: \n")
     for proportion, level in zip(hypothesis_tally, significance_levels):
-        stats_file.write("{:.2%} of positions at the "
-                         "{}% significance level\n".format(proportion, level))
-    stats_file.write("and {:.2%} of positions are rejected.\n\n\n"
-                     .format(hypothesis_tally[-1]))
+        stats_file.write(f"{proportion:.2%} of positions at the "
+                         f"{level}% significance level\n")
+    stats_file.write(f"and {hypothesis_tally[-1]:.2%} of positions are rejected.\n\n\n")
 
     # Normality (Skewness-Kurtosis)
     stats_file.write("Skewness-kurtosis all test of difference from normality\n"
@@ -196,7 +191,7 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
     skewkurtall = sp.stats.normaltest(fitnesses)
 
     stats_file.write("According to the skewness-kurtosis all test, the whole "
-                     "dataset gives p = {}.".format(skewkurtall.pvalue))
+                     f"dataset gives p = {skewkurtall.pvalue}.")
     if skewkurtall.pvalue >= 0.05:
         stats_file.write("\nTherefore the dataset does not differ significantly "
                          "from a normal distribution.\n\n")
@@ -212,22 +207,21 @@ def write_histogram_statistics(stats_full_name, aa_variant_fitnesses):
         else:
             skewkurtpass.append(0)
     stats_file.write("According to the skewness-kurtosis all test, "
-                     "{:.2%} of sites do not differ significantly from a "
-                     "normal distribution."
-                     .format(sum(skewkurtpass) / len(skewkurtpass)))
+                     f"{sum(skewkurtpass) / len(skewkurtpass):.2%} of sites "
+                     "do not differ significantly from a normal distribution.")
 
     stats_file.close()
 
 
 def write_fasta_alignment(generation, population, out_paths):
     """Write fasta alignment from sequences provided."""
-    fastafilename = "generation_{}.fasta".format(generation)
+    fastafilename = f"generation_{generation}.fasta"
     fullname = os.path.join(out_paths["fastas"], fastafilename)
     with open(fullname, "w") as fastafile:  # open file
         # Write fasta header followed by residue in generation string
         # TODO: This should be an ordered dict or list to preserve the order...
         for p, protein in list(population.items()):
-            fastafile.write(">clone_{}\n".format(p+1))
+            fastafile.write(f">clone_{p+1}\n")
             fastafile.write(compact_protein(protein)+"\n")
 
 
@@ -247,7 +241,7 @@ def write_final_fasta(population, tree, out_paths):
     with open(full_name, "w") as treefastafile:  # open file
         # Write fasta header followed by residue in generation string
         for pi in selection:
-            treefastafile.write(">clone_{}\n".format(pi+1))
+            treefastafile.write(f">clone_{pi+1}\n")
             treefastafile.write(compact_protein(population[pi]))
             treefastafile.write('\n')
         # Choose a random root to write
@@ -270,16 +264,17 @@ def create_output_folders(output_dir=None):
         output_dir = datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
     run_path = os.path.join("results", output_dir)
     if os.path.isdir(run_path):
-        response = input("Warning: the output directory '{}' already exists! Delete? [Y/n]: ".format(run_path))
+        response = input(f"Warning: the output directory '{run_path}' already exists! Delete? [Y/n]: ")
         if response.lower() == "y" or response.lower() == "":
             shutil.rmtree(run_path)
         else:
             exit()
     os.makedirs(run_path)
+    full_run_path = os.path.join(os.getcwd(), run_path)
     if os.path.isdir(run_path):
-        print("Results directory successfully created: {}".format(os.path.join(os.getcwd(), run_path)))
+        print(f"Results directory successfully created: {full_run_path}")
     else:
-        warnings.warn("Results directory not created: {}".format(os.path.join(os.getcwd(), run_path)))
+        warnings.warn(f"Results directory not created: {full_run_path}")
 
     for path in paths:
         os.makedirs(os.path.join(run_path, path))
@@ -324,13 +319,11 @@ def create_gif(filenames, duration=0.5):
 def save_history(generation, history, out_paths):
     """Save the last generation to disk."""
 
-    stabilities_file = os.path.join(out_paths["data"],
-                                    "stabilities_{}.csv".format(generation))
+    stabilities_file = os.path.join(out_paths["data"], f"stabilities_{generation}.csv")
     np.savetxt(stabilities_file, history[-1].stabilities, delimiter=',')
 
     # Save protein sequences
-    clones_file = os.path.join(out_paths["data"],
-                               "clones_{}.json".format(generation))
+    clones_file = os.path.join(out_paths["data"], f"clones_{generation}.json")
     population = {key: compact_protein(protein)
                   for key, protein in history[-1].population.items()}
     with open(clones_file, "w") as gf:

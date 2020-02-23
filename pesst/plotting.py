@@ -66,22 +66,23 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
     ax.set_xlabel("Generation")
     ax.set_ylabel("$T_m$", fontweight='bold')
     if fig_title:
-        ax.set_title("\n".join(wrap("Stability change for {} clones of {} "
-                                    "amino acids, mutated over {} generations"
-                                    .format(n_clones, clone_size, n_generations), 60)), fontweight='bold')
+        ax.set_title("\n".join(wrap(f"Stability change for {n_clones} clones "
+                                    f"of {clone_size} amino acids, mutated "
+                                    f"over {n_generations} generations", 60)), 
+                     fontweight='bold')
     if plot_omega:  # Add fitness threshold
         ax.axhline(omega, color=colours["omega"], lw=3, linestyle="-",
-                   zorder=10, label=r"$\Omega$ = {}".format(omega))
+                   zorder=10, label=rf"$\Omega$ = {omega}")
     if plot_epsilon:  # Add theoretical convergence line
         epsilon = clone_size * np.mean(fitness_table.values)
         ax.axhline(epsilon, color=colours["epsilon"], lw=3, linestyle=":",
-                   zorder=20, label=r"$\epsilon$ = {:.2f}".format(epsilon))
+                   zorder=20, label=rf"$\epsilon$ = {epsilon:.2f}")
 
     legend = ax.legend(title=legend_title)
     legend.set_zorder(100)
 
     if fig is not None:
-        evo_fig = "stability_evolution_over_{}_generations.png".format(n_generations)
+        evo_fig = f"stability_evolution_over_{n_generations}_generations.png"
         fig.savefig(os.path.join(out_paths["figures"], evo_fig))
     return ax
 
@@ -107,7 +108,7 @@ def plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega,
     #           label=r"$\mu_0$ = {:.2f}".format(mean_stability_0))
     ax.hlines(mean_stability, 0, n_clones-1,
               colors=colours["aa_g_mu"], linestyles="--", lw=3, zorder=20,
-              label=r"$\mu_p$ = {:.2f}".format(mean_stability))
+              label=rf"$\mu_p$ = {mean_stability:.2f}")
     ncol = 2
     # if omega > -np.inf:
     #     ax.hlines(omega, 0, n_clones-1,
@@ -140,7 +141,7 @@ def plot_initial_amino_acid_stabilities(fitness_table, omega, colours=None, ax=N
     ax.plot(fitness_table, "o", color=colours["aa_0"], markersize=1)
     ax.hlines(mean_stability_0, 0, clone_size-1,
               colors=colours["aa_0_mu"], linestyles="--", lw=3, zorder=20,
-              label=r"$\mu_0$ = {:.2f}".format(mean_stability_0))
+              label=rf"$\mu_0$ = {mean_stability_0:.2f}")
 
     # if omega > -np.inf:
     #     ax.hlines(omega, 0, clone_size-1,
@@ -169,15 +170,15 @@ def plot_stability_histograms(generation, aa_stabilities, fitness_table, omega,
     mean_stability = np.mean(aa_stabilities)
 
     # Plot initial distribution
-    stats_0 = "\n".join([r"$\sigma$ = {:.2f}".format(np.std(fitness_table.values)),
-                         "skew = {:.2f}".format(stats.skew(fitness_table.values, axis=None)),
-                         "kurtosis = {:.2f}".format(stats.kurtosis(fitness_table.values, axis=None))])
+    stats_0 = "\n".join([rf"$\sigma$ = {np.std(fitness_table.values):.2f}",
+                         f"skew = {stats.skew(fitness_table.values, axis=None):.2f}",
+                         f"kurtosis = {stats.kurtosis(fitness_table.values, axis=None):.2f}"])
     n, bins, _ = ax.hist(fitness_table.values.ravel(), bins='sqrt',
                          align='mid', orientation=orient,
                          color=colours["aa_0"], alpha=0.8, density=True,
-                         label="Initial distribution\n{}".format(stats_0))
+                         label=f"Initial distribution\n{stats_0}")
     # Plot initial distribution mean
-    label = r"$\mu_0$ = {:.2f}".format(mean_stability_0)
+    label = rf"$\mu_0$ = {mean_stability_0:.2f}"
     if orient == 'vertical':
         ax.axvline(x=mean_stability_0, color=colours["aa_0_mu"],
                    linestyle="--", lw=3, zorder=20, label=label)
@@ -187,15 +188,15 @@ def plot_stability_histograms(generation, aa_stabilities, fitness_table, omega,
 
     # Plot current distribution
     # TODO: Make "Intial/Present Distribution" bold or titles of extra legends
-    stats_g = "\n".join([r"$\sigma$ = {:.2f}".format(np.std(aa_stabilities)),
-                         "skew = {:.2f}".format(stats.skew(aa_stabilities, axis=None)),
-                         "kurtosis = {:.2f}".format(stats.kurtosis(aa_stabilities, axis=None))])
+    stats_g = "\n".join([rf"$\sigma$ = {np.std(aa_stabilities):.2f}",
+                         f"skew = {stats.skew(aa_stabilities, axis=None):.2f}",
+                         f"kurtosis = {stats.kurtosis(aa_stabilities, axis=None):.2f}"])
     ax.hist(aa_stabilities.ravel(), bins=bins,
             align='mid', color=colours["aa_g"], alpha=0.8,
             orientation=orient, density=True,
-            label="Present distribution\n{}".format(stats_g))
+            label=f"Present distribution\n{stats_g}")
     # Plot current distribution mean
-    label = r"$\mu_p$ = {:.2f}".format(mean_stability)
+    label = rf"$\mu_p$ = {mean_stability:.2f}"
     if orient == 'vertical':
         ax.axvline(x=mean_stability, color=colours["aa_g_mu"],
                    linestyle="--", lw=3, zorder=20, label=label)
@@ -233,7 +234,7 @@ def plot_stability_histograms(generation, aa_stabilities, fitness_table, omega,
                                     "every evolving clone", 60)),
                      fontweight='bold')
         fig.savefig(os.path.join(out_paths["figures"],
-                                 "histogram_{}.png".format(generation)))
+                                 f"histogram_{generation}.png"))
     return ax
 
 
@@ -257,17 +258,17 @@ def plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon,
 
     ax.hlines(mean_protein_stability, 0, n_clones-1,
               colors=colours["phi_mu"], linestyles="--", lw=3, zorder=20,
-              label=r"$\mu_\phi$ = {:.2f}".format(mean_protein_stability))
+              label=rf"$\mu_\phi$ = {mean_protein_stability:.2f}")
 
     if plot_epsilon:
         ax.hlines(epsilon, 0, n_clones-1,
                   colors=colours["epsilon"], linestyles=":", lw=3, zorder=20,
-                  label=r"$\epsilon$ = {:.2f}".format(epsilon))
+                  label=rf"$\epsilon$ = {epsilon:.2f}")
     ncol = 2
     if omega > -np.inf:
         ax.hlines(omega, 0, n_clones-1,
                   colors=colours["omega"], linestyles="-", lw=3, zorder=10,
-                  label=r"$\Omega$ = {}".format(omega))
+                  label=rf"$\Omega$ = {omega}")
         ncol += 1
 
     ax.set_xlabel("Clone")
@@ -393,24 +394,22 @@ def plot_all_stabilities(generation, history, fitness_table, omega,
     ax_phi_hist.set_ylabel(None)
 
     ax_phi_hist.axhline(y=mean_protein_stability, color=colours['phi_mu'], linestyle="--", lw=3, zorder=10,
-                        label=r"$\mu_\phi$ = {:.2f}".format(mean_protein_stability))
-                         # label=r"$\mu_p$ = {:.2f}".format(mean_fitness))
+                        label=rf"$\mu_\phi$ = {mean_protein_stability:.2f}")
     mean_protein_stability_0 = np.mean(initial_protein_stabilities)
     ax_phi_hist.axhline(y=mean_protein_stability_0, color=colours['phi_0_mu'], linestyle="-", lw=3, zorder=10,
-                        label=r"$\mu_{{\phi_0}}$ = {}".format(omega))
+                        label=rf"$\mu_{{\phi_0}}$ = {omega}")
     if plot_epsilon:
         ax_phi_hist.axhline(epsilon,
                   color=colours["epsilon"], linestyle=":", lw=3, zorder=20,
-                  label=r"$\epsilon$ = {:.2f}".format(epsilon))
+                  label=rf"$\epsilon$ = {epsilon:.2f}")
 
     ax_phi_hist.legend()
 
     # Add title and save
     # plt.subplots_adjust(top=0.85)
-    fig.suptitle(("Generation {}".format(generation)), fontweight='bold')
+    fig.suptitle((f"Generation {generation}"), fontweight='bold')
     # fig.set_tight_layout(True)
-    filename = os.path.join(out_paths["figures"],
-                            "stabilities_gen_{}.png".format(generation))
+    filename = os.path.join(out_paths["figures"], f"stabilities_gen_{generation}.png")
     fig.savefig(filename)
     plt.close()
     return (fig, [ax_phi_0, ax_phi, ax_phi_hist, 
@@ -517,18 +516,18 @@ def plot_simulation(generation, history, fitness_table, omega,
                 # label=r"$\mu_\phi$ = {:.2f}".format(mean_protein_stability))
     handles, labels = ax_evo.get_legend_handles_labels()
     mu_text_index = labels.index(r"$\mu_\phi$")
-    new_label = r"$\mu_\phi$ = {:.2f}".format(mean_protein_stability)
-    ax_evo.legend_.get_texts()[mu_text_index].set_text("{: <16}".format(new_label))
+    new_label = rf"$\mu_\phi$ = {mean_protein_stability:.2f}"
+    ax_evo.legend_.get_texts()[mu_text_index].set_text(f"{new_label: <16}")
     plt.setp(ax_evo.get_yticklabels(), visible=False)
     # NOTE: ax.set_xticklabels([]) removes ticks entirely
     ax_evo.set_ylabel(None)
 
     # Add title and save
     # plt.subplots_adjust(top=0.85)
-    fig.suptitle(("Generation {}".format(generation)), fontweight='bold')
+    fig.suptitle((f"Generation {generation}"), fontweight='bold')
     # fig.set_tight_layout(True)
     filename = os.path.join(out_paths["figures"],
-                            "pesst_gen_{}.png".format(generation))
+                            f"pesst_gen_{generation}.png")
     fig.savefig(filename)
     plt.close()
     return (fig, [ax_phi, ax_evo, 
@@ -553,8 +552,8 @@ def plot_gamma_distribution(gamma, samples, quartiles, average_medians,
     #                         / (stats.gamma(kappa).pdf(x, kappa)))  # * theta ** kappa))
     y = stats.gamma.pdf(x, kappa, scale=theta)
     ax.plot(x, y, linewidth=2, color='k', alpha=0,
-            label="\n".join([r"$\kappa$ = {:.2f}".format(kappa),
-                             r"$\theta$ = {:.2f}".format(theta)]))
+            label="\n".join([rf"$\kappa$ = {kappa:.2f}",
+                             rf"$\theta$ = {theta:.2f}"]))
     ax.hist(samples, bins=int(np.sqrt(len(samples))), range=(0, 6),
             density=True, color='g', histtype='step')
     ax.fill_between(x, y, where=x > quartiles[0], color='#4c4cff')
@@ -566,9 +565,9 @@ def plot_gamma_distribution(gamma, samples, quartiles, average_medians,
     ax.axvline(x=average_medians[2], color="#404040", linestyle=":")
     ax.axvline(x=average_medians[3], color="#404040", linestyle=":")
     ax.set_title("\n".join(wrap("Gamma rate categories calculated as the the "
-                                "average of {} median values of 4 equally likely "
-                                "quartiles of {:,} randomly sampled vaules"
-                                .format(n_iterations, n_samples), 60)),
+                                f"average of {n_iterations} median values of "
+                                f"4 equally likely quartiles of {n_samples:,} "
+                                "randomly sampled vaules", 60)),
                  fontweight='bold', fontsize=10)
     legend = ax.legend()
     legend.set_zorder(100)
@@ -621,8 +620,8 @@ def plot_phi_fitness_table(generation, phi_fitness_table, clims, out_paths):
     ax.set_xlabel("Location")
     ax.set_ylabel("Clone")
     filename = os.path.join(out_paths["figures"],
-                            "phi_fitness_table_{}.png".format(generation))
-    ax.set_title("Generation {}".format(generation), fontweight="bold")
+                            f"phi_fitness_table_{generation}.png")
+    ax.set_title(f"Generation {generation}", fontweight="bold")
     fig.savefig(filename)
     plt.close()
 

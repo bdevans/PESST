@@ -265,7 +265,7 @@ def record_generation_stability(generation, population, sites, fitness_table,
             stats_file_name = "normal_distribution_statistics_fitness_space.md"
             distributions = fitness_table.values
         else:
-            stats_file_name = "normal_distribution_statistics_generation{}.md".format(generation)
+            stats_file_name = f"normal_distribution_statistics_generation{generation}.md"
             # Build distribution of stability values excluding invariant sites
             distributions = get_phi_stability_table(population, fitness_table,
                                                     exclude_invariants=True,
@@ -481,7 +481,7 @@ def kill_proteins(population, tree, death_rate, fitness_table, omega):
     for pi in condemned:
         new_index = replace_protein(pi, tree, stabilities, omega)
         if new_index is None:  # Should never happen
-            warnings.warn("Unable to kill protein {}!".format(pi))
+            warnings.warn(f"Unable to kill protein {pi}!")
             raise Exception("No suitable candidates on branch!")
         else:
             population[pi] = population[new_index]  # Replace dead protein
@@ -726,7 +726,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
             figures.append("histogram")
         for fig_base in figures:
             path_root = os.path.join(out_paths["figures"], fig_base)
-            filenames = [path_root+"_{}.png".format(gen)
+            filenames = [f"{path_root}_{gen}.png"
                          for gen in recorded_generations]
             create_gif(filenames, duration=record["gif_rate"])
 

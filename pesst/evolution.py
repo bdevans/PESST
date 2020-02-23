@@ -252,12 +252,12 @@ def record_generation_stability(generation, population, sites, fitness_table,
              np.ceil(np.amax(fitness_table.values)))
     plot_phi_fitness_table(generation, stabilities, clims, out_paths)
 
-    if record["residues"]:
-        # save_dir = os.path.join(out_paths["figures"], "fitnessdotmatrix")
-        plot_threshold_fitness(generation, population, stabilities,
-                               fitness_table, omega, out_paths)
-        plot_fitness_space(generation, population, stabilities, fitness_table,
-                           omega, out_paths)
+    # if record["residues"]:
+    #     # save_dir = os.path.join(out_paths["figures"], "fitnessdotmatrix")
+    #     plot_threshold_fitness(generation, population, stabilities,
+    #                            fitness_table, omega, out_paths)
+    #     plot_fitness_space(generation, population, stabilities, fitness_table,
+    #                        omega, out_paths)
 
     if record["statistics"]:
         # Record 5 statistical tests on the protein fitness space
@@ -521,6 +521,8 @@ def evolve(n_generations, population, fitness_table, omega, sites,
     # TODO: Refactor plot_omega, plot_epsilon
     plot_simulation(0, history, fitness_table, omega, plot_omega, plot_epsilon,
                    n_generations, out_paths)
+    plot_all_stabilities(0, history, fitness_table, omega,
+                         plot_omega, plot_epsilon, n_generations, out_paths)
 
     for gen in trange(n_generations):  # run evolution for n_generations
 
@@ -559,6 +561,7 @@ def evolve(n_generations, population, fitness_table, omega, sites,
 
             plot_simulation(gen+1, history, fitness_table, omega,
                             plot_omega, plot_epsilon, n_generations, out_paths)
+            plot_all_stabilities(gen+1, history, fitness_table, omega,
                            plot_omega, plot_epsilon, n_generations, out_paths)
             if record["data"]:
                 save_history(gen+1, history, out_paths)
@@ -719,9 +722,9 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     # Create animations
     if record["gif"]:
         recorded_generations = list(range(0, n_generations+1, record["rate"]))
-        figures = ["pesst_gen", "phi_fitness_table"]
-        if record["residues"]:
-            figures.extend(["fit_dist_gen", "generation"])
+        figures = ["pesst_gen", "phi_fitness_table", "stabilities_gen"]
+        # if record["residues"]:
+        #     figures.extend(["OLD_fit_dist_gen", "OLD_generation"])
         if record["histograms"]:
             figures.append("histogram")
         for fig_base in figures:

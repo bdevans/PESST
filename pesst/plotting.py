@@ -437,10 +437,10 @@ def plot_simulation(generation, history, fitness_table, omega,
     mean_stability_0 = np.mean(fitness_table.values)
     epsilon = clone_size * mean_stability_0
 
-    fig = plt.figure(figsize=(10, 6))  # (width, height)
+    fig = plt.figure(figsize=(12, 9))  # (width, height)
     # https://matplotlib.org/users/gridspec.html
     gs = mpl.gridspec.GridSpec(nrows=2, ncols=3,
-                               width_ratios=[2, 1, 2],  # [Left, Middle, Right]
+                               width_ratios=[3, 2, 2],  # [Left, Middle, Right]
                                height_ratios=[2, 2])  # [Top, Bottom]
     gs.update(top=0.95, wspace=0.08, hspace=0.16)  # Leave room for the title
 

@@ -27,6 +27,7 @@ stability_start = 'low' #(omega + 10, omega + 20)  # high, (x, y) or low
 mu = -3 #-1.2
 sigma = 2.5
 skew = 3  # skewnorm.pdf(x, skew) = 2 * norm.pdf(x) * norm.cdf(skew*x)
+distributions = 'Tokuriki'  # None
 mutation_rate = 0.002  # Proportion of the total amino acids in mutating in the population each generation - should be small!
 
 output_dir = None
@@ -54,7 +55,7 @@ gamma = {"shape": 1.9,  # Most phylogenetic systems that use gamma only let you 
 # Set what to record
 record = {"rate": 50,           # write a new fasta file every x generations
           "fasta_rate": 50,     # write a new fasta file every x generations
-          "residues": False,
+        #   "residues": True,  # False,
           "statistics": True,
           "histograms": True,
           # "invariants": True,
@@ -62,6 +63,6 @@ record = {"rate": 50,           # write a new fasta file every x generations
           "gif": True,
           "gif_rate": 0.25}
 
-history = pesst(n_generations, stability_start, omega, mu, sigma, skew,
+history = pesst(n_generations, stability_start, omega, mu, sigma, skew, distributions,
                 n_clones, n_roots, clone_size, p_invariant, mutation_rate,
                 death_rate, gamma, record, output_dir, seed)

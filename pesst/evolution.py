@@ -25,14 +25,59 @@ from .plotting import (plot_simulation, plot_evolution, plot_gamma_distribution,
                        plot_phi_fitness_table)
 
 
-def get_stability_table(clone_size, mu, sigma, skew, amino_acids):
-    """Generate a dictionary describing list of fitness values at each position
-    of the generated protein.
+def get_stability_table(clone_size, amino_acids, distributions):
+    """Generate a dataframe describing the stability contributions for each 
+    amino acid (columns) in each position (rows) of the generated protein.
     """
-    values = sp.stats.skewnorm.rvs(skew, loc=mu, scale=sigma,
-                                   size=(clone_size, len(amino_acids)))
-    fitness_table = pd.DataFrame(values, columns=amino_acids)
-    return fitness_table
+
+    assert len(distributions)
+
+    if isinstance(distributions, (tuple, list)) \
+        and isinstance(distributions[0], (int, float, complex)):
+        # Boilerplate code to wrap a single set of parameters in a list
+        distributions = [distributions]
+
+    # values = np.zeros(shape=(clone_size, len(amino_acids)))
+    values = []
+    remaining_residues = clone_size
+    for d, params in enumerate(distributions):
+        if isinstance(params, dict):
+            assert 'mu' in params
+            assert 'sigma' in params
+            mu, sigma = params['mu'], params['sigma']
+            skew = params.get("skew", 0)
+            proportion = params.get("proportion", 1/len(distributions))
+        elif isinstance(params, (list, tuple)):
+            if len(params) == 2:
+                (mu, sigma) = params
+                skew = 0
+                proportion = 1/len(distributions)
+            elif len(params) == 3:
+                (mu, sigma, skew) = params
+                proportion = 1/len(distributions)
+            elif len(params) == 4: 
+                (mu, sigma, skew, proportion) = params
+            else:
+                raise RuntimeError(
+                    f'Unexpected number of parameters passed: {len(params)}'
+                    'Expected: 2 <= len(params) < 5')
+        else:
+            raise RuntimeError("Unexpected data format for distributions parameters!"
+                               f"Expected dictionary, tuple or list (got {type(params)})!")
+        if d < len(distributions)-1:
+            n_residues = int(np.round(proportion * clone_size))
+            remaining_residues -= n_residues
+        else:  # Last distribution
+            n_residues = remaining_residues
+        print(f'Distribution {d}: mu={mu}, sigma={sigma}, skew={skew}, proportion={proportion} ==> n_residues={n_residues}')
+        values.append(sp.stats.skewnorm.rvs(skew, loc=mu, scale=sigma,
+                                            size=(n_residues, len(amino_acids))))
+
+    values = np.concatenate(values, axis=0)  # vstack
+    assert clone_size == values.shape[0] and len(amino_acids) == values.shape[1], f"Unexpect shape: {values.shape}"
+    # Shuffle rows in place
+    np.random.shuffle(values)
+    return pd.DataFrame(values, columns=amino_acids)
 
 
 def clone_protein(protein, n_clones):
@@ -86,10 +131,10 @@ def gamma_ray(clone_size, sites, gamma, out_paths):
         # Define quartiles in that data with equal probability
         quartiles = np.percentile(samples, (0, 25, 50, 75, 100),
                                   interpolation='midpoint')
-            # Find the median of each quartile
-            medians[i, :], _, _ = sp.stats.binned_statistic(samples, samples,
-                                                            statistic='median',
-                                                            bins=quartiles)
+        # Find the median of each quartile
+        medians[i, :], _, _ = sp.stats.binned_statistic(samples, samples,
+                                                        statistic='median',
+                                                        bins=quartiles)
     # Calculate average of medians across iterations
     average_medians = np.mean(medians, axis=0)
 
@@ -571,7 +616,7 @@ def evolve(n_generations, population, fitness_table, omega, sites,
 
 
 def pesst(n_generations=2000, stability_start='high', omega=0,
-          mu=0, sigma=2.5, skew=0,
+          mu=0, sigma=2.5, skew=0, distributions='Tokuriki',
           n_clones=52, n_roots=4, clone_size=100, p_invariant=0.1,
           mutation_rate=0.001, death_rate=0.02,
           gamma_kwargs=None, record_kwargs=None, output_dir=None, seed=None):
@@ -584,6 +629,24 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     assert 0.0 <= p_invariant < 1.0  # Must be less than 1 for evolution
     n_invariants = int(p_invariant * clone_size)
     assert 0 <= n_invariants < clone_size
+
+    if distributions is None:
+        distributions = [(mu, sigma, skew, 1)]
+    elif isinstance(distributions, str) and distributions.lower() == 'tokuriki':
+        # Calculate the fraction of surface (and core) residues accoring to:
+        # Tokuriki et al. 2007 doi:10.1016/j.jmb.2007.03.069
+        P1 = 1.13 - (0.3 * np.log10(clone_size))
+        P1 = np.clip(P1, 0, 1)  # Ensure 0 <= P1 <= 1
+        n_surface = int(np.floor(P1 * clone_size))
+        n_core = clone_size - n_surface
+        # Create a list of distributions
+        # Distribution = namedtuple('Distribution', ['mu', 'sigma', 'skew', 'proportion'])
+        # distributions = [Distribution(mu=0.56, sigma=0.9, skew=0, proportion=P1),
+        #                  Distribution(mu=1.96, sigma=1.93, skew=0, proportion=1-P1)]
+        distributions = [{"mu": 0.56, "sigma": 0.90, "skew": 0, "proportion": P1},
+                         {"mu": 1.96, "sigma": 1.93, "skew": 0, "proportion": 1-P1}]
+    else:
+        assert isinstance(distributions, (list, tuple))
 
     # TODO: Add rerun flag to load settings (and seed)
     # settings = json.load(sf)
@@ -645,9 +708,10 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     settings_kwargs = {"n_generations": n_generations,
                        "stability_start": stability_start,
                        "omega": omega,
-                       "mu": mu,
-                       "sigma": sigma,
-                       "skew": skew,
+                    #    "mu": mu,
+                    #    "sigma": sigma,
+                    #    "skew": skew,
+                       "distributions": distributions,
                        "n_clones": n_clones,
                        "clone_size": clone_size,
                        "mutation_rate": mutation_rate,
@@ -658,10 +722,14 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
                        "gamma": gamma,
                        "record": record}
     save_settings(settings_kwargs, out_paths)  # record run settings
+    
     LG_matrix = load_LG_matrix()  # Load LG matrix
     plot_LG_matrix(LG_matrix, out_paths)
+
     # Make fitness table of Delta T_m values
-    fitness_table = get_stability_table(clone_size, mu, sigma, skew, LG_matrix.columns)
+    fitness_table = get_stability_table(clone_size, LG_matrix.columns, distributions)
+    write_stability_table(fitness_table, out_paths)
+
     if isinstance(stability_start, str) and stability_start.lower() == "low":
         print("NOTE: With 'low' starting fitness selected Omega is ignored.")
         # warnings.warn("With 'low' starting fitness selected Omega is ignored.")
@@ -676,8 +744,8 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
             plot_omega, plot_epsilon = True, True
         else:
             plot_omega, plot_epsilon = True, False
-    write_stability_table(fitness_table, out_paths)
     plot_stability_table(fitness_table, out_paths)
+
     T_max = sum(np.amax(fitness_table, axis=1))  # Fittest possible protein
     assert omega < T_max
 

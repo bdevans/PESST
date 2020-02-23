@@ -8,6 +8,19 @@ import seaborn as sns
 from scipy import stats  # gamma
 
 
+# pal = sns.color_palette("Paired"); print(pal.as_hex())
+# ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c',
+# '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928']
+default_colours = {"aa_0": "#b2df8a",  # "#fdbf6f",
+                   "aa_0_mu": "#33a02c",  # "#ff7f00",
+                   "aa_g": "#a6cee3",
+                   "aa_g_mu": "#1f78b4",
+                   "phi": "#9b59b6",
+                   "phi_0_mu": "#fb9a99",
+                   "phi_mu": "#34495e",
+                   "epsilon": "#fdbf6f", #"#ff7f00",  # "#33a02c",
+                   "omega": "#e74c3c"}
+
 def remove_inner_ticklabels(fig):
     for ax in fig.axes:
         try:
@@ -25,10 +38,8 @@ def plot_evolution(history, fitness_table, omega, plot_omega, plot_epsilon,
     proteins are briefly shown to exist.
     """
     if colours is None:
-        colours = {"phi": "#9b59b6",
-                   "phi_mu": "#34495e",
-                   "epsilon": "#33a02c",
-                   "omega": "#e74c3c"}
+        colours = default_colours
+
     # Create array of fitness values with shape (n_generations, n_clones)
     n_generations = len(history) - 1  # First entry is the initial state
     generation_numbers = np.arange(n_generations+1)  # Skip initial generation
@@ -83,10 +94,7 @@ def plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega,
         fig, ax = plt.subplots()
 
     if colours is None:
-        colours = {"aa_g": "#a6cee3",
-                   "aa_0_mu": "#ff7f00",
-                   "aa_g_mu": "#1f78b4",
-                   "omega": "#e74c3c"}
+        colours = default_colours
 
     (n_clones, clone_size) = aa_stabilities.shape
     protein_indicies = np.arange(n_clones)
@@ -123,10 +131,7 @@ def plot_initial_amino_acid_stabilities(fitness_table, omega, colours=None, ax=N
         fig, ax = plt.subplots()  # figsize=(8, 12)
 
     if colours is None:
-        colours = {"aa_g": "#a6cee3",
-                   "aa_0_mu": "#ff7f00",
-                   "aa_g_mu": "#1f78b4",
-                   "omega": "#e74c3c"}
+        colours = default_colours
 
     clone_size = fitness_table.shape[0]
     mean_stability_0 = np.mean(fitness_table.values)
@@ -158,14 +163,7 @@ def plot_stability_histograms(generation, aa_stabilities, fitness_table, omega,
         fig, ax = plt.subplots()  # figsize=(8, 12)
 
     if colours is None:
-        colours = {"aa_0": "#b2df8a",  # "#fdbf6f",
-                   "aa_0_mu": "#33a02c",  # "#ff7f00",
-                   "aa_g": "#a6cee3",
-                   "aa_g_mu": "#1f78b4",
-                   "phi": "#9b59b6",
-                   "phi_mu": "#34495e",
-                   "epsilon": "#ff7f00",  # "#33a02c",
-                   "omega": "#e74c3c"}
+        colours = default_colours
 
     mean_stability_0 = np.mean(fitness_table.values)
     mean_stability = np.mean(aa_stabilities)
@@ -247,10 +245,7 @@ def plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon,
         fig, ax = plt.subplots()  # figsize=(8, 12)
 
     if colours is None:
-        colours = {"aa_g": "#a6cee3",
-                   "aa_0_mu": "#ff7f00",
-                   "aa_g_mu": "#1f78b4",
-                   "omega": "#e74c3c"}
+        colours = default_colours
 
     (n_clones, clone_size) = aa_stabilities.shape
     protein_stabilities = np.sum(aa_stabilities, axis=1)
@@ -284,21 +279,11 @@ def plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon,
 
 
 def plot_all_stabilities(generation, history, fitness_table, omega,
-                   plot_omega, plot_epsilon, n_generations, out_paths):
+                         plot_omega, plot_epsilon, n_generations, out_paths, 
+                         colours=None):
 
-    # TODO: Make COLOURS a global variable
-    # pal = sns.color_palette("Paired"); print(pal.as_hex())
-    # ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c',
-    # '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928']
-    colours = {"aa_0": "#b2df8a",  # "#fdbf6f",
-               "aa_0_mu": "#33a02c",  # "#ff7f00",
-               "aa_g": "#a6cee3",
-               "aa_g_mu": "#1f78b4",
-               "phi": "#9b59b6",
-               "phi_0_mu": "#fb9a99",
-               "phi_mu": "#34495e",
-               "epsilon": "#fdbf6f", #"#ff7f00",  # "#33a02c",
-               "omega": "#e74c3c"}
+    if colours is None:
+        colours = default_colours
 
     pad_factor = 0.1
 
@@ -432,20 +417,11 @@ def plot_all_stabilities(generation, history, fitness_table, omega,
 
 
 def plot_simulation(generation, history, fitness_table, omega,
-                    plot_omega, plot_epsilon, n_generations, out_paths):
+                    plot_omega, plot_epsilon, n_generations, out_paths, 
+                    colours=None):
 
-    # TODO: Make COLOURS a global variable
-    # pal = sns.color_palette("Paired"); print(pal.as_hex())
-    # ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c',
-    # '#fdbf6f', '#ff7f00', '#cab2d6', '#6a3d9a', '#ffff99', '#b15928']
-    colours = {"aa_0": "#b2df8a",  # "#fdbf6f",
-               "aa_0_mu": "#33a02c",  # "#ff7f00",
-               "aa_g": "#a6cee3",
-               "aa_g_mu": "#1f78b4",
-               "phi": "#9b59b6",
-               "phi_mu": "#34495e",
-               "epsilon": "#ff7f00",  # "#33a02c",
-               "omega": "#e74c3c"}
+    if colours is None:
+        colours = default_colours
 
     pad_factor = 0.1
 

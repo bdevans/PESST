@@ -403,6 +403,7 @@ def plot_all_stabilities(generation, history, fitness_table, omega,
                   color=colours["epsilon"], linestyle=":", lw=3, zorder=20,
                   label=r"$\epsilon$ = {:.2f}".format(epsilon))
 
+    ax_phi_hist.legend()
 
     # Add title and save
     # plt.subplots_adjust(top=0.85)

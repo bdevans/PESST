@@ -30,8 +30,7 @@ setup_kwargs = {
     "url": "https://github.com/bdevans/PESST",
     # "packages": ['pesst'],
     "packages": find_packages(),
-    "python_requires": '>=3.6',
-    "install_requires": ['numpy', 'scipy', 'pandas', 'tqdm', 'matplotlib', 'seaborn', 'imageio']
+    "python_requires": '>=3.7',
     "extras_require": {"process":  ["biopython"]},
     "include_package_data": True,
     "long_description": read('README.md'),

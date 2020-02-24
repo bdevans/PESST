@@ -721,7 +721,7 @@ def plot_phi_stability_table(generation, phi_stability_table, clims, out_paths):
 #     # mean_initial_stability = np.mean(stability_table.values)
 #     scale = round((4 * np.std(stability_table.values)) + 1)
 #     loc = np.mean(stability_table.values)
-#     T_max = sum(np.amax(stability_table, axis=1))  # Fittest possible protein
+#     T_max = sum(np.amax(stability_table, axis=1))  # Most stable protein possible
 
 #     fig, (ax_arr) = plt.subplots(2, 2, sharey='row', #  sharex='col',
 #                                  gridspec_kw={'width_ratios': [4, 1],
@@ -821,7 +821,7 @@ def plot_phi_stability_table(generation, phi_stability_table, clims, out_paths):
 #     # plt.subplots_adjust(top=0.85)
 #     fig.suptitle(("Generation {}".format(generation)), fontweight='bold')  # TODO Prevent overlap with spines
 #     fig.set_tight_layout(True)
-#     filename = os.path.join(out_paths["figures"], "OLD_fit_dist_gen_{}.png".format(generation))
+#     filename = os.path.join(out_paths["figures"], "OLD_stable_dist_gen_{}.png".format(generation))
 #     fig.savefig(filename)
 #     plt.close()
 #     return (fig, ax_arr)

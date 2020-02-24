@@ -693,7 +693,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     #     record.update(record_kwargs)
     record_kwargs.setdefault('rate', 50)
     record_kwargs.setdefault('fasta_rate', 50)
-    record_kwargs.setdefault('residues', False)
+    # record_kwargs.setdefault('residues', False)
     record_kwargs.setdefault('statistics', True)
     record_kwargs.setdefault('histograms', True)
     record_kwargs.setdefault('data', True)

@@ -631,10 +631,11 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     assert 0 <= n_invariants < clone_size
 
     if distributions is None:
-        distributions = [(mu, sigma, skew, 1)]
+        # distributions = [(mu, sigma, skew, 1)]
+        distributions = [{"mu": mu, "sigma": sigma, "skew": skew, "proportion": 1}]
     elif isinstance(distributions, str) and distributions.lower() == 'tokuriki':
-        # Calculate the fraction of surface (and core) residues accoring to:
-        # Tokuriki et al. 2007 doi:10.1016/j.jmb.2007.03.069
+        # Calculate the fraction of surface (P1) and core (1-P1) residues 
+        # according to: Tokuriki et al. 2007. doi:10.1016/j.jmb.2007.03.069
         P1 = 1.13 - (0.3 * np.log10(clone_size))
         P1 = np.clip(P1, 0, 1)  # Ensure 0 <= P1 <= 1
         n_surface = int(np.floor(P1 * clone_size))

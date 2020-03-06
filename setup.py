@@ -23,6 +23,8 @@ setup_kwargs = {
     "version": "1.0.0",  # https://packaging.python.org/guides/single-sourcing-package-version/
     "author": "Benjamin Evans and Adam Thomas",
     "author_email": "ben.d.evans@gmail.com",
+    "maintainer": "Benjamin Evans",
+    "maintainer_email": "ben.d.evans@gmail.com",
     "description": ("Protein Evolution Simulator with Stability Tracking."),
     "license": "BSD",
     "keywords": "protein evolution simulator",

@@ -642,10 +642,10 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
         n_core = clone_size - n_surface
         # Create a list of distributions
         # Distribution = namedtuple('Distribution', ['mu', 'sigma', 'skew', 'proportion'])
-        # distributions = [Distribution(mu=0.56, sigma=0.9, skew=0, proportion=P1),
-        #                  Distribution(mu=1.96, sigma=1.93, skew=0, proportion=1-P1)]
-        distributions = [{"mu": 0.56, "sigma": 0.90, "skew": 0, "proportion": P1},
-                         {"mu": 1.96, "sigma": 1.93, "skew": 0, "proportion": 1-P1}]
+        # distributions = [Distribution(mu=-0.54, sigma=0.98, skew=0, proportion=P1),
+        #                  Distribution(mu=-2.05, sigma=1.91, skew=0, proportion=1-P1)]
+        distributions = [{"mu": -0.54, "sigma": 0.98, "skew": 0, "proportion": P1},
+                         {"mu": -2.05, "sigma": 1.91, "skew": 0, "proportion": 1-P1}]
     else:
         assert isinstance(distributions, (list, tuple))
 

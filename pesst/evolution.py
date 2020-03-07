@@ -766,8 +766,8 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     write_initial_protein(initial_protein, out_paths)  # Record initial protein
     initial_stability = calculate_stability(initial_protein, stability_table)
     if initial_stability < omega:
-        raise Exception("The stability threshold is too high!")
-    # assert initial_stability < T_max
+        raise Exception(f"The stability threshold (omeage={omega}) is too high "
+                        f"for the distribution (mean={mean_stability:.3f})!")
 
     initial_population = clone_protein(initial_protein, n_clones)  # copy
     # Population = namedtuple('Population', ['proteins', 'sites', 'stabilities'])

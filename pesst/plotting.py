@@ -51,7 +51,6 @@ def plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
     fig = None
     if ax is None:
         fig, ax = plt.subplots(figsize=(12, 8))
-    # ax.plot(generation_numbers, stabiltiies, lw=1)
     # sns.lineplot(generation_numbers, stabiltiies, estimator=None, lw=1)
     ax.plot(generation_numbers, stabiltiies, color=colours["phi"], alpha=0.2, lw=1)
             # color=sns.desaturate(colours["phi"], 0.3), lw=1)

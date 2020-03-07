@@ -69,7 +69,8 @@ def get_stability_table(clone_size, amino_acids, distributions):
             remaining_residues -= n_residues
         else:  # Last distribution
             n_residues = remaining_residues
-        print(f'Distribution {d}: mu={mu}, sigma={sigma}, skew={skew}, proportion={proportion} ==> n_residues={n_residues}')
+        print(f'Distribution {d}: mu={mu}, sigma={sigma}, skew={skew}, '
+              f'proportion={proportion:.2f} ==> n_residues={n_residues}')
         values.append(sp.stats.skewnorm.rvs(skew, loc=mu, scale=sigma,
                                             size=(n_residues, len(amino_acids))))
 

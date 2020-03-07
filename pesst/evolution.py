@@ -23,6 +23,7 @@ from .plotting import (plot_simulation, plot_evolution, plot_gamma_distribution,
                        plot_stability_histograms, plot_all_stabilities,
                        plot_stability_table, plot_LG_matrix,
                        plot_phi_stability_table)
+from .utilities import print_protein
 
 
 def get_stability_table(clone_size, amino_acids, distributions):
@@ -747,8 +748,12 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
             plot_omega, plot_epsilon = True, False
     plot_stability_table(stability_table, out_paths)
 
-    T_max = sum(np.amax(stability_table, axis=1))  # Most stable protein possible
-    assert omega < T_max
+    # NOTE: These could be calculated after fixing sites
+    # min_stability = np.sum(np.amin(stability_table, axis=1))
+    # mean_stability = np.sum(np.mean(stability_table, axis=1))  # Approximate
+    # max_stability = np.sum(np.amax(stability_table, axis=1))
+    # print(f"Protein stability bounds: ({min_stability:.3f}, {max_stability:.3f}), "
+    #       f"[mean = {mean_stability:.3f}]")
 
     # Generate variant/invariant sites
     # TODO: return boolean array where True is variant
@@ -762,9 +767,30 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     # phi
     initial_protein = get_stable_protein(stability_start, clone_size, sites,
                                          stability_table)
-    # print_protein(initial_protein)
     write_initial_protein(initial_protein, out_paths)  # Record initial protein
     initial_stability = calculate_stability(initial_protein, stability_table)
+
+    # Calculate bounds on the protein stability space and an approximate mean
+    max_protein = copy.deepcopy(initial_protein)
+    max_residues = stability_table.idxmax(axis=1)
+    min_protein = copy.deepcopy(initial_protein)
+    min_residues = stability_table.idxmin(axis=1)
+    mean_stabilities = get_amino_acid_stabilities(initial_protein, stability_table)
+    # Account for invariant sites
+    for vloc in sites.variant:
+        max_protein[vloc] = max_residues[vloc]
+        min_protein[vloc] = min_residues[vloc]
+        mean_stabilities[vloc] = np.mean(stability_table.loc[vloc])
+    min_stability = calculate_stability(min_protein, stability_table)
+    mean_stability = sum(mean_stabilities)
+    max_stability = calculate_stability(max_protein, stability_table)
+
+    print(f"Protein stability bounds: ({min_stability:.3f}, {max_stability:.3f}), "
+          f"[mean = {mean_stability:.3f}]")
+    print(f"Initial protein stability = {initial_stability:.3f} [Omega = {omega}]")
+    print_protein(initial_protein)
+
+    assert omega < max_stability
     if initial_stability < omega:
         raise Exception(f"The stability threshold (omeage={omega}) is too high "
                         f"for the distribution (mean={mean_stability:.3f})!")

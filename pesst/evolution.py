@@ -623,6 +623,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
           mutation_rate=0.001, death_rate=0.02,
           gamma_kwargs=None, record_kwargs=None, output_dir=None, seed=None):
 
+    print('PESST started...')
     # Validate arguments
     assert 1 < clone_size
     assert 2 < n_roots < n_clones
@@ -729,6 +730,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     LG_matrix = load_LG_matrix()  # Load LG matrix
     plot_LG_matrix(LG_matrix, out_paths)
 
+    print('Creating amino acid stability distribution...')
     # Make stability table of Delta T_m values
     stability_table = get_stability_table(clone_size, LG_matrix.columns, distributions)
     write_stability_table(stability_table, out_paths)
@@ -803,6 +805,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     write_roots(tree["roots"], out_paths)
     write_tree(0, tree, out_paths)
 
+    print(f'Evolving {n_clones} proteins for {n_generations} generations...')
     history = evolve(n_generations, initial_population, stability_table, omega,
                      sites, p_mutation, mutation_rate, death_rate, tree,
                      LG_matrix, plot_omega, plot_epsilon, record, out_paths)

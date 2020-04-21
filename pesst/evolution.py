@@ -355,7 +355,7 @@ def get_phi_stability_table(population, stability_table, exclude_invariants=Fals
     return np.asarray(dist_clone_stability)
 
 
-def calculate_population_stability(population, stability_table):
+def calculate_population_stabilities(population, stability_table):
     """Calculate the total stability of every protein in a population."""
     return np.sum(get_phi_stability_table(population, stability_table), axis=1)
 
@@ -495,7 +495,7 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
             mutant = mutate_protein(protein, p_mutation, LG_matrix)
             next_generation[pi] = mutant  # update with new sequence
 
-        stabilities = calculate_population_stability(next_generation,
+        stabilities = calculate_population_stabilities(next_generation,
                                                    stability_table)
 
         for pi in range(len(stabilities)):
@@ -524,7 +524,7 @@ def kill_proteins(population, tree, death_rate, stability_table, omega):
     clones = np.arange(n_clones)
     condemned = clones[np.where(np.random.rand(n_clones) < death_rate)]
     # Recalculate stabilities after all mutations
-    stabilities = calculate_population_stability(population, stability_table)
+    stabilities = calculate_population_stabilities(population, stability_table)
     for pi in condemned:
         new_index = replace_protein(pi, tree, stabilities, omega)
         if new_index is None:  # Should never happen

@@ -307,7 +307,7 @@ def plot_all_stabilities(generation, history, stability_table, omega,
                                         colours=colours, ax=ax_aa_0)
     # Calculate \Delta \Delta G_e (amino acid) stability plotting bounds
     ymin, ymax = np.floor(np.amin(stability_table.values)), np.ceil(np.amax(stability_table.values))
-    pad = 0.5 * pad_factor * abs(ymax - ymin)
+    pad = pad_factor * abs(ymax - ymin)  # * 0.5
     ymax = np.ceil(ymax + pad)
     ymin = np.floor(ymin - pad)
     ax_aa_0.set_ylim(ymin, ymax)
@@ -451,7 +451,7 @@ def plot_simulation(generation, history, stability_table, omega,
                                 colours=colours, ax=ax_aa_g)
     # Calculate \Delta \Delta G_e (amino acid) stability plotting bounds
     ymin, ymax = np.floor(np.amin(stability_table.values)), np.ceil(np.amax(stability_table.values))
-    pad = 0.5 * pad_factor * abs(ymax - ymin)
+    pad = pad_factor * abs(ymax - ymin)  # * 0.5
     ymax = np.ceil(ymax + pad)
     ymin = np.floor(ymin - pad)
     ax_aa_g.set_ylim(ymin, ymax)

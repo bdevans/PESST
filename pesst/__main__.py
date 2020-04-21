@@ -13,7 +13,7 @@ plt.style.use('seaborn-ticks')
 n_generations = 200  # amount of generations the protein evolves for
 
 # TODO: These could possibly go into their own dictionary too
-n_clones = 52  # S number of clones in the population, phi
+n_clones = 150  # 52  # S number of clones in the population, phi
 # TODO: Place bifurcation parameters into kwargs dict with a flag for bifurcations
 n_roots = 4
 death_rate = 0.05  # Set to 0 to turn off protein deaths
@@ -21,8 +21,9 @@ death_rate = 0.05  # Set to 0 to turn off protein deaths
 clone_size = 100  # number of amino acids in the protein including the start methionine
 p_invariant = 0.1  # amount of invariant sites in a generation (not including root)
 
-omega = -150  # -np.inf  # arbitrary number for stability threshold
-stability_start = (omega + -10, omega + 20)  # 'high' # 'low' #(omega + 10, omega + 20)  # high, (x, y) or low
+# With (\Delta) \Delta G_e, positive is bad (destabilising) and negative is good (stabilising)
+omega = 150  # -np.inf  # arbitrary number for stability threshold
+stability_start = 'high'  # (omega + -100, omega + -50)  # 'low'  # high, (x, y) or low
 # parameters for normal distribution used to select stability values
 mu = -3 #-1.2
 sigma = 2.5

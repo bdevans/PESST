@@ -37,7 +37,7 @@ setup_kwargs = {
     "install_requires": ['numpy', 'scipy', 'pandas', 'tqdm', 'matplotlib', 'seaborn', 'imageio'],
     "extras_require": {"process":  ["biopython"]},
     "include_package_data": True,
-    "long_description": read('README.md'),
+    # "long_description": read('README.md'),
     "long_description_content_type": "text/markdown",
     "classifiers": ["Development Status :: 5 - Production/Stable",
                     "Intended Audience :: Science/Research",

@@ -11,11 +11,11 @@ except ImportError:
 from pesst.evolution import calculate_stability
 
 
-def process_fasta(stability_matrix, fasta_file, output_path):
+def process_fasta(stability_table, fasta_file, output_path):
     # stabilitymatrix = input("stability matrix location (must be CSV from previous evolution run): ")
     # fasta = input("input fasta file location (must be a sequence or list of sequences in fasta format): ")
 
-    stability_df = pd.read_csv(stability_matrix, index_col="Position")
+    stability_df = pd.read_csv(stability_table, index_col="Position")
 
     # records = list(SeqIO.parse("example.fasta", "fasta"))
     seqlib = SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta"))

@@ -261,8 +261,8 @@ def create_output_folders(output_dir=None):
     folder within the run path.
     """
 
-    paths = ['initial', 'data', 'figures', 'tree', 'fastas', 'treefastas',
-             'statistics']
+    paths = ['initial', 'data', 'figures', 'animations',
+             'tree', 'fastas', 'treefastas', 'statistics']
 
     if output_dir is None:
         output_dir = datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
@@ -305,13 +305,16 @@ def load_settings(out_paths):
     return settings
 
 
-def create_gif(filenames, duration=0.5):
-    basename, ext = os.path.splitext(filenames[0])  # os.path.basename(filenames[0])
-    output_file, _ = basename.rsplit('_', 1)
+def create_gif(filenames, out_paths, duration=0.5):
+    """Create an animated gif from a list of static figure filenames."""
+    filename = os.path.basename(filenames[0])
+    basename, ext = os.path.splitext(filename)
+    output_basename, _ = basename.rsplit('_', 1)  # Trim generation number
+    output_file = os.path.join(out_paths["animations"], f"{output_basename}.gif")
     images = []
     for filename in filenames:
         images.append(imageio.imread(filename))
-    imageio.mimsave(output_file+'.gif', images, duration=duration)
+    imageio.mimsave(output_file, images, duration=duration)
 
     # Streaming approach for longer animations
     # with imageio.get_writer('/path/to/movie.gif', mode='I') as writer:

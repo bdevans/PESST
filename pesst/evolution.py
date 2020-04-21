@@ -829,7 +829,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
             path_root = os.path.join(out_paths["figures"], fig_base)
             filenames = [f"{path_root}_{gen}.png"
                          for gen in recorded_generations]
-            create_gif(filenames, duration=record["gif_rate"])
+            create_gif(filenames, out_paths, duration=record["gif_rate"])
 
         # if record["statistics"]:
         #     path_root = os.path.join(out_paths["figures"], "generation_")

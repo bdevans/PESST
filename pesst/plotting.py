@@ -157,7 +157,8 @@ def plot_initial_amino_acid_stabilities(stability_table, omega, colours=None, ax
 
 
 def plot_stability_histograms(generation, aa_stabilities, stability_table, omega,
-                              out_paths, orient='vertical', colours=None, ax=None):
+                              out_paths, orient='vertical', density_cap=0.7, 
+                              colours=None, ax=None):
 
     fig = None
     if ax is None:
@@ -220,11 +221,11 @@ def plot_stability_histograms(generation, aa_stabilities, stability_table, omega
     if orient == 'vertical':
         ax.set_xlabel(r"$\Delta \Delta G_e$ (kcal/mol)")
         ax.set_ylabel("Distribution density")
-        ax.set_ybound(0, 0.6)
+        ax.set_ybound(0, density_cap)
     elif orient == 'horizontal':
         ax.set_ylabel(r"$\Delta \Delta G_e$ (kcal/mol)")
         ax.set_xlabel("Distribution density")
-        ax.set_xbound(0, 0.6)
+        ax.set_xbound(0, density_cap)
 
     # Set to 1.5*largest original bin count
     # ax.set_ylim(0, round(1.5*np.amax(n)))

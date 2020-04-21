@@ -288,6 +288,7 @@ def plot_all_stabilities(generation, history, stability_table, omega,
         colours = default_colours
 
     pad_factor = 0.1
+    density_cap = 0.7
 
     aa_stabilities = history[-1].stabilities
     (n_clones, clone_size) = aa_stabilities.shape
@@ -329,7 +330,7 @@ def plot_all_stabilities(generation, history, stability_table, omega,
     # Plot marginal stability distributions
     ax_hist = plt.subplot(gs[1, -1], sharey=ax_aa_0)
     plot_stability_histograms(generation, aa_stabilities, stability_table, omega,
-                              out_paths, orient='horizontal', density_cap=0.7,
+                              out_paths, orient='horizontal', density_cap=density_cap,
                               colours=colours, ax=ax_hist)
     plt.setp(ax_hist.get_yticklabels(), visible=False)
     ax_hist.set_ylabel(None)
@@ -396,6 +397,7 @@ def plot_all_stabilities(generation, history, stability_table, omega,
     plt.setp(ax_phi_hist.get_xticklabels(), visible=False)
     plt.setp(ax_phi_hist.get_yticklabels(), visible=False)
     ax_phi_hist.set_ylabel(None)
+    ax_phi_hist.set_xbound(0, density_cap)
 
     ax_phi_hist.axhline(y=mean_protein_stability, color=colours['phi_mu'], linestyle="--", lw=3, zorder=10,
                         label=rf"$\mu_\phi$ = {mean_protein_stability:.2f}")
@@ -432,6 +434,7 @@ def plot_simulation(generation, history, stability_table, omega,
         colours = default_colours
 
     pad_factor = 0.1
+    density_cap = 0.7
 
     aa_stabilities = history[-1].stabilities
     (n_clones, clone_size) = aa_stabilities.shape
@@ -471,7 +474,7 @@ def plot_simulation(generation, history, stability_table, omega,
     # Plot marginal stability distributions
     ax_hist = plt.subplot(gs[1, -1], sharey=ax_aa_g)
     plot_stability_histograms(generation, aa_stabilities, stability_table, omega,
-                              out_paths, orient='horizontal', density_cap=0.7,
+                              out_paths, orient='horizontal', density_cap=density_cap,
                               colours=colours, ax=ax_hist)
     plt.setp(ax_hist.get_yticklabels(), visible=False)
     ax_hist.set_ylabel(None)

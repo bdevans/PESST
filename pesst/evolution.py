@@ -209,12 +209,13 @@ def get_stable_protein(stability_start, clone_size, sites, stability_table):
     initial_protein = get_random_protein(clone_size, stability_table)
 
     if isinstance(stability_start, str):  # not medium
+        # With (\Delta) \Delta G_e, positive is bad (destabilising) and negative is good (stabilising)
         if stability_start.lower() == 'low':  # generate super unstable protein
             # TODO: Adjust threshold or allow building proteins above threshold
-            sequence = [0, 1, 2]  # Three lowest
+            sequence = [-1, -2, -3]  # Three highest (most destabilising)
 
         elif stability_start.lower() == 'high':  # generate super stable protein
-            sequence = [-1, -2, -3]  # Three highest
+            sequence = [0, 1, 2]  # Three lowest (least destabilising)
 
         pool = [["M"] * 3]
         for ai in range(1, len(stability_table.index)):  # range(clone_size):
@@ -410,9 +411,10 @@ def bifurcate_branches(branches):
 
 
 def select_from_pool(protein_index, candidates, stabilities, omega):
-    """Filter out original protein and those below the stability threshold."""
+    """Filter out the original protein and those above the instability
+    threshold."""
     pool = [c for c in candidates
-            if c != protein_index and stabilities[c] >= omega]
+            if c != protein_index and stabilities[c] <= omega]
     if len(pool) > 0:
         new_protein_index = random.choice(pool)
     else:
@@ -499,7 +501,7 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
                                                    stability_table)
 
         for pi in range(len(stabilities)):
-            if stabilities[pi] < omega:  # clone a random sequence
+            if stabilities[pi] > omega:  # clone a random sequence if unstable
                 mutant_index = replace_protein(pi, tree, stabilities, omega)
                 # If no suitable clones are available, re-mutate and try again
                 if mutant_index is None:
@@ -633,6 +635,9 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     n_invariants = int(p_invariant * clone_size)
     assert 0 <= n_invariants < clone_size
 
+    # NOTE: With (\Delta) \Delta G_e, positive is bad (destabilising)
+    # and negative is good (stabilising)
+
     if distributions is None:
         # distributions = [(mu, sigma, skew, 1)]
         distributions = [{"mu": mu, "sigma": sigma, "skew": skew, "proportion": 1}]
@@ -645,17 +650,19 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
         n_core = clone_size - n_surface
         # Create a list of distributions
         # Distribution = namedtuple('Distribution', ['mu', 'sigma', 'skew', 'proportion'])
-        # distributions = [Distribution(mu=-0.54, sigma=0.98, skew=0, proportion=P1),
-        #                  Distribution(mu=-2.05, sigma=1.91, skew=0, proportion=1-P1)]
-        distributions = [{"mu": -0.54, "sigma": 0.98, "skew": 0, "proportion": P1},
-                         {"mu": -2.05, "sigma": 1.91, "skew": 0, "proportion": 1-P1}]
+        # distributions = [Distribution(mu=0.54, sigma=0.98, skew=0, proportion=P1),
+        #                  Distribution(mu=2.05, sigma=1.91, skew=0, proportion=1-P1)]
+        distributions = [{"mu": 0.54, "sigma": 0.98, "skew": 0, "proportion": P1},
+                         {"mu": 2.05, "sigma": 1.91, "skew": 0, "proportion": 1-P1}]
     else:
         assert isinstance(distributions, (list, tuple))
 
     # TODO: Add rerun flag to load settings (and seed)
     # settings = json.load(sf)
+
+    # Instability threshold
     if omega is None:
-        omega = -np.inf
+        omega = np.inf
 
     # TODO: switch from random to np.random for proper seeding
     if seed is None:
@@ -731,7 +738,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     plot_LG_matrix(LG_matrix, out_paths)
 
     print('Creating amino acid stability distribution...')
-    # Make stability table of Delta T_m values
+    # Make stability table of \Delta \Delta G_e values
     stability_table = get_stability_table(clone_size, LG_matrix.columns, distributions)
     write_stability_table(stability_table, out_paths)
 
@@ -741,10 +748,10 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
                       # "If the run fails, please check your stability threshold,"
                       # "omega, is low enough: {}".format(omega))
         plot_omega, plot_epsilon = False, True
-        omega = -np.inf
+        omega = np.inf
     else:
         epsilon = clone_size * np.mean(stability_table.values)  # mu
-        if omega < epsilon:
+        if omega > epsilon:
             plot_omega, plot_epsilon = True, True
         else:
             plot_omega, plot_epsilon = True, False
@@ -792,10 +799,11 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     print(f"Initial protein stability = {initial_stability:.3f} [Omega = {omega}]")
     print_protein(initial_protein)
 
-    assert omega < max_stability
-    if initial_stability < omega:
-        raise Exception(f"The stability threshold (omeage={omega}) is too high "
-                        f"for the distribution (mean={mean_stability:.3f})!")
+    # assert omega < max_stability  # Ensure that the possibile (instabilities) span Omega
+    assert min_stability < omega
+    if initial_stability > omega:
+        raise Exception(f"The instability threshold (omeage = {omega}) is too low "
+                        f"for the distribution (mean = {mean_stability:.3f})!")
 
     initial_population = clone_protein(initial_protein, n_clones)  # copy
     # Population = namedtuple('Population', ['proteins', 'sites', 'stabilities'])

@@ -63,7 +63,7 @@ def plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
     else:
         ax.set_xlim([-0.05*n_generations, 1.05*n_generations])
     ax.set_xlabel("Generation")
-    ax.set_ylabel("$T_m$", fontweight='bold')
+    ax.set_ylabel("$\Delta G_e$ (kcal/mol)") #, fontweight='bold')
     if fig_title:
         ax.set_title("\n".join(wrap(f"Stability change for {n_clones} clones "
                                     f"of {clone_size} amino acids, mutated "
@@ -116,7 +116,7 @@ def plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega,
     #     ncol += 1
 
     ax.set_xlabel("Clone")
-    ax.set_ylabel(r"$\Delta T_m$")
+    ax.set_ylabel(r"$\Delta \Delta G_e$ (kcal/mol)")
     legend = ax.legend(loc="upper left", fontsize=6.5, ncol=ncol)
     legend.set_zorder(100)
     ax.set_title("Stability distribution of every amino acid in the population", size=8)
@@ -148,10 +148,11 @@ def plot_initial_amino_acid_stabilities(stability_table, omega, colours=None, ax
     #               label=r"$\Omega$ = {}".format(omega))
 
     ax.set_xlabel("Amino acid position")
-    ax.set_ylabel(r"$\Delta T_m$")
+    ax.set_ylabel(r"$\Delta \Delta G_e$ (kcal/mol)")
     legend = ax.legend(loc="upper left", fontsize=6.5)
     legend.set_zorder(100)
-    ax.set_title(r"Stabiltiy distribution of $\Delta T_m$ matrix", size=8)
+    ax.set_title(
+        r"Stabiltiy distribution of $\Delta \Delta G_e$ (kcal/mol) matrix", size=8)
     return ax
 
 
@@ -217,11 +218,11 @@ def plot_stability_histograms(generation, aa_stabilities, stability_table, omega
     legend.set_zorder(100)
 
     if orient == 'vertical':
-        ax.set_xlabel(r"$\Delta T_m$")
+        ax.set_xlabel(r"$\Delta \Delta G_e$ (kcal/mol)")
         ax.set_ylabel("Distribution density")
         ax.set_ybound(0, 0.6)
     elif orient == 'horizontal':
-        ax.set_ylabel(r"$\Delta T_m$")
+        ax.set_ylabel(r"$\Delta \Delta G_e$ (kcal/mol)")
         ax.set_xlabel("Distribution density")
         ax.set_xbound(0, 0.6)
 
@@ -271,7 +272,7 @@ def plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon,
         ncol += 1
 
     ax.set_xlabel("Clone")
-    ax.set_ylabel(r"$T_m$")
+    ax.set_ylabel(r"$\Delta G_e$ (kcal/mol)")
     legend = ax.legend(loc="upper left", fontsize=6.5, ncol=ncol)
     legend.set_zorder(100)
     return ax
@@ -290,8 +291,6 @@ def plot_all_stabilities(generation, history, stability_table, omega,
     aa_stabilities = history[-1].stabilities
     (n_clones, clone_size) = aa_stabilities.shape
     (clone_size, n_amino_acids) = stability_table.shape
-    T_max = sum(np.amax(stability_table, axis=1))  # Most stable possible protein
-    # T_min = sum(np.amin(stability_table, axis=1))  # Least stable possible protein
     mean_stability_0 = np.mean(stability_table.values)
     epsilon = clone_size * mean_stability_0
 
@@ -304,13 +303,14 @@ def plot_all_stabilities(generation, history, stability_table, omega,
 
     # Plot initial distribution
     ax_aa_0 = plt.subplot(gs[1, 0])
+    plot_initial_amino_acid_stabilities(stability_table, omega,
+                                        colours=colours, ax=ax_aa_0)
+    # Calculate \Delta \Delta G_e (amino acid) stability plotting bounds
     ymin, ymax = np.floor(np.amin(stability_table.values)), np.ceil(np.amax(stability_table.values))
     pad = 0.5 * pad_factor * abs(ymax - ymin)
     ymax = np.ceil(ymax + pad)
     ymin = np.floor(ymin - pad)
     ax_aa_0.set_ylim(ymin, ymax)
-    plot_initial_amino_acid_stabilities(stability_table, omega,
-                                        colours=colours, ax=ax_aa_0)
     # plt.setp(ax_aa_0.get_yticklabels(), visible=False)
     # ax_aa_0.set_ylabel(None)
     ax_aa_0.set_title(None)
@@ -335,18 +335,22 @@ def plot_all_stabilities(generation, history, stability_table, omega,
     ax_hist.set_title(None)
 
 
-    # Axis scaling logic
+    # Calculate \Delta G_e (protein) stability plotting bounds
     initial_protein_stabilities = np.sum(history[0].stabilities, axis=1)
     # NOTE: All clones in the initial population are currently identical
+    DGe_max = sum(np.amax(stability_table, axis=1))  # Most unstable possible protein
+    # DGe_min = sum(np.amin(stability_table, axis=1))  # Least unstable possible protein
     min_s0 = min(initial_protein_stabilities)
     max_s0 = max(initial_protein_stabilities)
-    max_values = [epsilon, omega, max_s0, T_max * 0.1]
+    max_values = [epsilon, max_s0]  # , DGe_max * 0.1]
+    if plot_omega and omega < np.inf:
+        max_values.append(omega)
     ymax = max(max_values)
-    # print(ymax, T_max)
+    # print(ymax, DGe_max)
     # if np.argmax(max_values) == 0:  # need to extend the range beyond epsilon
-    #     ymax = T_max * 0.1
+    #     ymax = DGe_max * 0.1
     min_values = [min_s0]
-    if omega > -np.inf:
+    if plot_omega and omega > -np.inf:
         min_values.append(omega)
     if plot_epsilon:
         min_values.append(epsilon)
@@ -431,8 +435,6 @@ def plot_simulation(generation, history, stability_table, omega,
     aa_stabilities = history[-1].stabilities
     (n_clones, clone_size) = aa_stabilities.shape
     (clone_size, n_amino_acids) = stability_table.shape
-    T_max = sum(np.amax(stability_table, axis=1))  # Most stable possible protein
-    # T_min = sum(np.amin(stability_table, axis=1))  # Least stable possible protein
     mean_stability_0 = np.mean(stability_table.values)
     epsilon = clone_size * mean_stability_0
 
@@ -447,6 +449,7 @@ def plot_simulation(generation, history, stability_table, omega,
     ax_aa_g = plt.subplot(gs[1, 0])
     plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega,
                                 colours=colours, ax=ax_aa_g)
+    # Calculate \Delta \Delta G_e (amino acid) stability plotting bounds
     ymin, ymax = np.floor(np.amin(stability_table.values)), np.ceil(np.amax(stability_table.values))
     pad = 0.5 * pad_factor * abs(ymax - ymin)
     ymax = np.ceil(ymax + pad)
@@ -483,18 +486,23 @@ def plot_simulation(generation, history, stability_table, omega,
     ax_phi.set_title(None)
     ax_phi.legend_.remove()
 
-    # Axis scaling logic
+    # Calculate \Delta G_e (protein) stability plotting bounds
     initial_protein_stabilities = np.sum(history[0].stabilities, axis=1)
     # NOTE: All clones in the initial population are currently identical
+    # This could be extended to the first few generations
+    DGe_max = sum(np.amax(stability_table, axis=1))  # Most unstable possible protein
+    # DGe_min = sum(np.amin(stability_table, axis=1))  # Least unstable possible protein
     min_s0 = min(initial_protein_stabilities)
     max_s0 = max(initial_protein_stabilities)
-    max_values = [epsilon, omega, max_s0, T_max * 0.1]
+    max_values = [epsilon, max_s0]  # , DGe_max * 0.1]
+    if plot_omega and omega < np.inf:
+        max_values.append(omega)
     ymax = max(max_values)
-    # print(ymax, T_max)
+    # print(ymax, DGe_max)
     # if np.argmax(max_values) == 0:  # need to extend the range beyond epsilon
-    #     ymax = T_max * 0.1
+    #     ymax = DGe_max * 0.1
     min_values = [min_s0]
-    if omega > -np.inf:
+    if plot_omega and omega > -np.inf:
         min_values.append(omega)
     if plot_epsilon:
         min_values.append(epsilon)
@@ -590,12 +598,14 @@ def plot_stability_table(stability_table, out_paths):
     fig, ax = plt.subplots(figsize=(w_leg + n_amino_acids/cpi, clone_size/(cpi+3)))
     sns.heatmap(stability_table, center=0, annot=True, fmt=".2f", linewidths=.5,
                 cmap="RdBu_r", annot_kws={"size": 5},
-                cbar_kws={"label": r"$\Delta T_m$", "fraction": fraction, "pad": pad}, 
+                cbar_kws={
+                    "label": r"$\Delta \Delta G_e$ (kcal/mol)", "fraction": fraction, "pad": pad},
                 ax=ax)
     ax.xaxis.set_ticks_position('top')
     ax.set_xlabel("Amino Acid")
     ax.set_ylabel("Location")
-    ax.set_title(r"Amino Acid stability contributions ($\Delta T_m$)")
+    ax.set_title(
+        r"Amino Acid stability contributions ($\Delta \Delta G_e$ (kcal/mol))")
     fig.set_tight_layout(True)
     filename = os.path.join(out_paths["initial"], "stability_table.png")
     fig.savefig(filename)
@@ -619,8 +629,8 @@ def plot_LG_matrix(LG_matrix, out_paths):
 
 
 def plot_phi_stability_table(generation, phi_stability_table, clims, out_paths):
-    r"""Plot a heatmap of changes in stability (\Delta T_m) for each amino acid
-    in each protein."""
+    r"""Plot a heatmap of changes in stability (\Delta \Delta G_e (kcal/mol))
+    for each amino acid in each protein."""
     (n_proteins, clone_size) = phi_stability_table.shape
     fraction = 0.1
     pad = 0.05
@@ -630,7 +640,8 @@ def plot_phi_stability_table(generation, phi_stability_table, clims, out_paths):
     fig, ax = plt.subplots(figsize=(w_leg + clone_size/(cpi+2), n_proteins/cpi))
     sns.heatmap(phi_stability_table, center=0, annot=False, fmt=".2f",
                 linewidths=.5, cmap="RdBu_r", annot_kws={"size": 5},
-                cbar_kws={"label": r"$\Delta T_m$", "fraction": fraction, "pad": pad}, 
+                cbar_kws={
+                    "label": r"$\Delta \Delta G_e$ (kcal/mol)", "fraction": fraction, "pad": pad},
                 vmin=clims[0], vmax=clims[1], ax=ax)
     ax.xaxis.set_ticks_position('top')
     ax.set_xlabel("Location")

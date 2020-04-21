@@ -309,11 +309,12 @@ def record_generation_stability(generation, population, sites, stability_table,
 
     if record["statistics"]:
         # Record 5 statistical tests on the protein stability space
+        stats_file_name = f"normal_distribution_tests_G{generation}.md"
         if generation == 0:
-            stats_file_name = "normal_distribution_statistics_stability_space.md"
+            # stats_file_name = "normal_distribution_statistics_stability_space.md"
             distributions = stability_table.values
         else:
-            stats_file_name = f"normal_distribution_statistics_generation{generation}.md"
+            # stats_file_name = f"normal_distribution_statistics_generation{generation}.md"
             # Build distribution of stability values excluding invariant sites
             distributions = get_phi_stability_table(population, stability_table,
                                                     exclude_invariants=True,
@@ -825,14 +826,14 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     # Create animations
     if record["gif"]:
         recorded_generations = list(range(0, n_generations+1, record["rate"]))
-        figures = ["pesst_gen", "phi_stability_table", "stabilities_gen"]
+        figures = ["pesst", "phi_stability_table", "stabilities"]
         # if record["residues"]:
         #     figures.extend(["OLD_stable_dist_gen", "OLD_generation"])
         if record["histograms"]:
             figures.append("histogram")
         for fig_base in figures:
             path_root = os.path.join(out_paths["figures"], fig_base)
-            filenames = [f"{path_root}_{gen}.png"
+            filenames = [f"{path_root}_G{gen}.png"
                          for gen in recorded_generations]
             create_gif(filenames, out_paths, duration=record["gif_rate"])
 

@@ -219,7 +219,7 @@ def write_histogram_statistics(stats_full_name, aa_variant_stabilities):
 
 def write_fasta_alignment(generation, population, out_paths):
     """Write fasta alignment from sequences provided."""
-    fastafilename = f"generation_{generation}.fasta"
+    fastafilename = f"clones_G{generation}.fasta"
     fullname = os.path.join(out_paths["fastas"], fastafilename)
     with open(fullname, "w") as fastafile:  # open file
         # Write fasta header followed by residue in generation string
@@ -326,11 +326,11 @@ def create_gif(filenames, out_paths, duration=0.5):
 def save_history(generation, history, out_paths):
     """Save the last generation to disk."""
 
-    stabilities_file = os.path.join(out_paths["data"], f"stabilities_{generation}.csv")
+    stabilities_file = os.path.join(out_paths["data"], f"stabilities_G{generation}.csv")
     np.savetxt(stabilities_file, history[-1].stabilities, delimiter=',')
 
     # Save protein sequences
-    clones_file = os.path.join(out_paths["data"], f"clones_{generation}.json")
+    clones_file = os.path.join(out_paths["data"], f"clones_G{generation}.json")
     population = {key: compact_protein(protein)
                   for key, protein in history[-1].population.items()}
     with open(clones_file, "w") as gf:

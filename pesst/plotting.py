@@ -235,7 +235,7 @@ def plot_stability_histograms(generation, aa_stabilities, stability_table, omega
                                     "every evolving clone", 60)),
                      fontweight='bold')
         fig.savefig(os.path.join(out_paths["figures"],
-                                 f"histogram_{generation}.png"))
+                                 f"histogram_G{generation}.png"))
     return ax
 
 
@@ -419,7 +419,7 @@ def plot_all_stabilities(generation, history, stability_table, omega,
     # plt.subplots_adjust(top=0.85)
     fig.suptitle((f"Generation {generation}"), fontweight='bold')
     # fig.set_tight_layout(True)
-    filename = os.path.join(out_paths["figures"], f"stabilities_gen_{generation}.png")
+    filename = os.path.join(out_paths["figures"], f"stabilities_G{generation}.png")
     fig.savefig(filename)
     plt.close()
     return (fig, [ax_phi_0, ax_phi, ax_phi_hist, 
@@ -542,7 +542,7 @@ def plot_simulation(generation, history, stability_table, omega,
     fig.suptitle((f"Generation {generation}"), fontweight='bold')
     # fig.set_tight_layout(True)
     filename = os.path.join(out_paths["figures"],
-                            f"pesst_gen_{generation}.png")
+                            f"pesst_G{generation}.png")
     fig.savefig(filename)
     plt.close()
     return (fig, [ax_phi, ax_evo, 
@@ -651,7 +651,7 @@ def plot_phi_stability_table(generation, phi_stability_table, clims, out_paths):
     ax.set_xlabel("Location")
     ax.set_ylabel("Clone")
     filename = os.path.join(out_paths["figures"],
-                            f"phi_stability_table_{generation}.png")
+                            f"phi_stability_table_G{generation}.png")
     ax.set_title(f"Generation {generation}", fontweight="bold")
     fig.set_tight_layout(True)
     fig.savefig(filename)

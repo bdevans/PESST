@@ -425,13 +425,13 @@ def select_from_pool(protein_index, candidates, stabilities, omega):
 def replace_protein(protein_index, tree, stabilities, omega):
 
     if protein_index in tree["roots"]:
-        new_index = select_from_pool(protein_index, tree["roots"], stabilities,
-                                     omega)
+        new_index = select_from_pool(protein_index, tree["roots"],
+                                     stabilities, omega)
     else:  # Protein is in one of the branches
         for branch in tree["branches"]:
             if protein_index in branch:
-                new_index = select_from_pool(protein_index, branch, stabilities,
-                                             omega)
+                new_index = select_from_pool(protein_index, branch,
+                                             stabilities, omega)
     return new_index
 
 
@@ -568,8 +568,8 @@ def evolve(n_generations, population, stability_table, omega, sites,
         save_history(0, history, out_paths)
 
     # TODO: Refactor plot_omega, plot_epsilon
-    plot_simulation(0, history, stability_table, omega, plot_omega, plot_epsilon,
-                   n_generations, out_paths)
+    plot_simulation(0, history, stability_table, omega, plot_omega, 
+                    plot_epsilon, n_generations, out_paths)
     plot_all_stabilities(0, history, stability_table, omega,
                          plot_omega, plot_epsilon, n_generations, out_paths)
 
@@ -605,9 +605,9 @@ def evolve(n_generations, population, stability_table, omega, sites,
             write_fasta_alignment(gen+1, population, out_paths)
         # Record population details at the end of processing
         if (gen+1) % record["rate"] == 0:
-            record_generation_stability(gen+1, population, sites, stability_table,
-                                        omega, p_mutation, record, out_paths)
-
+            record_generation_stability(gen+1, population, sites,
+                                        stability_table, omega, p_mutation,
+                                        record, out_paths)
             plot_simulation(gen+1, history, stability_table, omega,
                             plot_omega, plot_epsilon, n_generations, out_paths)
             plot_all_stabilities(gen+1, history, stability_table, omega,
@@ -641,7 +641,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     if distributions is None:
         # distributions = [(mu, sigma, skew, 1)]
         distributions = [{"mu": mu, "sigma": sigma, "skew": skew, "proportion": 1}]
-    elif isinstance(distributions, str) and distributions.lower() == 'tokuriki':
+    elif isinstance(distributions, str) and distributions.capitalize() == 'Tokuriki':
         # Calculate the fraction of surface (P1) and core (1-P1) residues 
         # according to: Tokuriki et al. 2007. doi:10.1016/j.jmb.2007.03.069
         P1 = 1.13 - (0.3 * np.log10(clone_size))
@@ -719,9 +719,6 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     settings_kwargs = {"n_generations": n_generations,
                        "stability_start": stability_start,
                        "omega": omega,
-                    #    "mu": mu,
-                    #    "sigma": sigma,
-                    #    "skew": skew,
                        "distributions": distributions,
                        "n_clones": n_clones,
                        "clone_size": clone_size,
@@ -743,7 +740,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     write_stability_table(stability_table, out_paths)
 
     if isinstance(stability_start, str) and stability_start.lower() == "low":
-        print("NOTE: With 'low' starting stability selected Omega is ignored.")
+        print("NOTE: With 'low' starting stability Omega is ignored.")
         # warnings.warn("With 'low' starting stability selected Omega is ignored.")
                       # "If the run fails, please check your stability threshold,"
                       # "omega, is low enough: {}".format(omega))

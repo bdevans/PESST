@@ -20,8 +20,8 @@ def process_fasta(stability_matrix, fasta_file, output_path):
     # records = list(SeqIO.parse("example.fasta", "fasta"))
     seqlib = SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta"))
 
-    stabilities = {id: [calculate_stability(list(seq), stability_df), seq]
-                   for id, seq in seqlib.items()}
+    stabilities = {seq_id: [calculate_stability(list(seq), stability_df), seq]
+                   for seq_id, seq in seqlib.items()}
 
     base_name, _ = os.path.splitext(os.path.basename(fasta_file))
     calcs_path = os.path.join(output_path, f"fitcalc_{base_name}")
@@ -33,7 +33,7 @@ def process_fasta(stability_matrix, fasta_file, output_path):
 
     with open(os.path.join(calcs_path, base_name+".csv"), "w+") as cf:
         cf.write("clone,stability,sequence\n")
-        for id, (stability, sequence) in stabilities.items():
-            cf.write(f"{id},{stability},{sequence}\n")
+        for seq_id, (stability, sequence) in stabilities.items():
+            cf.write(f"{seq_id},{stability},{sequence}\n")
 
     return stabilities

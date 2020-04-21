@@ -399,10 +399,12 @@ def plot_all_stabilities(generation, history, stability_table, omega,
     ax_phi_hist.set_ylabel(None)
     ax_phi_hist.set_xbound(0, density_cap)
 
-    ax_phi_hist.axhline(y=mean_protein_stability, color=colours['phi_mu'], linestyle="--", lw=3, zorder=10,
+    ax_phi_hist.axhline(y=mean_protein_stability, color=colours['phi_mu'],
+                        linestyle="--", lw=3, zorder=10,
                         label=rf"$\mu_\phi$ = {mean_protein_stability:.2f}")
     mean_protein_stability_0 = np.mean(initial_protein_stabilities)
-    ax_phi_hist.axhline(y=mean_protein_stability_0, color=colours['phi_0_mu'], linestyle="-", lw=3, zorder=10,
+    ax_phi_hist.axhline(y=mean_protein_stability_0, color=colours['phi_0_mu'],
+                        linestyle="-", lw=3, zorder=10,
                         label=rf"$\mu_{{\phi_0}}$ = {mean_protein_stability_0:.2f}")
     if plot_epsilon:
         ax_phi_hist.axhline(epsilon,

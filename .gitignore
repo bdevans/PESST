@@ -108,3 +108,4 @@ NOTES.md
 results/
 # *.png
 benchmark.py
+.DS_Store

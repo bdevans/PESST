@@ -329,8 +329,8 @@ def plot_all_stabilities(generation, history, stability_table, omega,
     # Plot marginal stability distributions
     ax_hist = plt.subplot(gs[1, -1], sharey=ax_aa_0)
     plot_stability_histograms(generation, aa_stabilities, stability_table, omega,
-                              out_paths, orient='horizontal', colours=colours,
-                              ax=ax_hist)
+                              out_paths, orient='horizontal', density_cap=0.7,
+                              colours=colours, ax=ax_hist)
     plt.setp(ax_hist.get_yticklabels(), visible=False)
     ax_hist.set_ylabel(None)
     ax_hist.set_title(None)
@@ -471,8 +471,8 @@ def plot_simulation(generation, history, stability_table, omega,
     # Plot marginal stability distributions
     ax_hist = plt.subplot(gs[1, -1], sharey=ax_aa_g)
     plot_stability_histograms(generation, aa_stabilities, stability_table, omega,
-                              out_paths, orient='horizontal', colours=colours,
-                              ax=ax_hist)
+                              out_paths, orient='horizontal', density_cap=0.7,
+                              colours=colours, ax=ax_hist)
     plt.setp(ax_hist.get_yticklabels(), visible=False)
     ax_hist.set_ylabel(None)
     ax_hist.set_title(None)

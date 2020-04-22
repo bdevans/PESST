@@ -792,6 +792,20 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     mean_stability = sum(mean_stabilities)
     max_stability = calculate_stability(max_protein, stability_table)
 
+    # min_stabilities = np.amin(stability_table, axis=1)
+    # for iloc in sites.invariant:
+    #     min_stabilities[iloc] = stability_table.loc[iloc, initial_protein[iloc]]
+    # min_stability = np.sum(min_stabilities)
+    # initial_stabiliies = get_amino_acid_stabilities(initial_protein, stability_table)
+    # is_variant = np.zeros_like(initial_protein, dtype=bool)
+    # is_variant[sites.variant] = True
+    # is_invariant = ~is_variant
+    # min_stability = np.sum(np.amin(stability_table, axis=1)[is_variant], 
+    #                        initial_stabiliies[is_invariant])
+    # min_stability = np.sum(np.where(is_variant, np.amin(stability_table, axis=1), initial_stabiliies))
+    # max_stability = np.sum(np.where(is_variant, np.amax(stability_table, axis=1), initial_stabiliies))
+    # mean_stability = np.sum(np.where(is_variant, np.mean(stability_table, axis=1), initial_stabiliies))
+
     print(f"Protein stability bounds: ({min_stability:.3f}, {max_stability:.3f}), "
           f"[mean = {mean_stability:.3f}]")
     print(f"Initial protein stability = {initial_stability:.3f} [Omega = {omega}]")

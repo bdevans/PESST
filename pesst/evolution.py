@@ -12,6 +12,7 @@ import scipy as sp
 from scipy import stats
 import pandas as pd
 # import matplotlib as mpl
+from matplotlib import pyplot as plt  # TODO: Move into plotting.py
 from tqdm import trange
 
 from .dataio import (create_output_folders, save_settings, write_tree,
@@ -296,6 +297,7 @@ def record_generation_stability(generation, population, sites, stability_table,
     # Build distribution of stability values existing in evolving protein
     stabilities = get_phi_stability_table(population, stability_table)
 
+    # TODO: Move plot out
     clims = (np.floor(np.amin(stability_table.values)),
              np.ceil(np.amax(stability_table.values)))
     plot_phi_stability_table(generation, stabilities, clims, out_paths)
@@ -327,6 +329,7 @@ def record_generation_stability(generation, population, sites, stability_table,
                                  stability_table.values.ravel())
 
     if record["histograms"]:
+        # TODO: Move out
         # disthistfilename = "generation_{}.png".format(generation)
         # disthistfullname = os.path.join(out_paths["figures"], "histograms", disthistfilename)
         # plot_histogram_of_stability(generation, stabilities.ravel(),
@@ -499,7 +502,7 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
             next_generation[pi] = mutant  # update with new sequence
 
         stabilities = calculate_population_stabilities(next_generation,
-                                                   stability_table)
+                                                       stability_table)
 
         for pi in range(len(stabilities)):
             if stabilities[pi] > omega:  # clone a random sequence if unstable
@@ -573,6 +576,7 @@ def evolve(n_generations, population, stability_table, omega, sites,
                     plot_epsilon, n_generations, out_paths)
     plot_all_stabilities(0, history, stability_table, omega,
                          plot_omega, plot_epsilon, n_generations, out_paths)
+    plt.close('all')  # TODO: Move into plotting.py
 
     for gen in trange(n_generations):  # run evolution for n_generations
 
@@ -612,9 +616,10 @@ def evolve(n_generations, population, stability_table, omega, sites,
             plot_simulation(gen+1, history, stability_table, omega,
                             plot_omega, plot_epsilon, n_generations, out_paths)
             plot_all_stabilities(gen+1, history, stability_table, omega,
-                           plot_omega, plot_epsilon, n_generations, out_paths)
+                                 plot_omega, plot_epsilon, n_generations, out_paths)
             if record["data"]:
                 save_history(gen+1, history, out_paths)
+            plt.close('all')  # TODO: Move into plotting.py
 
     write_final_fasta(population, tree, out_paths)
     return history

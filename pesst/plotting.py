@@ -566,6 +566,11 @@ def plot_traces(generation, history, stability_table, omega,
 
     # Plot current generation's amino acid stabilities: \Delta \Delta G_e vs clone
     ax_aa_g = plt.subplot(gs[1, 2], sharey=ax_aa_0)
+    # if plot_initial:
+    #     plot_amino_acid_stabilities(history[0].stabilities, epsilon_r,
+    #                                 colours={"aa_g": colours["aa_0"], 
+    #                                          "aa_g_mu": colours["aa_0_mu"]}, 
+    #                                 ax=ax_aa_g)
     plot_amino_acid_stabilities(aa_stabilities, epsilon_r,
                                 colours=colours, ax=ax_aa_g)
     plt.setp(ax_aa_g.get_yticklabels(), visible=False)

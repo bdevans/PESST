@@ -23,7 +23,7 @@ from .dataio import (create_output_folders, save_settings, write_tree,
 from .plotting import (plot_simulation, plot_evolution, plot_gamma_distribution,
                        plot_stability_histograms, plot_all_stabilities,
                        plot_stability_table, plot_LG_matrix,
-                       plot_phi_stability_table)
+                       plot_phi_stability_table, plot_traces)
 from .utilities import print_protein
 
 
@@ -343,7 +343,7 @@ def get_phi_stability_table(population, stability_table, exclude_invariants=Fals
     """Build a stability table for given generation's population.
 
     The array has one row for each protein in the population and the stability
-    value for each amino acid in its position.
+    value (\Delta \Delta G_e) for each amino acid in its position.
     """
     dist_clone_stability = []
     # Find and plot all stability values in the current generation
@@ -576,6 +576,8 @@ def evolve(n_generations, population, stability_table, omega, sites,
                     plot_epsilon, n_generations, out_paths)
     plot_all_stabilities(0, history, stability_table, omega,
                          plot_omega, plot_epsilon, n_generations, out_paths)
+    plot_traces(0, history, stability_table, omega,
+                plot_omega, plot_epsilon, n_generations, out_paths)
     plt.close('all')  # TODO: Move into plotting.py
 
     for gen in trange(1, n_generations+1):  # run evolution for 1:n_generations
@@ -616,6 +618,8 @@ def evolve(n_generations, population, stability_table, omega, sites,
                             plot_omega, plot_epsilon, n_generations, out_paths)
             plot_all_stabilities(gen, history, stability_table, omega,
                                  plot_omega, plot_epsilon, n_generations, out_paths)
+            plot_traces(gen, history, stability_table, omega,
+                        plot_omega, plot_epsilon, n_generations, out_paths)
             if record["data"]:
                 save_history(gen, history, out_paths)
             plt.close('all')  # TODO: Move into plotting.py
@@ -844,7 +848,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     # Create animations
     if record["gif"]:
         recorded_generations = list(range(0, n_generations+1, record["rate"]))
-        figures = ["pesst", "phi_stability_table", "stabilities"]
+        figures = ["pesst", "phi_stability_table", "stabilities", "traces"]
         # if record["residues"]:
         #     figures.extend(["OLD_stable_dist_gen", "OLD_generation"])
         if record["histograms"]:

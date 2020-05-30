@@ -1,4 +1,5 @@
 import os
+import warnings
 from textwrap import wrap
 
 import numpy as np
@@ -479,6 +480,202 @@ def plot_all_stabilities(generation, history, stability_table, omega,
     fig.savefig(filename)
     plt.close()
     return (fig, [ax_phi_0, ax_phi, ax_phi_hist, 
+                  ax_aa_0, ax_aa_g, ax_hist])
+
+
+def plot_traces(generation, history, stability_table, omega,
+                plot_omega, plot_epsilon, n_generations, out_paths, 
+                plot_initial=True, colours=None):
+
+    if colours is None:
+        colours = default_colours
+
+    pad_factor = 0.1
+    density_cap = 0.7
+
+    aa_stabilities = history[-1].stabilities
+    (n_clones, clone_size) = aa_stabilities.shape
+    (clone_size, n_amino_acids) = stability_table.shape
+    mean_stability_0 = np.mean(stability_table.values)
+    epsilon = clone_size * mean_stability_0
+
+    fig = plt.figure(figsize=(12, 8))  # (width, height)
+    if plot_initial:
+        ncols = 4
+        width_ratios = [1, 1.618, 1, 1]
+    else:
+        ncols = 3
+        width_ratios = [1, 1.618, 1]
+    # https://matplotlib.org/users/gridspec.html
+    gs = mpl.gridspec.GridSpec(nrows=2, ncols=ncols,
+                               # [Left, Middle, Right]
+                               width_ratios=width_ratios,
+                               height_ratios=[2, 2])  #  [Top, Bottom]
+    gs.update(top=0.95, wspace=0.10, hspace=0.08)  # Leave room for the title
+
+
+    # Plot initial distribution: \Delta \Delta G_e vs locus
+    ax_aa_0 = plt.subplot(gs[1, 0])
+    plot_initial_amino_acid_stabilities(stability_table, omega,
+                                        colours=colours, ax=ax_aa_0)
+    # Calculate \Delta \Delta G_e (amino acid) stability plotting bounds
+    ymin = np.floor(np.amin(stability_table.values))
+    ymax = np.ceil(np.amax(stability_table.values))
+    pad = pad_factor * abs(ymax - ymin)  # * 0.5
+    ymax = np.ceil(ymax + pad)
+    ymin = np.floor(ymin - pad)
+    ax_aa_0.set_ylim(ymin, ymax)
+    # plt.setp(ax_aa_0.get_yticklabels(), visible=False)
+    # ax_aa_0.set_ylabel(None)
+    ax_aa_0.set_title(None)
+    ax_aa_0.legend_.remove()
+
+    # Plot stability trace (amino acid evoutionary history): \Delta \Delta G_e vs generation
+    ax_evo_aa = plt.subplot(gs[1, 1], sharey=ax_aa_0)
+    gen_xlims = (-5, n_generations+5)
+    plot_amino_acid_evolution(history, mean_stability_0, out_paths,
+                              fig_title=False, xlims=gen_xlims, colours=colours,
+                              ax=ax_evo_aa)
+    plt.setp(ax_evo_aa.get_yticklabels(), visible=False)
+    ax_evo_aa.set_ylabel(None)
+
+    # Plot current generation's amino acid stabilities: \Delta \Delta G_e vs clone
+    ax_aa_g = plt.subplot(gs[1, 2], sharey=ax_aa_0)
+    if plot_initial:
+        plot_amino_acid_stabilities(history[0].stabilities, mean_stability_0, omega,
+                                    colours={"aa_g": colours["aa_0"], 
+                                             "aa_g_mu": colours["aa_0_mu"]}, 
+                                    ax=ax_aa_g)
+    plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega,
+                                colours=colours, ax=ax_aa_g)
+    plt.setp(ax_aa_g.get_yticklabels(), visible=False)
+    ax_aa_g.set_ylabel(None)
+    ax_aa_g.set_title(None)
+    ax_aa_g.legend_.remove()
+
+    # Plot marginal stability distributions: \Delta \Delta G_e vs density
+    ax_hist = plt.subplot(gs[1, -1], sharey=ax_aa_0)
+    plot_stability_histograms(generation, aa_stabilities, stability_table, omega,
+                              out_paths, orient='horizontal', density_cap=density_cap,
+                              colours=colours, ax=ax_hist)
+    plt.setp(ax_hist.get_yticklabels(), visible=False)
+    ax_hist.set_ylabel(None)
+    ax_hist.set_title(None)
+
+
+    # Calculate \Delta G_e (protein) stability plotting bounds
+    initial_protein_stabilities = np.sum(history[0].stabilities, axis=1)
+    # NOTE: All clones in the initial population are currently identical
+    # Most unstable possible protein
+    DGe_max = sum(np.amax(stability_table, axis=1))
+    # DGe_min = sum(np.amin(stability_table, axis=1))  # Least unstable possible protein
+    min_s0 = min(initial_protein_stabilities)
+    max_s0 = max(initial_protein_stabilities)
+    max_values = [epsilon, max_s0]  # , DGe_max * 0.1]
+    if plot_omega and omega < np.inf:
+        max_values.append(omega)
+    ymax = max(max_values)
+    # print(ymax, DGe_max)
+    # if np.argmax(max_values) == 0:  # need to extend the range beyond epsilon
+    #     ymax = DGe_max * 0.1
+    min_values = [min_s0]
+    if plot_omega and omega > -np.inf:
+        min_values.append(omega)
+    if plot_epsilon:
+        min_values.append(epsilon)
+    ymin = min(min_values)
+    pad = pad_factor * abs(ymax - ymin)
+    ymax = np.ceil(ymax + pad)
+    ymin = np.floor(ymin - pad)
+
+    protein_stabilities = np.sum(aa_stabilities, axis=1)
+    mean_protein_stability = np.mean(protein_stabilities)
+
+    # Plot initial protein stabilities: \Delta G_e vs locus
+    ax_phi_0 = plt.subplot(gs[0, 0])
+    plot_protein_stabilities(history[0].stabilities, omega, epsilon, plot_epsilon,
+                             colours=colours, ax=ax_phi_0)
+    plt.setp(ax_phi_0.get_xticklabels(), visible=False)
+    ax_phi_0.set_xlabel(None)
+    ax_phi_0.set_title(None)
+    ax_phi_0.legend_.remove()
+    # plt.setp(ax_phi_0.get_yticklabels(), visible=False)
+    # ax_phi_0.set_ylabel(None)
+    ax_phi_0.set_ylim(ymin, ymax)
+
+    
+    # Plot protein evolutionary history: \Delta G_e vs generation
+    ax_evo_phi = plt.subplot(gs[0, 1], sharex=ax_evo_aa, sharey=ax_phi_0)
+    plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
+                   out_paths, fig_title=False, xlims=gen_xlims, colours=colours,
+                   ax=ax_evo_phi)
+    # Add a marker to show the current mean stability
+    ax_evo_phi.plot(len(history)-1, mean_protein_stability, '*',
+                    color=colours["phi_mu"], markersize=10)  # ,
+                # label=r"$\mu_\phi$ = {:.2f}".format(mean_protein_stability))
+    handles, labels = ax_evo_phi.get_legend_handles_labels()
+    mu_text_index = labels.index(r"$\mu_\phi$")
+    new_label = rf"$\mu_\phi$ = {mean_protein_stability:.2f}"
+    ax_evo_phi.legend_.get_texts()[mu_text_index].set_text(f"{new_label: <16}")
+    plt.setp(ax_evo_phi.get_yticklabels(), visible=False)
+    # NOTE: ax.set_xticklabels([]) removes ticks entirely
+    ax_evo_phi.set_ylabel(None)
+    plt.setp(ax_evo_phi.get_xticklabels(), visible=False)
+    ax_evo_phi.set_xlabel(None)
+
+
+    # Plot current generation's protein stabilities: \Delta G_e vs clone
+    ax_phi = plt.subplot(gs[0, 2], sharex=ax_aa_g, sharey=ax_phi_0)
+    plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon,
+                             colours=colours, ax=ax_phi)
+    plt.setp(ax_phi.get_xticklabels(), visible=False)
+    ax_phi.set_xlabel(None)
+    ax_phi.set_title(None)
+    ax_phi.legend_.remove()
+    plt.setp(ax_phi.get_yticklabels(), visible=False)
+    ax_phi.set_ylabel(None)
+
+    # Plot marginal protein stability distributions: \Delta G_e vs density
+    ax_phi_hist = plt.subplot(gs[0, -1], sharex=ax_hist, sharey=ax_phi_0)
+    # bins = np.linspace(ymin, ymax, int(np.sqrt(n_clones)))
+    # ax_phi_hist.set_ylim(ymin, ymax)
+    ax_phi_hist.hist(protein_stabilities.ravel(), bins='sqrt',  # bins, # 'sqrt',#int(np.sqrt(n_clones)),
+                     color=colours['phi'], alpha=0.8,
+                     align='mid', orientation='horizontal', density=True, stacked=True)
+    plt.setp(ax_phi_hist.get_xticklabels(), visible=False)
+    plt.setp(ax_phi_hist.get_yticklabels(), visible=False)
+    ax_phi_hist.set_ylabel(None)
+    ax_phi_hist.set_xbound(0, density_cap)
+
+    ax_phi_hist.axhline(y=mean_protein_stability, color=colours['phi_mu'],
+                        linestyle="--", lw=3, zorder=10,
+                        label=rf"$\mu_\phi$ = {mean_protein_stability:.2f}")
+    mean_protein_stability_0 = np.mean(initial_protein_stabilities)
+    ax_phi_hist.axhline(y=mean_protein_stability_0, color=colours['phi_0_mu'],
+                        linestyle="-", lw=3, zorder=10,
+                        label=rf"$\mu_{{\phi_0}}$ = {mean_protein_stability_0:.2f}")
+    if plot_epsilon:
+        ax_phi_hist.axhline(epsilon,
+                            color=colours["epsilon"], linestyle=":", lw=3, zorder=20,
+                            label=rf"$\epsilon$ = {epsilon:.2f}")
+
+    if plot_omega:
+        ax_phi_hist.axhline(y=omega, color=colours['omega'], linestyle="-", lw=3, zorder=10,
+                            label=rf"$\Omega$ = {omega}")
+
+    ax_phi_hist.legend(loc="upper right", fontsize=6.5)
+
+    # Add title and save
+    # plt.subplots_adjust(top=0.85)
+    fig.suptitle((f"Generation {generation}"), fontweight='bold')
+    # fig.set_tight_layout(True)
+    filename = os.path.join(
+        out_paths["figures"], f"traces_G{generation}.png")
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", message='Creating legend with loc="best" can be slow with large amounts of data.')
+        fig.savefig(filename)
+    plt.close()
+    return (fig, [ax_phi_0, ax_phi, ax_phi_hist,
                   ax_aa_0, ax_aa_g, ax_hist])
 
 

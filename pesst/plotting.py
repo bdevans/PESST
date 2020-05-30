@@ -46,17 +46,17 @@ def plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
     (clone_size, n_amino_acids) = stability_table.shape
     (n_clones, _) = history[0].stabilities.shape
 
-    stabilties = np.array([np.sum(history[g].stabilities, axis=1)
+    stabilities = np.array([np.sum(history[g].stabilities, axis=1)
                             for g in range(n_generations+1)])
     fig = None
     if ax is None:
         fig, ax = plt.subplots(figsize=(12, 8))
     # sns.lineplot(generation_numbers, stabiltiies, estimator=None, lw=1)
-    ax.plot(generation_numbers, stabilties, color=colours["phi"], alpha=0.2, lw=1)
+    ax.plot(generation_numbers, stabilities, color=colours["phi"], alpha=0.2, lw=1)
             # color=sns.desaturate(colours["phi"], 0.3), lw=1)
 
     # Average across clones
-    ax.plot(generation_numbers, np.mean(stabilties, axis=1), "--",
+    ax.plot(generation_numbers, np.mean(stabilities, axis=1), "--",
             color=colours["phi_mu"], lw=3, zorder=20, label=r"$\mu_\phi$")
     if xlims is not None:
         ax.set_xlim(xlims)

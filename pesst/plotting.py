@@ -240,9 +240,9 @@ def plot_stability_histograms(generation, aa_stabilities, stability_table, omega
     n, bins, _ = ax.hist(stability_table.values.ravel(), bins='sqrt',
                          align='mid', orientation=orient,
                          color=colours["aa_0"], alpha=0.8, density=True,
-                         label=f"Initial distribution\n{stats_0}")
+                         label="\n".join([r"$\epsilon$ distribution", stats_0]))
     # Plot initial distribution mean
-    label = rf"$\mu_0$ = {mean_stability_0:.2f}"
+    label = rf"$\epsilon_r$ = {mean_stability_0:.2f}"
     if orient == 'vertical':
         ax.axvline(x=mean_stability_0, color=colours["aa_0_mu"],
                    linestyle="--", lw=3, zorder=20, label=label)

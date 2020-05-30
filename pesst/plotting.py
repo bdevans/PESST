@@ -97,7 +97,7 @@ def plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega,
         colours = default_colours
 
     (n_clones, clone_size) = aa_stabilities.shape
-    protein_indicies = np.arange(n_clones)
+    protein_indicies = np.arange(1, n_clones+1)
     mean_stability = np.mean(aa_stabilities)
 
     ax.plot(protein_indicies, aa_stabilities,
@@ -135,10 +135,11 @@ def plot_initial_amino_acid_stabilities(stability_table, omega, colours=None, ax
 
     clone_size = stability_table.shape[0]
     mean_stability_0 = np.mean(stability_table.values)
+    locus_indicies = np.arange(1, clone_size+1)
 
     # Plot each column of stability_table as a separate dataseries against 0..N-1
-    ax.plot(stability_table, "o", color=colours["aa_0"], markersize=1)
-    ax.hlines(mean_stability_0, 0, clone_size-1,
+    ax.plot(locus_indicies, stability_table, "o", color=colours["aa_0"], markersize=1)
+    ax.hlines(mean_stability_0, 1, clone_size,
               colors=colours["aa_0_mu"], linestyles="--", lw=3, zorder=20,
               label=rf"$\mu_0$ = {mean_stability_0:.2f}")
 
@@ -251,23 +252,23 @@ def plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon,
 
     (n_clones, clone_size) = aa_stabilities.shape
     protein_stabilities = np.sum(aa_stabilities, axis=1)
-    protein_indicies = np.arange(n_clones)
+    protein_indicies = np.arange(1, n_clones+1)
     mean_protein_stability = np.mean(protein_stabilities)
 
     ax.plot(protein_indicies, protein_stabilities, "*",
             color=colours["phi"], markersize=4)
 
-    ax.hlines(mean_protein_stability, 0, n_clones-1,
+    ax.hlines(mean_protein_stability, 1, n_clones,
               colors=colours["phi_mu"], linestyles="--", lw=3, zorder=20,
               label=rf"$\mu_\phi$ = {mean_protein_stability:.2f}")
 
     if plot_epsilon:
-        ax.hlines(epsilon, 0, n_clones-1,
+        ax.hlines(epsilon, 1, n_clones,
                   colors=colours["epsilon"], linestyles=":", lw=3, zorder=20,
                   label=rf"$\epsilon$ = {epsilon:.2f}")
     ncol = 2
     if omega > -np.inf:
-        ax.hlines(omega, 0, n_clones-1,
+        ax.hlines(omega, 1, n_clones,
                   colors=colours["omega"], linestyles="-", lw=3, zorder=10,
                   label=rf"$\Omega$ = {omega}")
         ncol += 1

@@ -34,6 +34,9 @@ def load_LG_matrix(full_file_name=None):
     if full_file_name is None:
         resource = os.path.join("data", "LGaa.csv")
         full_file_name = pkg_resources.resource_filename("pesst", resource)
+        # full_file_name = pkg_resources.resource_filename("pesst.data", "LGaa.csv")
+        # pwd, this_filename = os.path.split(__file__)
+        # full_file_name = os.path.join(pwd, "data", "LGaa.csv")
     LG_matrix = pd.read_csv(full_file_name, index_col="Original")
     return LG_matrix
 

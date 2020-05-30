@@ -302,7 +302,7 @@ def plot_stability_histograms(generation, aa_stabilities, stability_table, omega
     return ax
 
 
-def plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon,
+def plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon, plot_mean=True,
                              colours=None, ax=None):
 
     fig = None
@@ -610,7 +610,8 @@ def plot_traces(generation, history, stability_table, omega,
 
     # Plot initial protein stabilities: \Delta G_e vs locus
     ax_phi_0 = plt.subplot(gs[0, 0])
-    plot_protein_stabilities(history[0].stabilities, omega, epsilon, plot_epsilon,
+    plot_protein_stabilities(stability_table, omega, epsilon, plot_epsilon,
+                             plot_mean=False,  # Plot epsilon only
                              colours=colours, ax=ax_phi_0)
     plt.setp(ax_phi_0.get_xticklabels(), visible=False)
     ax_phi_0.set_xlabel(None)

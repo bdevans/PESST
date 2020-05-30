@@ -678,7 +678,7 @@ def plot_traces(generation, history, stability_table, omega,
     if plot_epsilon:
         ax_phi_hist.axhline(epsilon,
                             color=colours["epsilon"], linestyle=":", lw=3, zorder=20,
-                            label=rf"$\epsilon$ = {epsilon:.2f}")
+                            label=rf"$\epsilon_\phi$ = {epsilon:.2f}")
 
     if plot_omega:
         ax_phi_hist.axhline(y=omega, color=colours['omega'], linestyle="-", lw=3, zorder=20,

@@ -516,8 +516,8 @@ def plot_traces(generation, history, stability_table, omega,
     aa_stabilities = history[-1].stabilities
     (n_clones, clone_size) = aa_stabilities.shape
     (clone_size, n_amino_acids) = stability_table.shape
-    mean_stability_0 = np.mean(stability_table.values)
-    epsilon = clone_size * mean_stability_0
+    epsilon_r = np.mean(stability_table.values)
+    epsilon = clone_size * epsilon_r
 
     fig = plt.figure(figsize=(12, 8))  # (width, height)
     if plot_initial:
@@ -553,7 +553,7 @@ def plot_traces(generation, history, stability_table, omega,
     # Plot stability trace (amino acid evoutionary history): \Delta \Delta G_e vs generation
     ax_evo_aa = plt.subplot(gs[1, 1], sharey=ax_aa_0)
     gen_xlims = (-5, n_generations+5)
-    plot_amino_acid_evolution(history, mean_stability_0, out_paths,
+    plot_amino_acid_evolution(history, epsilon_r, out_paths,
                               fig_title=False, xlims=gen_xlims, colours=colours,
                               ax=ax_evo_aa)
     if not plot_evo_legend:

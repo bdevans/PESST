@@ -494,6 +494,7 @@ def plot_traces(generation, history, stability_table, omega,
 
     pad_factor = 0.1
     density_cap = 0.7
+    plot_evo_legend = False
 
     aa_stabilities = history[-1].stabilities
     (n_clones, clone_size) = aa_stabilities.shape
@@ -538,6 +539,8 @@ def plot_traces(generation, history, stability_table, omega,
     plot_amino_acid_evolution(history, mean_stability_0, out_paths,
                               fig_title=False, xlims=gen_xlims, colours=colours,
                               ax=ax_evo_aa)
+    if not plot_evo_legend:
+        ax_evo_aa.legend_.remove()
     plt.setp(ax_evo_aa.get_yticklabels(), visible=False)
     ax_evo_aa.set_ylabel(None)
 
@@ -615,10 +618,13 @@ def plot_traces(generation, history, stability_table, omega,
     ax_evo_phi.plot(len(history)-1, mean_protein_stability, '*',
                     color=colours["phi_mu"], markersize=10)  # ,
                 # label=r"$\mu_\phi$ = {:.2f}".format(mean_protein_stability))
-    handles, labels = ax_evo_phi.get_legend_handles_labels()
-    mu_text_index = labels.index(r"$\mu_\phi$")
-    new_label = rf"$\mu_\phi$ = {mean_protein_stability:.2f}"
-    ax_evo_phi.legend_.get_texts()[mu_text_index].set_text(f"{new_label: <16}")
+    if plot_evo_legend:
+        handles, labels = ax_evo_phi.get_legend_handles_labels()
+        mu_text_index = labels.index(r"$\mu_\phi$")
+        new_label = rf"$\mu_\phi$ = {mean_protein_stability:.2f}"
+        ax_evo_phi.legend_.get_texts()[mu_text_index].set_text(f"{new_label: <16}")
+    else:
+        ax_evo_phi.legend_.remove()
     plt.setp(ax_evo_phi.get_yticklabels(), visible=False)
     # NOTE: ax.set_xticklabels([]) removes ticks entirely
     ax_evo_phi.set_ylabel(None)

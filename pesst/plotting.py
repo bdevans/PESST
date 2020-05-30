@@ -556,6 +556,9 @@ def plot_traces(generation, history, stability_table, omega,
     plot_amino_acid_evolution(history, epsilon_r, out_paths,
                               fig_title=False, xlims=gen_xlims, colours=colours,
                               ax=ax_evo_aa)
+    # Add a marker to show the current mean stability
+    ax_evo_aa.plot(len(history)-1, np.mean(aa_stabilities), '*',
+                    color=colours["aa_g_mu"], markersize=10)
     if not plot_evo_legend:
         ax_evo_aa.legend_.remove()
     plt.setp(ax_evo_aa.get_yticklabels(), visible=False)

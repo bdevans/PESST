@@ -72,9 +72,9 @@ def plot_amino_acid_evolution(history, epsilon_r, out_paths,
     if epsilon_r is not None:  # Add theoretical convergence line
         # epsilon_r == mean_stability_0 == np.mean(stability_table.values)
         ax.axhline(epsilon_r, color=colours["aa_0_mu"], lw=3, linestyle="--",
-                   zorder=10, label=rf"$\epsilon_r$ = {epsilon_r:.2f}")
+                   zorder=20, label=rf"$\epsilon_r$ = {epsilon_r:.2f}")
 
-    legend = ax.legend(title=legend_title)
+    legend = ax.legend(title=legend_title, loc="upper right", frameon=True, fancybox=True, framealpha=0.8)
     legend.set_zorder(100)
 
     if fig is not None:
@@ -125,13 +125,13 @@ def plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
                      fontweight='bold')
     if plot_omega:  # Add stability threshold
         ax.axhline(omega, color=colours["omega"], lw=3, linestyle="-",
-                   zorder=10, label=rf"$\Omega$ = {omega}")
+                   zorder=20, label=rf"$\Omega$ = {omega}")
     if plot_epsilon:  # Add theoretical convergence line
         epsilon = clone_size * np.mean(stability_table.values)
         ax.axhline(epsilon, color=colours["epsilon"], lw=3, linestyle=":",
                    zorder=20, label=rf"$\epsilon$ = {epsilon:.2f}")
 
-    legend = ax.legend(title=legend_title)
+    legend = ax.legend(title=legend_title, loc="upper right", frameon=True, fancybox=True, framealpha=0.8)
     legend.set_zorder(100)
 
     if fig is not None:
@@ -165,13 +165,13 @@ def plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega,
     ncol = 2
     # if omega > -np.inf:
     #     ax.hlines(omega, 0, n_clones-1,
-    #               colors=colours["omega"], linestyles="-", lw=3, zorder=10,
+    #               colors=colours["omega"], linestyles="-", lw=3, zorder=20,
     #               label=r"$\Omega$ = {}".format(omega))
     #     ncol += 1
 
     ax.set_xlabel("Clone")
     ax.set_ylabel(r"$\Delta \Delta G_e$ (kcal/mol)")
-    legend = ax.legend(loc="upper left", fontsize=6.5, ncol=ncol)
+    legend = ax.legend(loc="upper left", fontsize=6.5, ncol=ncol, frameon=True, fancybox=True, framealpha=0.8)
     legend.set_zorder(100)
     ax.set_title("Stability distribution of every amino acid in the population", size=8)
 
@@ -179,6 +179,7 @@ def plot_amino_acid_stabilities(aa_stabilities, mean_stability_0, omega,
 
 
 def plot_initial_amino_acid_stabilities(stability_table, omega, colours=None, ax=None):
+# TODO: def plot_locus_stabilities(generation, stability_table, omega, colours=None, ax=None):
 
     fig = None
     if ax is None:
@@ -199,12 +200,12 @@ def plot_initial_amino_acid_stabilities(stability_table, omega, colours=None, ax
 
     # if omega > -np.inf:
     #     ax.hlines(omega, 0, clone_size-1,
-    #               colors=colours["omega"], linestyles="-", lw=3, zorder=10,
+    #               colors=colours["omega"], linestyles="-", lw=3, zorder=20,
     #               label=r"$\Omega$ = {}".format(omega))
 
     ax.set_xlabel("Amino acid position")
     ax.set_ylabel(r"$\Delta \Delta G_e$ (kcal/mol)")
-    legend = ax.legend(loc="upper left", fontsize=6.5)
+    legend = ax.legend(loc="upper left", fontsize=6.5, frameon=True, fancybox=True, framealpha=0.8)
     legend.set_zorder(100)
     ax.set_title(
         r"Stabiltiy distribution of $\Delta \Delta G_e$ (kcal/mol) matrix", size=8)
@@ -270,7 +271,7 @@ def plot_stability_histograms(generation, aa_stabilities, stability_table, omega
     #         ax.axhline(y=omega, color=colours["omega"],
     #                    linestyle="-", lw=3, zorder=10, label=label)
     # Add legend
-    legend = ax.legend(loc="upper right", fontsize=6.5)
+    legend = ax.legend(loc="upper right", fontsize=6.5, frameon=True, fancybox=True, framealpha=0.8)
     legend.set_zorder(100)
 
     if orient == 'vertical':
@@ -323,13 +324,13 @@ def plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon,
     ncol = 2
     if omega > -np.inf:
         ax.hlines(omega, 1, n_clones,
-                  colors=colours["omega"], linestyles="-", lw=3, zorder=10,
+                  colors=colours["omega"], linestyles="-", lw=3, zorder=20,
                   label=rf"$\Omega$ = {omega}")
         ncol += 1
 
     ax.set_xlabel("Clone")
     ax.set_ylabel(r"$\Delta G_e$ (kcal/mol)")
-    legend = ax.legend(loc="upper left", fontsize=6.5, ncol=ncol)
+    legend = ax.legend(loc="upper left", fontsize=6.5, ncol=ncol, frameon=True, fancybox=True, framealpha=0.8)
     legend.set_zorder(100)
     return ax
 
@@ -455,11 +456,11 @@ def plot_all_stabilities(generation, history, stability_table, omega,
     ax_phi_hist.set_xbound(0, density_cap)
 
     ax_phi_hist.axhline(y=mean_protein_stability, color=colours['phi_mu'],
-                        linestyle="--", lw=3, zorder=10,
+                        linestyle="--", lw=3, zorder=20,
                         label=rf"$\mu_\phi$ = {mean_protein_stability:.2f}")
     mean_protein_stability_0 = np.mean(initial_protein_stabilities)
     ax_phi_hist.axhline(y=mean_protein_stability_0, color=colours['phi_0_mu'],
-                        linestyle="-", lw=3, zorder=10,
+                        linestyle="-", lw=3, zorder=20,
                         label=rf"$\mu_{{\phi_0}}$ = {mean_protein_stability_0:.2f}")
     if plot_epsilon:
         ax_phi_hist.axhline(epsilon,
@@ -467,10 +468,11 @@ def plot_all_stabilities(generation, history, stability_table, omega,
                   label=rf"$\epsilon$ = {epsilon:.2f}")
     
     if plot_omega:
-        ax_phi_hist.axhline(y=omega, color=colours['omega'], linestyle="-", lw=3, zorder=10,
+        ax_phi_hist.axhline(y=omega, color=colours['omega'], linestyle="-", lw=3, zorder=20,
                             label=rf"$\Omega$ = {omega}")
 
-    ax_phi_hist.legend(loc="upper right", fontsize=6.5)
+    legend = ax_phi_hist.legend(loc="upper right", fontsize=6.5, frameon=True, fancybox=True, framealpha=0.8)
+    legend.set_zorder(100)
 
     # Add title and save
     # plt.subplots_adjust(top=0.85)
@@ -660,10 +662,11 @@ def plot_traces(generation, history, stability_table, omega,
                             label=rf"$\epsilon$ = {epsilon:.2f}")
 
     if plot_omega:
-        ax_phi_hist.axhline(y=omega, color=colours['omega'], linestyle="-", lw=3, zorder=10,
+        ax_phi_hist.axhline(y=omega, color=colours['omega'], linestyle="-", lw=3, zorder=20,
                             label=rf"$\Omega$ = {omega}")
 
-    ax_phi_hist.legend(loc="upper right", fontsize=6.5)
+    legend = ax_phi_hist.legend(loc="upper right", fontsize=6.5, frameon=True, fancybox=True, framealpha=0.8)
+    legend.set_zorder(100)
 
     # Add title and save
     # plt.subplots_adjust(top=0.85)

@@ -578,16 +578,15 @@ def evolve(n_generations, population, stability_table, omega, sites,
                          plot_omega, plot_epsilon, n_generations, out_paths)
     plt.close('all')  # TODO: Move into plotting.py
 
-    for gen in trange(n_generations):  # run evolution for n_generations
+    for gen in trange(1, n_generations+1):  # run evolution for 1:n_generations
 
         # Bifuricate in even generation numbers so every branch on tree has
         # 3 leaves that have been evolving by the last generation
-        if gen > 0 and (gen+1) % n_gens_per_bifurcation == 0 \
-                   and len(tree["branches"][0]) > 3:
+        if gen % n_gens_per_bifurcation == 0 and len(tree["branches"][0]) > 3:
             tree["branches"] = bifurcate_branches(tree["branches"])
             # Write out bifurcations
             # tree_log_file = os.path.join(run_path, "tree", "tree.txt")
-            write_tree(gen+1, tree, out_paths)
+            write_tree(gen, tree, out_paths)
 
         # Mutate population
         next_generation = mutate_population(population, n_mutations_per_gen,
@@ -606,19 +605,19 @@ def evolve(n_generations, population, stability_table, omega, sites,
         history.append(Generation(population=population, stabilities=phi_stabilities))
 
         # Write fasta every record["fasta_rate"] generations
-        if (gen+1) % record["fasta_rate"] == 0:
-            write_fasta_alignment(gen+1, population, out_paths)
+        if gen % record["fasta_rate"] == 0:
+            write_fasta_alignment(gen, population, out_paths)
         # Record population details at the end of processing
-        if (gen+1) % record["rate"] == 0:
-            record_generation_stability(gen+1, population, sites,
+        if gen % record["rate"] == 0:
+            record_generation_stability(gen, population, sites,
                                         stability_table, omega, p_mutation,
                                         record, out_paths)
-            plot_simulation(gen+1, history, stability_table, omega,
+            plot_simulation(gen, history, stability_table, omega,
                             plot_omega, plot_epsilon, n_generations, out_paths)
-            plot_all_stabilities(gen+1, history, stability_table, omega,
+            plot_all_stabilities(gen, history, stability_table, omega,
                                  plot_omega, plot_epsilon, n_generations, out_paths)
             if record["data"]:
-                save_history(gen+1, history, out_paths)
+                save_history(gen, history, out_paths)
             plt.close('all')  # TODO: Move into plotting.py
 
     write_final_fasta(population, tree, out_paths)

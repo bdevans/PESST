@@ -519,7 +519,7 @@ def plot_traces(generation, history, stability_table, omega,
     epsilon_r = np.mean(stability_table.values)
     epsilon = clone_size * epsilon_r
 
-    fig = plt.figure(figsize=(12, 8))  # (width, height)
+    fig = plt.figure(figsize=(14, 8))  # (width, height)
     if plot_initial:
         ncols = 4
         width_ratios = [1, 1.618, 1, 1]
@@ -531,7 +531,7 @@ def plot_traces(generation, history, stability_table, omega,
                                # [Left, Middle, Right]
                                width_ratios=width_ratios,
                                height_ratios=[2, 2])  #  [Top, Bottom]
-    gs.update(top=0.95, wspace=0.10, hspace=0.08)  # Leave room for the title
+    # gs.update(top=0.95, wspace=0.08, hspace=0.08, left=0.05, right=0.95)  # Leave room for the title
 
 
     # Plot initial distribution: \Delta \Delta G_e vs locus
@@ -689,8 +689,10 @@ def plot_traces(generation, history, stability_table, omega,
 
     # Add title and save
     # plt.subplots_adjust(top=0.85)
+    # gs.tight_layout(fig, rect=(0, 0, 1, 1))
     fig.suptitle((f"Generation {generation}"), fontweight='bold')
     # fig.set_tight_layout(True)
+    gs.tight_layout(fig, rect=(0.02, 0.02, 0.98, 0.95))  # Leave room for the title
     filename = os.path.join(
         out_paths["figures"], f"traces_G{generation}.png")
     with warnings.catch_warnings():

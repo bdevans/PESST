@@ -260,7 +260,7 @@ def plot_stability_histograms(generation, aa_stabilities, stability_table, omega
             orientation=orient, density=True,
             label=f"Present distribution\n{stats_g}")
     # Plot current distribution mean
-    label = rf"$\mu_p$ = {mean_stability:.2f}"
+    label = rf"$\mu_r$ = {mean_stability:.2f}"
     if orient == 'vertical':
         ax.axvline(x=mean_stability, color=colours["aa_g_mu"],
                    linestyle="--", lw=3, zorder=20, label=label)

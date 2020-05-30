@@ -29,6 +29,59 @@ def remove_inner_ticklabels(fig):
             pass
 
 
+def plot_amino_acid_evolution(history, epsilon_r, out_paths, 
+                              fig_title=True, legend_title=None, 
+                              xlims=None, colours=None, ax=None):
+    """Plot stability against generation for all amino acids.
+    """
+    if colours is None:
+        colours = default_colours
+
+    # Create array of stability values with shape (n_generations, n_clones)
+    n_generations = len(history) - 1  # First entry is the initial state
+    generation_numbers = np.arange(n_generations+1)  # Skip initial generation
+    # (clone_size, n_amino_acids) = stability_table.shape
+    # (n_clones, _) = history[0].stabilities.shape
+    n_residues = history[0].stabilities.size  # == stability_table.shape
+
+    stabilities = np.array([history[g].stabilities.ravel()
+                            for g in range(n_generations+1)])
+    fig = None
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(12, 8))
+    # sns.lineplot(generation_numbers, stabiltiies, estimator=None, lw=1)
+    ax.plot(generation_numbers, stabilities,
+            color=colours["aa_g"], alpha=0.2, lw=1)
+    # color=sns.desaturate(colours["phi"], 0.3), lw=1)
+
+    # Average across clones
+    ax.plot(generation_numbers, np.mean(stabilities, axis=1), "--",
+            color=colours["aa_g_mu"], lw=3, zorder=20, label=r"$\mu_{r}$")  # residues
+    if xlims is not None:
+        ax.set_xlim(xlims)
+    else:
+        ax.set_xlim([-0.05*n_generations, 1.05*n_generations])
+    ax.set_xlabel("Generation")
+    ax.set_ylabel("$\Delta \Delta G_e$ (kcal/mol)")  # , fontweight='bold')
+    if fig_title:
+        ax.set_title("\n".join(wrap(f"Stability change for {n_residues} "
+                                    "amino acids, mutated over "
+                                    f"{n_generations} generations", 60)),
+                     fontweight='bold')
+    if epsilon_r is not None:  # Add theoretical convergence line
+        # epsilon_r == mean_stability_0 == np.mean(stability_table.values)
+        ax.axhline(epsilon_r, color=colours["aa_0_mu"], lw=3, linestyle="--",
+                   zorder=10, label=rf"$\epsilon_r$ = {epsilon_r:.2f}")
+
+    legend = ax.legend(title=legend_title)
+    legend.set_zorder(100)
+
+    if fig is not None:
+        evo_fig = f"residue_evolution_over_{n_generations}_generations.png"
+        fig.savefig(os.path.join(out_paths["figures"], evo_fig))
+    return ax
+
+
 def plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
                    out_paths, fig_title=True, legend_title=None, xlims=None,
                    colours=None, ax=None):

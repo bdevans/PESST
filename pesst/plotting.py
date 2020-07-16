@@ -1,4 +1,5 @@
 import os
+import copy
 import warnings
 from textwrap import wrap
 
@@ -237,10 +238,19 @@ def plot_stability_histograms(generation, aa_stabilities, stability_table, omega
     stats_0 = "\n".join([rf"$\sigma$ = {np.std(stability_table.values):.2f}",
                          f"skew = {stats.skew(stability_table.values, axis=None):.2f}",
                          f"kurtosis = {stats.kurtosis(stability_table.values, axis=None):.2f}"])
-    n, bins, _ = ax.hist(stability_table.values.ravel(), bins='sqrt',
-                         align='mid', orientation=orient,
-                         color=colours["aa_0"], alpha=0.8, density=True,
-                         label="\n".join([r"$\epsilon$ distribution", stats_0]))
+    # n, bins, _ = ax.hist(stability_table.values.ravel(), bins='sqrt',
+    #                      align='mid', orientation=orient,
+    #                      color=colours["aa_0"], alpha=0.8, density=True,
+    #                      label="\n".join([r"$\epsilon$ distribution", stats_0]))
+    if orient.lower() == 'vertical':
+        # NOTE: The terminology is reversed
+        vertical = False
+    else:
+        vertical = True
+    sns.distplot(stability_table.values.ravel(), #bins='sqrt', 
+                 color=colours['aa_0'], hist_kws={"alpha": 0.8}, 
+                 norm_hist=True, kde=False, ax=ax, vertical=vertical,
+                 label="\n".join([r"$\epsilon$ distribution", stats_0]))
     # Plot initial distribution mean
     label = rf"$\epsilon_r$ = {mean_stability_0:.2f}"
     if orient == 'vertical':
@@ -255,10 +265,14 @@ def plot_stability_histograms(generation, aa_stabilities, stability_table, omega
     stats_g = "\n".join([rf"$\sigma$ = {np.std(aa_stabilities):.2f}",
                          f"skew = {stats.skew(aa_stabilities, axis=None):.2f}",
                          f"kurtosis = {stats.kurtosis(aa_stabilities, axis=None):.2f}"])
-    ax.hist(aa_stabilities.ravel(), bins=bins,
-            align='mid', color=colours["aa_g"], alpha=0.8,
-            orientation=orient, density=True,
-            label=f"Present distribution\n{stats_g}")
+    # ax.hist(aa_stabilities.ravel(), bins=bins,
+    #         align='mid', color=colours["aa_g"], alpha=0.8,
+    #         orientation=orient, density=True,
+    #         label=f"Present distribution\n{stats_g}")
+    sns.distplot(aa_stabilities.ravel(), #bins='sqrt', 
+                 color=colours['aa_g'], hist_kws={"alpha": 0.8}, 
+                 norm_hist=True, kde=False, ax=ax, vertical=vertical,
+                 label=f"Present distribution\n{stats_g}")
     # Plot current distribution mean
     label = rf"$\mu_r$ = {mean_stability:.2f}"
     if orient == 'vertical':
@@ -504,7 +518,7 @@ def plot_all_stabilities(generation, history, stability_table, omega,
 
 def plot_traces(generation, history, stability_table, omega,
                 plot_omega, plot_epsilon, n_generations, out_paths, 
-                plot_initial=True, colours=None):
+                plot_initial=False, colours=None):
 
     if colours is None:
         colours = default_colours
@@ -522,10 +536,10 @@ def plot_traces(generation, history, stability_table, omega,
     fig = plt.figure(figsize=(14, 8))  # (width, height)
     if plot_initial:
         ncols = 4
-        width_ratios = [1, 1.618, 1, 1]
+        width_ratios = [0.618, 1.618, 1, 0.618]
     else:
         ncols = 3
-        width_ratios = [1, 1.618, 1]
+        width_ratios = [1.618, 1, 0.618]
     # https://matplotlib.org/users/gridspec.html
     gs = mpl.gridspec.GridSpec(nrows=2, ncols=ncols,
                                # [Left, Middle, Right]
@@ -533,25 +547,34 @@ def plot_traces(generation, history, stability_table, omega,
                                height_ratios=[2, 2])  #  [Top, Bottom]
     # gs.update(top=0.95, wspace=0.08, hspace=0.08, left=0.05, right=0.95)  # Leave room for the title
 
+    ax_botton_left = plt.subplot(gs[1, 0])
+    ax_top_left = plt.subplot(gs[0, 0], sharex=ax_botton_left)
 
-    # Plot initial distribution: \Delta \Delta G_e vs locus
-    ax_aa_0 = plt.subplot(gs[1, 0])
-    plot_initial_amino_acid_stabilities(stability_table, omega,
-                                        colours=colours, ax=ax_aa_0)
+    if plot_initial:
+        # Plot initial distribution: \Delta \Delta G_e vs locus
+        ax_aa_0 = ax_botton_left
+        plot_initial_amino_acid_stabilities(stability_table, omega,
+                                            colours=colours, ax=ax_aa_0)
+        ax_aa_0.set_title(None)
+        ax_aa_0.legend_.remove()
+
     # Calculate \Delta \Delta G_e (amino acid) stability plotting bounds
     ymin = np.floor(np.amin(stability_table.values))
     ymax = np.ceil(np.amax(stability_table.values))
     pad = pad_factor * abs(ymax - ymin)  # * 0.5
     ymax = np.ceil(ymax + pad)
     ymin = np.floor(ymin - pad)
-    ax_aa_0.set_ylim(ymin, ymax)
+    ax_botton_left.set_ylim(ymin, ymax)
     # plt.setp(ax_aa_0.get_yticklabels(), visible=False)
     # ax_aa_0.set_ylabel(None)
-    ax_aa_0.set_title(None)
-    ax_aa_0.legend_.remove()
+    # ax_botton_left.set_title(None)
+    # ax_botton_left.legend_.remove()
 
     # Plot stability trace (amino acid evoutionary history): \Delta \Delta G_e vs generation
-    ax_evo_aa = plt.subplot(gs[1, 1], sharey=ax_aa_0)
+    if plot_initial:
+        ax_evo_aa = plt.subplot(gs[1, 1], sharey=ax_aa_0)
+    else:
+        ax_evo_aa = ax_botton_left
     gen_xlims = (-5, n_generations+5)
     plot_amino_acid_evolution(history, epsilon_r, out_paths,
                               fig_title=False, xlims=gen_xlims, colours=colours,
@@ -561,11 +584,18 @@ def plot_traces(generation, history, stability_table, omega,
                     color=colours["aa_g_mu"], markersize=10)
     if not plot_evo_legend:
         ax_evo_aa.legend_.remove()
-    plt.setp(ax_evo_aa.get_yticklabels(), visible=False)
-    ax_evo_aa.set_ylabel(None)
+    
+    if plot_initial:
+        plt.setp(ax_evo_aa.get_yticklabels(), visible=False)
+        ax_evo_aa.set_ylabel(None)
 
     # Plot current generation's amino acid stabilities: \Delta \Delta G_e vs clone
-    ax_aa_g = plt.subplot(gs[1, 2], sharey=ax_aa_0)
+    # ax_aa_g = plt.subplot(gs[1, 2], sharey=ax_aa_0)
+    if plot_initial:
+        col = 2
+    else:
+        col = 1
+    ax_aa_g = plt.subplot(gs[1, col], sharey=ax_botton_left)
     # if plot_initial:
     #     plot_amino_acid_stabilities(history[0].stabilities, epsilon_r,
     #                                 colours={"aa_g": colours["aa_0"], 
@@ -579,7 +609,7 @@ def plot_traces(generation, history, stability_table, omega,
     ax_aa_g.legend_.remove()
 
     # Plot marginal stability distributions: \Delta \Delta G_e vs density
-    ax_hist = plt.subplot(gs[1, -1], sharey=ax_aa_0)
+    ax_hist = plt.subplot(gs[1, -1], sharey=ax_botton_left)
     plot_stability_histograms(generation, aa_stabilities, stability_table, omega,
                               out_paths, orient='horizontal', density_cap=density_cap,
                               colours=colours, ax=ax_hist)
@@ -616,25 +646,37 @@ def plot_traces(generation, history, stability_table, omega,
     protein_stabilities = np.sum(aa_stabilities, axis=1)
     mean_protein_stability = np.mean(protein_stabilities)
 
-    # Plot initial protein stabilities: \Delta G_e vs locus
-    ax_phi_0 = plt.subplot(gs[0, 0])
-    plot_protein_stabilities(stability_table, omega, epsilon, plot_epsilon,
-                             plot_mean=False,  # Plot epsilon only
-                             colours=colours, ax=ax_phi_0)
-    plt.setp(ax_phi_0.get_xticklabels(), visible=False)
-    ax_phi_0.set_xlabel(None)
-    ax_phi_0.set_title(None)
-    ax_phi_0.legend_.remove()
-    # plt.setp(ax_phi_0.get_yticklabels(), visible=False)
-    # ax_phi_0.set_ylabel(None)
-    ax_phi_0.set_ylim(ymin, ymax)
+    if plot_initial:
+        # Plot initial protein stabilities: \Delta G_e vs locus
+        # ax_phi_0 = plt.subplot(gs[0, 0])
+        ax_phi_0 = ax_top_left
+        epsilon_r_colours = copy.copy(colours)
+        epsilon_r_colours["phi"] = "#ff7f00"
+        plot_protein_stabilities(stability_table, omega, epsilon, plot_epsilon,
+                                plot_mean=False,  # Plot epsilon only
+                                colours=epsilon_r_colours, ax=ax_phi_0)
+        plt.setp(ax_phi_0.get_xticklabels(), visible=False)
+        ax_phi_0.set_xlabel(None)
+        ax_phi_0.set_title(None)
+        ax_phi_0.legend_.remove()
+        # plt.setp(ax_phi_0.get_yticklabels(), visible=False)
+        # ax_phi_0.set_ylabel(None)
+        # ax_phi_0.set_ylim(ymin, ymax)
 
-    
+    ax_top_left.set_ylim(ymin, ymax)
+    if not plot_initial:
+        ax_top_left.set_ylabel(r"$\Delta G_e$ (kcal/mol)")
+
     # Plot protein evolutionary history: \Delta G_e vs generation
-    ax_evo_phi = plt.subplot(gs[0, 1], sharex=ax_evo_aa, sharey=ax_phi_0)
+    if plot_initial:
+        ax_evo_phi = plt.subplot(gs[0, 1], sharex=ax_evo_aa, sharey=ax_phi_0)
+    else:
+        ax_evo_phi = ax_top_left
     plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
                    out_paths, fig_title=False, xlims=gen_xlims, colours=colours,
                    ax=ax_evo_phi)
+    # if not plot_initial:
+    #     ax_evo_phi.set_ylabel(r"$\Delta G_e$ (kcal/mol)")
     # Add a marker to show the current mean stability
     ax_evo_phi.plot(len(history)-1, mean_protein_stability, '*',
                     color=colours["phi_mu"], markersize=10)  # ,
@@ -646,15 +688,20 @@ def plot_traces(generation, history, stability_table, omega,
         ax_evo_phi.legend_.get_texts()[mu_text_index].set_text(f"{new_label: <16}")
     else:
         ax_evo_phi.legend_.remove()
-    plt.setp(ax_evo_phi.get_yticklabels(), visible=False)
+    if plot_initial:
+        plt.setp(ax_evo_phi.get_yticklabels(), visible=False)
+        ax_evo_phi.set_ylabel(None)
     # NOTE: ax.set_xticklabels([]) removes ticks entirely
-    ax_evo_phi.set_ylabel(None)
     plt.setp(ax_evo_phi.get_xticklabels(), visible=False)
     ax_evo_phi.set_xlabel(None)
 
 
     # Plot current generation's protein stabilities: \Delta G_e vs clone
-    ax_phi = plt.subplot(gs[0, 2], sharex=ax_aa_g, sharey=ax_phi_0)
+    if plot_initial:
+        col = 2
+    else:
+        col = 1
+    ax_phi = plt.subplot(gs[0, col], sharex=ax_aa_g, sharey=ax_top_left)
     plot_protein_stabilities(aa_stabilities, omega, epsilon, plot_epsilon,
                              colours=colours, ax=ax_phi)
     plt.setp(ax_phi.get_xticklabels(), visible=False)
@@ -665,12 +712,15 @@ def plot_traces(generation, history, stability_table, omega,
     ax_phi.set_ylabel(None)
 
     # Plot marginal protein stability distributions: \Delta G_e vs density
-    ax_phi_hist = plt.subplot(gs[0, -1], sharex=ax_hist, sharey=ax_phi_0)
+    ax_phi_hist = plt.subplot(gs[0, -1], sharex=ax_hist, sharey=ax_top_left)
     # bins = np.linspace(ymin, ymax, int(np.sqrt(n_clones)))
     # ax_phi_hist.set_ylim(ymin, ymax)
-    ax_phi_hist.hist(protein_stabilities.ravel(), bins='sqrt',  # bins, # 'sqrt',#int(np.sqrt(n_clones)),
-                     color=colours['phi'], alpha=0.8,
-                     align='mid', orientation='horizontal', density=True, stacked=True)
+    # ax_phi_hist.hist(protein_stabilities.ravel(), bins='sqrt',  # bins, # 'sqrt',#int(np.sqrt(n_clones)),
+    #                  color=colours['phi'], alpha=0.8,
+    #                  align='mid', orientation='horizontal', density=True, stacked=True)
+    sns.distplot(protein_stabilities.ravel(), #bins='sqrt', 
+                 color=colours['phi'], kde=False, hist_kws={"alpha": 0.8}, 
+                 vertical=True, norm_hist=True, ax=ax_phi_hist)
     plt.setp(ax_phi_hist.get_xticklabels(), visible=False)
     plt.setp(ax_phi_hist.get_yticklabels(), visible=False)
     ax_phi_hist.set_ylabel(None)
@@ -707,8 +757,13 @@ def plot_traces(generation, history, stability_table, omega,
         warnings.filterwarnings("ignore", message='Creating legend with loc="best" can be slow with large amounts of data.')
         fig.savefig(filename)
     plt.close()
-    return (fig, [ax_phi_0, ax_phi, ax_phi_hist,
-                  ax_aa_0, ax_aa_g, ax_hist])
+    if plot_initial:
+        return (fig, [ax_phi_0, ax_evo_phi, ax_phi, ax_phi_hist,
+                      ax_aa_0, ax_evo_aa, ax_aa_g, ax_hist])
+    else:
+        return (fig, [ax_evo_phi, ax_phi, ax_phi_hist,
+                      ax_evo_aa, ax_aa_g, ax_hist])
+    # return fig  # TODO: Check this contains all the axes
 
 
 def plot_simulation(generation, history, stability_table, omega,

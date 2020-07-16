@@ -54,8 +54,8 @@ gamma = {"shape": 1.9,  # Most phylogenetic systems that use gamma only let you 
          "samples": 10000}
 
 # Set what to record
-record = {"rate": 50,           # write a new fasta file every x generations
-          "fasta_rate": 50,     # write a new fasta file every x generations
+record = {"rate": 50,           # record generation data and write new figures every X generations
+          "fasta_rate": 50,     # write a new fasta file every X generations
         #   "residues": True,  # False,
           "statistics": True,
           "histograms": True,

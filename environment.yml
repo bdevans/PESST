@@ -3,13 +3,13 @@ name: pesst
 channels:
   - conda-forge
 dependencies:
-  - python=3.7
+  - python>=3.6
   - pip
-  - numpy
-  - scipy
-  - matplotlib
-  - tqdm
-  - pandas
-  - seaborn
-  - imageio
   - biopython
+  - imageio
+  - matplotlib>=2.2
+  - numpy>1.15
+  - pandas>0.23
+  - scipy>=1.1
+  - seaborn
+  - tqdm

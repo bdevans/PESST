@@ -66,9 +66,8 @@ def plot_amino_acid_evolution(history, epsilon_r, out_paths,
     ax.set_xlabel("Generation")
     ax.set_ylabel("$\Delta \Delta G_e$ (kcal/mol)")  # , fontweight='bold')
     if fig_title:
-        ax.set_title(fill(f"Stability change for {n_residues} "
-                        "amino acids, mutated over "
-                        f"{n_generations} generations", 60),
+        ax.set_title(fill(f"Stability change for {n_residues} amino acids, "
+                          f"mutated over {n_generations} generations", 60),
                      fontweight='bold')
     if epsilon_r is not None:  # Add theoretical convergence line
         # epsilon_r == mean_stability_0 == np.mean(stability_table.values)
@@ -122,7 +121,7 @@ def plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
     if fig_title:
         ax.set_title(fill(f"Stability change for {n_clones} clones "
                         f"of {clone_size} amino acids, mutated "
-                        f"over {n_generations} generations", 60), 
+                        f"over {n_generations} generations", 60),
                      fontweight='bold')
     if plot_omega:  # Add stability threshold
         ax.axhline(omega, color=colours["omega"], lw=3, linestyle="-",

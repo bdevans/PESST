@@ -1,7 +1,7 @@
 import os
 import copy
 import warnings
-from textwrap import wrap
+from textwrap import fill
 
 import numpy as np
 import matplotlib as mpl
@@ -66,9 +66,9 @@ def plot_amino_acid_evolution(history, epsilon_r, out_paths,
     ax.set_xlabel("Generation")
     ax.set_ylabel("$\Delta \Delta G_e$ (kcal/mol)")  # , fontweight='bold')
     if fig_title:
-        ax.set_title("\n".join(wrap(f"Stability change for {n_residues} "
-                                    "amino acids, mutated over "
-                                    f"{n_generations} generations", 60)),
+        ax.set_title(fill(f"Stability change for {n_residues} "
+                        "amino acids, mutated over "
+                        f"{n_generations} generations", 60),
                      fontweight='bold')
     if epsilon_r is not None:  # Add theoretical convergence line
         # epsilon_r == mean_stability_0 == np.mean(stability_table.values)
@@ -120,9 +120,9 @@ def plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
     ax.set_xlabel("Generation")
     ax.set_ylabel("$\Delta G_e$ (kcal/mol)") #, fontweight='bold')
     if fig_title:
-        ax.set_title("\n".join(wrap(f"Stability change for {n_clones} clones "
-                                    f"of {clone_size} amino acids, mutated "
-                                    f"over {n_generations} generations", 60)), 
+        ax.set_title(fill(f"Stability change for {n_clones} clones "
+                        f"of {clone_size} amino acids, mutated "
+                        f"over {n_generations} generations", 60), 
                      fontweight='bold')
     if plot_omega:  # Add stability threshold
         ax.axhline(omega, color=colours["omega"], lw=3, linestyle="-",
@@ -307,9 +307,9 @@ def plot_stability_histograms(generation, aa_stabilities, stability_table, omega
     # Set to 1.5*largest original bin count
     # ax.set_ylim(0, round(1.5*np.amax(n)))
     if fig is not None:
-        ax.set_title("\n".join(wrap("Initial stability distribution vs. "
-                                    "changing stability distribution across "
-                                    "every evolving clone", 60)),
+        ax.set_title(fill("Initial stability distribution vs. "
+                        "changing stability distribution across "
+                        "every evolving clone", 60),
                      fontweight='bold')
         fig.savefig(os.path.join(out_paths["figures"],
                                  f"histogram_G{generation}.png"))
@@ -919,10 +919,10 @@ def plot_gamma_distribution(gamma, samples, quartiles, average_medians,
     ax.axvline(x=average_medians[1], color="#404040", linestyle=":")
     ax.axvline(x=average_medians[2], color="#404040", linestyle=":")
     ax.axvline(x=average_medians[3], color="#404040", linestyle=":")
-    ax.set_title("\n".join(wrap("Gamma rate categories calculated as the the "
-                                f"average of {n_iterations} median values of "
-                                f"4 equally likely quartiles of {n_samples:,} "
-                                "randomly sampled vaules", 60)),
+    ax.set_title(fill("Gamma rate categories calculated as the the "
+                    f"average of {n_iterations} median values of "
+                    f"4 equally likely quartiles of {n_samples:,} "
+                    "randomly sampled vaules", 60),
                  fontweight='bold', fontsize=10)
     legend = ax.legend()
     legend.set_zorder(100)

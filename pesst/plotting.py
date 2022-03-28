@@ -219,7 +219,7 @@ def plot_initial_amino_acid_stabilities(stability_table, omega, colours=None, ax
     return ax
 
 
-def plot_stability_histograms(generation, aa_stabilities, stability_table, omega,
+def plot_stability_histograms(generation, aa_stabilities, stability_table, #omega,
                               out_paths, orient='vertical', density_cap=0.7, 
                               colours=None, ax=None):
 
@@ -434,7 +434,7 @@ def plot_all_stabilities(generation, history, stability_table, omega,
 
     # Plot marginal stability distributions
     ax_hist = plt.subplot(gs[1, -1], sharey=ax_aa_0)
-    plot_stability_histograms(generation, aa_stabilities, stability_table, omega,
+    plot_stability_histograms(generation, aa_stabilities, stability_table, #omega,
                               out_paths, orient='horizontal', density_cap=density_cap,
                               colours=colours, ax=ax_hist)
     plt.setp(ax_hist.get_yticklabels(), visible=False)
@@ -631,7 +631,7 @@ def plot_traces(generation, history, stability_table, omega,
 
     # Plot marginal stability distributions: \Delta \Delta G_e vs density
     ax_hist = plt.subplot(gs[1, -1], sharey=ax_botton_left)
-    plot_stability_histograms(generation, aa_stabilities, stability_table, omega,
+    plot_stability_histograms(generation, aa_stabilities, stability_table, #omega,
                               out_paths, orient='horizontal', density_cap=density_cap,
                               colours=colours, ax=ax_hist)
     plt.setp(ax_hist.get_yticklabels(), visible=False)
@@ -837,7 +837,7 @@ def plot_simulation(generation, history, stability_table, omega,
 
     # Plot marginal stability distributions
     ax_hist = plt.subplot(gs[1, -1], sharey=ax_aa_g)
-    plot_stability_histograms(generation, aa_stabilities, stability_table, omega,
+    plot_stability_histograms(generation, aa_stabilities, stability_table, #omega,
                               out_paths, orient='horizontal', density_cap=density_cap,
                               colours=colours, ax=ax_hist)
     plt.setp(ax_hist.get_yticklabels(), visible=False)

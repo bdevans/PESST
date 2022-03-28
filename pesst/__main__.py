@@ -61,6 +61,7 @@ record = {"rate": 50,           # record generation data and write new figures e
           "histograms": True,
           # "invariants": True,
           "data": True,
+          "figures": True,
           "gif": True,
           "gif_rate": 0.25}
 

@@ -10,10 +10,7 @@ from operator import itemgetter
 
 import numpy as np
 import scipy as sp
-# from scipy import stats
 import scipy.stats
-# from scipy.stats import binned_statistic
-# from scipy.stats import anderson, normaltest, skew, skewtest, kurtosistest, shapiro, kurtosis, ks_2samp
 import pandas as pd
 import imageio
 
@@ -77,11 +74,11 @@ def append_ks_statistics(stats_full_name, distribution_stability, initial_stabil
         ksdata = sp.stats.ks_2samp(distribution_stability, initial_stability)
         stats_file.write("\n\n\n2-sided Kolmogorov-Smirnov test of similarity "
                          "between the stability space and evolving protein\n"
-                         "----------------------------------------------"
-                         "----------------------------------------------\n\n")
+                         "-----------------------------------------------"
+                         "-----------------------------------------------\n\n")
         stats_file.write("The Kolmogorov-Smirnov test between the stability "
                          "space and the evolving protein gives a p-value of: "
-                         f"{ksdata.pvalue}\n")
+                         f"{ksdata.pvalue}. \n")
 
         if ksdata.pvalue < 0.05:
             stats_file.write("Therefore, as the p-value is smaller than 0.05 "
@@ -101,7 +98,7 @@ def write_histogram_statistics(stats_full_name, aa_variant_stabilities):
     stats_file = open(stats_full_name, "w")  # open file
 
     stats_file.write("Tests for normality on the amino acid stabilities\n"
-                     "===============================================\n\n\n")
+                     "=================================================\n\n\n")
 
     # TODO: Check that the ordering is correct (default: row major)
     stabilities = aa_variant_stabilities.ravel()
@@ -110,13 +107,13 @@ def write_histogram_statistics(stats_full_name, aa_variant_stabilities):
     stats_file.write("Skewness\n"
                      "--------\n\n"
                      "The skewness of the data is: "
-                     f"{sp.stats.skew(stabilities)}\n\n\n")
+                     f"{sp.stats.skew(stabilities)}.\n\n\n")
 
     # Kurtosis
     stats_file.write("Kurtosis\n"
                      "--------\n\n"
                      "The kurtosis of the data is: "
-                     f"{sp.stats.kurtosis(stabilities)}\n\n\n")
+                     f"{sp.stats.kurtosis(stabilities)}.\n\n\n")
 
     # Normality (Shapiro-Wilk)
     stats_file.write("Shapiro-Wilk test of non-normality\n"
@@ -126,13 +123,13 @@ def write_histogram_statistics(stats_full_name, aa_variant_stabilities):
         warnings.filterwarnings("ignore", message="p-value may not be accurate for N > 5000.")
         W_shapiro, p_shapiro = sp.stats.shapiro(stabilities)
     stats_file.write("The Shapiro-Wilk test of non-normality for the entire "
-                     f"dataset gives p = {p_shapiro}\n")
+                     f"dataset gives p = {p_shapiro}.\n")
     if p_shapiro >= 0.05:
         shapiro = 'not '
     else:
         shapiro = ''
     stats_file.write("Therefore the Shapiro-Wilk test suggests that the whole "
-                     f"dataset is {shapiro}confidently non-normal\n")
+                     f"dataset is {shapiro}confidently non-normal.\n")
     if len(stabilities) > 5000:
         stats_file.write("Warning: There are more than 5,000 datapoints "
                          f"({len(stabilities)}) so the p-value may be inaccurate.\n\n")
@@ -153,7 +150,7 @@ def write_histogram_statistics(stats_full_name, aa_variant_stabilities):
             passpercentcalc.append(0)
     stats_file.write("According to the Shapiro-Wilk test, the proportion of "
                      "individual positions that are not confidently "
-                     f"non-normal is: {sum(passpercentcalc) / len(passpercentcalc):.2%}\n\n\n")
+                     f"non-normal is: {sum(passpercentcalc) / len(passpercentcalc):.2%}.\n\n\n")
 
     # Normality (Anderson-Darling)
     # Significance levels (percentages) for normal distributions
@@ -163,7 +160,7 @@ def write_histogram_statistics(stats_full_name, aa_variant_stabilities):
     anderson_results = sp.stats.anderson(stabilities)
     stats_file.write("The Anderson-Darling test of normality for the entire "
                      f"dataset gives a test statistic of {anderson_results.statistic} "
-                     f"and critical values of {anderson_results.critical_values}\n")
+                     f"and critical values of {anderson_results.critical_values}.\n")
     if anderson_results.statistic > anderson_results.critical_values[-1]:
         stats_file.write("Therefore according to the Anderson-Darling test, "
                          "the hypothesis of normality is rejected for the "

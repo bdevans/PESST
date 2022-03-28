@@ -110,3 +110,4 @@ results/
 # *.png
 benchmark.py
 .DS_Store
+.devcontainer/frozen-requirements.txt

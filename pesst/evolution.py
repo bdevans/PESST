@@ -21,9 +21,9 @@ from .dataio import (create_output_folders, save_settings, write_tree,
                      write_histogram_statistics, append_ks_statistics,
                      create_gif, save_history)
 from .plotting import (plot_simulation, plot_evolution, plot_gamma_distribution,
-                       plot_stability_histograms, plot_all_stabilities,
-                       plot_stability_table, plot_LG_matrix,
-                       plot_phi_stability_table, plot_traces)
+                       plot_generation_stability, plot_stability_histograms,
+                       plot_all_stabilities, plot_stability_table,
+                       plot_LG_matrix, plot_traces)
 from .utilities import print_protein
 
 
@@ -106,12 +106,12 @@ def get_allowed_sites(clone_size, n_invariants):
     return Sites(invariant=invariant_sites, variant=variant_sites)
 
 
-def gamma_ray(clone_size, sites, gamma, out_paths):
+def gamma_ray(clone_size, sites, gamma, record, out_paths):
     """Generate a set of gamma rate categories.
 
     Does so by sampling many times from a gamma distribution.
     Tests of the trade-off between computing time and variance led me to set
-    this to 10000 samples from the distribution.
+    this to 10,000 samples from the distribution.
     Computes quartiles from the data with equal likelihood by finding bounds
     for quartiles and collecting values between bounds.
     Finds discrete rate values by taking the median of sorted collected values.
@@ -141,8 +141,10 @@ def gamma_ray(clone_size, sites, gamma, out_paths):
     # Calculate average of medians across iterations
     average_medians = np.mean(medians, axis=0)
 
-    # Replot the gamma distributuion as a check
-    plot_gamma_distribution(gamma, samples, quartiles, average_medians, out_paths)
+    # TODO: Move plotting out
+    if record["figures"]:
+        # Plot the gamma distribution as a check
+        plot_gamma_distribution(gamma, samples, quartiles, average_medians, out_paths)
 
     gamma_categories = np.random.choice(average_medians, size=clone_size)
     gamma_categories[sites.invariant] = 0
@@ -288,19 +290,24 @@ def get_stable_protein(stability_start, clone_size, sites, stability_table):
     return protein
 
 
-def record_generation_stability(generation, population, sites, stability_table,
-                                omega, p_mutation, record, out_paths):
+
+
+
+def record_generation_statistics(generation, population, sites,
+                                 stability_table, out_paths):
+                                # omega, p_mutation, record, out_paths):
     """Record the stability of every protein in the generation and store them in
     dictionary. Optionally generate data and figures about stability.
     """
 
-    # Build distribution of stability values existing in evolving protein
-    stabilities = get_phi_stability_table(population, stability_table)
+    # # Build distribution of stability values existing in evolving protein
+    # stabilities = get_phi_stability_table(population, stability_table)
 
-    # TODO: Move plot out
-    clims = (np.floor(np.amin(stability_table.values)),
-             np.ceil(np.amax(stability_table.values)))
-    plot_phi_stability_table(generation, stabilities, clims, out_paths)
+    # # TODO: Move plot out
+    # if record["figures"]:
+    #     clims = (np.floor(np.amin(stability_table.values)),
+    #             np.ceil(np.amax(stability_table.values)))
+    #     plot_phi_stability_table(generation, stabilities, clims, out_paths)
 
     # if record["residues"]:
     #     # save_dir = os.path.join(out_paths["figures"], "stabilitydotmatrix")
@@ -309,33 +316,33 @@ def record_generation_stability(generation, population, sites, stability_table,
     #     plot_stability_space(generation, population, stabilities, stability_table,
     #                        omega, out_paths)
 
-    if record["statistics"]:
-        # Record 5 statistical tests on the protein stability space
-        stats_file_name = f"normal_distribution_tests_G{generation}.md"
-        if generation == 0:
-            # stats_file_name = "normal_distribution_statistics_stability_space.md"
-            distributions = stability_table.values
-        else:
-            # stats_file_name = f"normal_distribution_statistics_generation{generation}.md"
-            # Build distribution of stability values excluding invariant sites
-            distributions = get_phi_stability_table(population, stability_table,
-                                                    exclude_invariants=True,
-                                                    variant_sites=sites.variant)
-                                                    # record["invariants"], sites.variant)
-        stats_full_name = os.path.join(out_paths["statistics"], stats_file_name)
-        write_histogram_statistics(stats_full_name, distributions)
-        if generation > 0:
-            append_ks_statistics(stats_full_name, distributions.ravel(),
-                                 stability_table.values.ravel())
+    # if record["statistics"]:
+    # Record 5 statistical tests on the protein stability space
+    stats_file_name = f"normal_distribution_tests_G{generation}.md"
+    if generation == 0:
+        # stats_file_name = "normal_distribution_statistics_stability_space.md"
+        distributions = stability_table.values
+    else:
+        # stats_file_name = f"normal_distribution_statistics_generation{generation}.md"
+        # Build distribution of stability values excluding invariant sites
+        distributions = get_phi_stability_table(population, stability_table,
+                                                exclude_invariants=True,
+                                                variant_sites=sites.variant)
+                                                # record["invariants"], sites.variant)
+    stats_full_name = os.path.join(out_paths["statistics"], stats_file_name)
+    write_histogram_statistics(stats_full_name, distributions)
+    if generation > 0:
+        append_ks_statistics(stats_full_name, distributions.ravel(),
+                             stability_table.values.ravel())
 
-    if record["histograms"]:
-        # TODO: Move out
-        # disthistfilename = "generation_{}.png".format(generation)
-        # disthistfullname = os.path.join(out_paths["figures"], "histograms", disthistfilename)
-        # plot_histogram_of_stability(generation, stabilities.ravel(),
-        #                           stability_table.values.ravel(), omega, out_paths)
-        plot_stability_histograms(generation, stabilities, stability_table,
-                                  omega, out_paths)
+    # if record["histograms"] and record["figures"]:
+    #     # TODO: Move out
+    #     # disthistfilename = "generation_{}.png".format(generation)
+    #     # disthistfullname = os.path.join(out_paths["figures"], "histograms", disthistfilename)
+    #     # plot_histogram_of_stability(generation, stabilities.ravel(),
+    #     #                           stability_table.values.ravel(), omega, out_paths)
+    #     plot_stability_histograms(generation, stabilities, stability_table,
+    #                               omega, out_paths)
 
 
 def get_phi_stability_table(population, stability_table, exclude_invariants=False,
@@ -560,8 +567,14 @@ def evolve(n_generations, population, stability_table, omega, sites,
     # population = copy.deepcopy(initial_population)  # current generation
     phi_stabilities = get_phi_stability_table(population, stability_table)
     # Record initial population
-    record_generation_stability(0, population, sites, stability_table, omega,
-                                p_mutation, record, out_paths)
+    if record["statistics"]:
+        record_generation_statistics(0, population, sites, stability_table, out_paths)
+    if record["figures"]:
+        # Build distribution of stability values existing in evolving protein
+        stabilities = get_phi_stability_table(population, stability_table)
+        plot_generation_stability(0, stabilities, stability_table, out_paths)
+        if record["histograms"]:
+            plot_stability_histograms(0, stabilities, stability_table, out_paths)
     write_fasta_alignment(0, population, out_paths)
 
     # Store each generation along with its stability
@@ -571,14 +584,15 @@ def evolve(n_generations, population, stability_table, omega, sites,
     if record["data"]:
         save_history(0, history, out_paths)
 
-    # TODO: Refactor plot_omega, plot_epsilon
-    plot_simulation(0, history, stability_table, omega, plot_omega, 
-                    plot_epsilon, n_generations, out_paths)
-    plot_all_stabilities(0, history, stability_table, omega,
-                         plot_omega, plot_epsilon, n_generations, out_paths)
-    plot_traces(0, history, stability_table, omega,
-                plot_omega, plot_epsilon, n_generations, out_paths)
-    plt.close('all')  # TODO: Move into plotting.py
+    if record["figures"]:
+        # TODO: Refactor plot_omega, plot_epsilon
+        plot_simulation(0, history, stability_table, omega, plot_omega, 
+                        plot_epsilon, n_generations, out_paths)
+        plot_all_stabilities(0, history, stability_table, omega,
+                             plot_omega, plot_epsilon, n_generations, out_paths)
+        plot_traces(0, history, stability_table, omega,
+                    plot_omega, plot_epsilon, n_generations, out_paths)
+        plt.close('all')  # TODO: Move into plotting.py
 
     for gen in trange(1, n_generations+1):  # run evolution for 1:n_generations
 
@@ -611,15 +625,20 @@ def evolve(n_generations, population, stability_table, omega, sites,
             write_fasta_alignment(gen, population, out_paths)
         # Record population details at the end of processing
         if gen % record["rate"] == 0:
-            record_generation_stability(gen, population, sites,
-                                        stability_table, omega, p_mutation,
-                                        record, out_paths)
-            plot_simulation(gen, history, stability_table, omega,
+            if record["statistics"]:
+                record_generation_statistics(gen, population, sites, stability_table, out_paths)
+            if record["figures"]:
+                # Build distribution of stability values existing in evolving protein
+                stabilities = get_phi_stability_table(population, stability_table)
+                plot_generation_stability(gen, stabilities, stability_table, out_paths)
+                if record["histograms"]:
+                    plot_stability_histograms(gen, stabilities, stability_table, out_paths)
+                plot_simulation(gen, history, stability_table, omega,
+                                plot_omega, plot_epsilon, n_generations, out_paths)
+                plot_all_stabilities(gen, history, stability_table, omega,
+                                     plot_omega, plot_epsilon, n_generations, out_paths)
+                plot_traces(gen, history, stability_table, omega,
                             plot_omega, plot_epsilon, n_generations, out_paths)
-            plot_all_stabilities(gen, history, stability_table, omega,
-                                 plot_omega, plot_epsilon, n_generations, out_paths)
-            plot_traces(gen, history, stability_table, omega,
-                        plot_omega, plot_epsilon, n_generations, out_paths)
             if record["data"]:
                 save_history(gen, history, out_paths)
             plt.close('all')  # TODO: Move into plotting.py
@@ -717,6 +736,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     record_kwargs.setdefault('statistics', True)
     record_kwargs.setdefault('histograms', True)
     record_kwargs.setdefault('data', True)
+    record_kwargs.setdefault('figures', True)
     record_kwargs.setdefault('gif', True)
     record_kwargs.setdefault('gif_rate', 0.25)
     record = record_kwargs  # TODO: Remove after renaming args and below
@@ -741,7 +761,8 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     save_settings(settings_kwargs, out_paths)  # record run settings
     
     LG_matrix = load_LG_matrix()  # Load LG matrix
-    plot_LG_matrix(LG_matrix, out_paths)
+    if record["figures"]:
+        plot_LG_matrix(LG_matrix, out_paths)
 
     print('Creating amino acid stability distribution...')
     # Make stability table of \Delta \Delta G_e values
@@ -761,7 +782,8 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
             plot_omega, plot_epsilon = True, True
         else:
             plot_omega, plot_epsilon = True, False
-    plot_stability_table(stability_table, out_paths)
+    if record["figures"]:
+        plot_stability_table(stability_table, out_paths)
 
     # NOTE: These could be calculated after fixing sites
     # min_stability = np.sum(np.amin(stability_table, axis=1))
@@ -774,7 +796,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     # TODO: return boolean array where True is variant
     sites = get_allowed_sites(clone_size, n_invariants)
     # Generate mutation probabilities for every site
-    p_mutation = gamma_ray(clone_size, sites, gamma, out_paths)  # TODO: Move plotting out
+    p_mutation = gamma_ray(clone_size, sites, gamma, record, out_paths)  # TODO: Move plotting out
 
     # Generate a protein of specified stability taking into account the invariant
     # sites created (calling variables in this order stops the evolutionary
@@ -838,30 +860,31 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
                      sites, p_mutation, mutation_rate, death_rate, tree,
                      LG_matrix, plot_omega, plot_epsilon, record, out_paths)
 
-    # legend_title = "; ".join([r"$\mu$ = {}".format(mu),
-    #                           r"$\sigma$ = {}".format(sigma),
-    #                           "skew = {}".format(skew),
-    #                           r"$\delta$ = {}".format(mutation_rate)])
-    plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
-                   out_paths)  # , legend_title=legend_title)
+    if record["figures"]:
+        # legend_title = "; ".join([r"$\mu$ = {}".format(mu),
+        #                           r"$\sigma$ = {}".format(sigma),
+        #                           "skew = {}".format(skew),
+        #                           r"$\delta$ = {}".format(mutation_rate)])
+        plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
+                    out_paths)  # , legend_title=legend_title)
 
-    # Create animations
-    if record["gif"]:
-        recorded_generations = list(range(0, n_generations+1, record["rate"]))
-        figures = ["pesst", "phi_stability_table", "stabilities", "traces"]
-        # if record["residues"]:
-        #     figures.extend(["OLD_stable_dist_gen", "OLD_generation"])
-        if record["histograms"]:
-            figures.append("histogram")
-        for fig_base in figures:
-            path_root = os.path.join(out_paths["figures"], fig_base)
-            filenames = [f"{path_root}_G{gen}.png"
-                         for gen in recorded_generations]
-            create_gif(filenames, out_paths, duration=record["gif_rate"])
+        # Create animations
+        if record["gif"]:
+            recorded_generations = list(range(0, n_generations+1, record["rate"]))
+            figures = ["pesst", "phi_stability_table", "stabilities", "traces"]
+            # if record["residues"]:
+            #     figures.extend(["OLD_stable_dist_gen", "OLD_generation"])
+            if record["histograms"]:
+                figures.append("histogram")
+            for fig_base in figures:
+                path_root = os.path.join(out_paths["figures"], fig_base)
+                filenames = [f"{path_root}_G{gen}.png"
+                            for gen in recorded_generations]
+                create_gif(filenames, out_paths, duration=record["gif_rate"])
 
-        # if record["statistics"]:
-        #     path_root = os.path.join(out_paths["figures"], "generation_")
-        #     filenames = [path_root+"{}.png".format(gen)
-        #                  for gen in record_generations]
-        #     create_gif(filenames, duration=0.25)
+            # if record["statistics"]:
+            #     path_root = os.path.join(out_paths["figures"], "generation_")
+            #     filenames = [path_root+"{}.png".format(gen)
+            #                  for gen in record_generations]
+            #     create_gif(filenames, duration=0.25)
     return history, out_paths

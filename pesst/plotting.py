@@ -219,6 +219,14 @@ def plot_initial_amino_acid_stabilities(stability_table, omega, colours=None, ax
     return ax
 
 
+def plot_generation_stability(generation, stabilities, stability_table, out_paths):
+    """Plot stability tables for a generation."""
+
+    clims = (np.floor(np.amin(stability_table.values)),
+             np.ceil(np.amax(stability_table.values)))
+    plot_phi_stability_table(generation, stabilities, clims, out_paths)
+
+
 def plot_stability_histograms(generation, aa_stabilities, stability_table, #omega,
                               out_paths, orient='vertical', density_cap=0.7, 
                               colours=None, ax=None):

@@ -198,7 +198,7 @@ def plot_initial_amino_acid_stabilities(stability_table, omega, colours=None, ax
     locus_indicies = np.arange(1, clone_size+1)
 
     # Plot each column of stability_table as a separate dataseries against 0..N-1
-    ax.plot(locus_indicies, stability_table, "o", color=colours["aa_0"], markersize=1)
+    ax.plot(locus_indicies, stability_table.values, "o", color=colours["aa_0"], markersize=1)
     # ax.hlines(mean_stability_0, 1, clone_size,
     #           colors=colours["aa_0_mu"], linestyles="--", lw=3, zorder=20,
     #           label=rf"$\mu_0$ = {mean_stability_0:.2f}")

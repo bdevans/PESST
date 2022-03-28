@@ -244,12 +244,21 @@ def plot_stability_histograms(generation, aa_stabilities, stability_table, omega
     if orient.lower() == 'vertical':
         # NOTE: The terminology is reversed
         vertical = False
+        sns.histplot(stability_table.values.ravel(),
+                     color=colours['aa_0'], alpha=0.8,
+                     stat='density', ax=ax,
+                     label="\n".join([r"$\epsilon$ distribution", stats_0]))
     else:
         vertical = True
-    sns.distplot(stability_table.values.ravel(), #bins='sqrt', 
-                 color=colours['aa_0'], hist_kws={"alpha": 0.8}, 
-                 norm_hist=True, kde=False, ax=ax, vertical=vertical,
-                 label="\n".join([r"$\epsilon$ distribution", stats_0]))
+        sns.histplot(y=stability_table.values.ravel(),
+                     color=colours['aa_0'], alpha=0.8,
+                     stat='density', ax=ax,
+                     label="\n".join([r"$\epsilon$ distribution", stats_0]))
+    # sns.distplot(stability_table.values.ravel(), #bins='sqrt', 
+    #              color=colours['aa_0'], hist_kws={"alpha": 0.8}, 
+    #              norm_hist=True, kde=False, ax=ax, vertical=vertical,
+    #              label="\n".join([r"$\epsilon$ distribution", stats_0]))
+
     # Plot initial distribution mean
     label = rf"$\epsilon_r$ = {mean_stability_0:.2f}"
     if orient == 'vertical':
@@ -268,10 +277,20 @@ def plot_stability_histograms(generation, aa_stabilities, stability_table, omega
     #         align='mid', color=colours["aa_g"], alpha=0.8,
     #         orientation=orient, density=True,
     #         label=f"Present distribution\n{stats_g}")
-    sns.distplot(aa_stabilities.ravel(), #bins='sqrt', 
-                 color=colours['aa_g'], hist_kws={"alpha": 0.8}, 
-                 norm_hist=True, kde=False, ax=ax, vertical=vertical,
-                 label=f"Present distribution\n{stats_g}")
+    if orient.lower() == 'vertical':
+        sns.histplot(aa_stabilities.ravel(),
+                     color=colours['aa_g'], alpha= 0.8,
+                     stat='density', ax=ax,
+                     label=f"Present distribution\n{stats_g}")
+    else:
+        sns.histplot(y=aa_stabilities.ravel(),
+                     color=colours['aa_g'], alpha= 0.8,
+                     stat='density', ax=ax,
+                     label=f"Present distribution\n{stats_g}")
+    # sns.distplot(aa_stabilities.ravel(), #bins='sqrt', 
+    #              color=colours['aa_g'], hist_kws={"alpha": 0.8}, 
+    #              norm_hist=True, kde=False, ax=ax, vertical=vertical,
+    #              label=f"Present distribution\n{stats_g}")
     # Plot current distribution mean
     label = rf"$\mu_r$ = {mean_stability:.2f}"
     if orient == 'vertical':
@@ -477,11 +496,14 @@ def plot_all_stabilities(generation, history, stability_table, omega,
     ax_phi_hist = plt.subplot(gs[0, -1], sharex=ax_hist, sharey=ax_phi_0)
     # bins = np.linspace(ymin, ymax, int(np.sqrt(n_clones)))
     # ax_phi_hist.set_ylim(ymin, ymax)
-    ax_phi_hist.hist(protein_stabilities.ravel(), bins='sqrt', # bins, # 'sqrt',#int(np.sqrt(n_clones)),
-                     color=colours['phi'], alpha=0.8,
-                     align='mid', orientation='horizontal', density=True)
+    # ax_phi_hist.hist(protein_stabilities.ravel(), bins='sqrt', # bins, # 'sqrt',#int(np.sqrt(n_clones)),
+    #                  color=colours['phi'], alpha=0.8,
+    #                  align='mid', orientation='horizontal', density=True)
+    sns.histplot(y=protein_stabilities.ravel(),
+                 color=colours['phi'], alpha=0.8, stat='density', ax=ax_phi_hist)
     plt.setp(ax_phi_hist.get_xticklabels(), visible=False)
     plt.setp(ax_phi_hist.get_yticklabels(), visible=False)
+    ax_phi_hist.set_xlabel(None)
     ax_phi_hist.set_ylabel(None)
     ax_phi_hist.set_xbound(0, density_cap)
 
@@ -717,11 +739,14 @@ def plot_traces(generation, history, stability_table, omega,
     # ax_phi_hist.hist(protein_stabilities.ravel(), bins='sqrt',  # bins, # 'sqrt',#int(np.sqrt(n_clones)),
     #                  color=colours['phi'], alpha=0.8,
     #                  align='mid', orientation='horizontal', density=True, stacked=True)
-    sns.distplot(protein_stabilities.ravel(), #bins='sqrt', 
-                 color=colours['phi'], kde=False, hist_kws={"alpha": 0.8}, 
-                 vertical=True, norm_hist=True, ax=ax_phi_hist)
+    # sns.distplot(protein_stabilities.ravel(), #bins='sqrt', 
+    #              color=colours['phi'], kde=False, hist_kws={"alpha": 0.8}, 
+    #              vertical=True, norm_hist=True, ax=ax_phi_hist)
+    sns.histplot(y=protein_stabilities.ravel(),
+                 color=colours['phi'], alpha=0.8, stat='density', ax=ax_phi_hist)
     plt.setp(ax_phi_hist.get_xticklabels(), visible=False)
     plt.setp(ax_phi_hist.get_yticklabels(), visible=False)
+    ax_phi_hist.set_xlabel(None)
     ax_phi_hist.set_ylabel(None)
     ax_phi_hist.set_xbound(0, density_cap)
 

@@ -29,7 +29,7 @@ from .utilities import print_protein
 
 
 def get_stability_table(clone_size, amino_acids, distributions):
-    """Generate a dataframe describing the stability contributions for each 
+    """Generate a dataframe describing the stability contributions for each
     amino acid (columns) in each position (rows) of the generated protein.
     """
 
@@ -58,7 +58,7 @@ def get_stability_table(clone_size, amino_acids, distributions):
             elif len(params) == 3:
                 (mu, sigma, skew) = params
                 proportion = 1/len(distributions)
-            elif len(params) == 4: 
+            elif len(params) == 4:
                 (mu, sigma, skew, proportion) = params
             else:
                 raise RuntimeError(
@@ -411,6 +411,8 @@ def create_tree(n_proteins, n_roots):
 
 
 def calc_bifurcation_interval(n_generations, n_clones, n_roots):
+    """Calculate the bifurcation interval (in generations) given that there
+    must be at least three proteins left in each branch after bifurcation."""
     # Original iterative algorithm
     # pool = n_clones - n_roots
     # n_phases = 1  # n_bifurations + 1
@@ -609,7 +611,7 @@ def evolve(n_generations, population, stability_table, omega, sites,
 
     if record["figures"]:
         # TODO: Refactor plot_omega, plot_epsilon
-        plot_simulation(0, history, stability_table, omega, plot_omega, 
+        plot_simulation(0, history, stability_table, omega, plot_omega,
                         plot_epsilon, n_generations, out_paths)
         plot_all_stabilities(0, history, stability_table, omega,
                              plot_omega, plot_epsilon, n_generations, out_paths)
@@ -675,6 +677,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
           n_clones=52, n_roots=4, clone_size=100, p_invariant=0.1,
           mutation_rate=0.001, death_rate=0.02,
           gamma_kwargs=None, record_kwargs=None, output_dir=None, seed=None):
+    """The main function to intialise and run PESST evolutionary simulations."""
 
     print('PESST started...')
     # Validate arguments
@@ -867,7 +870,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     # assert omega < max_stability  # Ensure that the possibile (instabilities) span Omega
     assert min_stability < omega
     if initial_stability > omega:
-        raise Exception(f"The instability threshold (omeage = {omega}) is too low "
+        raise Exception(f"The instability threshold (Omega = {omega}) is too low "
                         f"for the distribution (mean = {mean_stability:.3f})!")
 
     initial_population = clone_protein(initial_protein, n_clones)  # copy

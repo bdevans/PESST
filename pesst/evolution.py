@@ -538,8 +538,8 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
         stabilities = calculate_population_stabilities(next_generation,
                                                        stability_table)
 
-        for pi in range(len(stabilities)):
-            if stabilities[pi] > omega:  # clone a random sequence if unstable
+        for pi, stability in enumerate(stabilities):
+            if stability > omega:  # clone a random sequence if unstable
                 mutant_index = replace_protein(pi, tree, stabilities, omega)
                 # If no suitable clones are available, re-mutate and try again
                 if mutant_index is None:

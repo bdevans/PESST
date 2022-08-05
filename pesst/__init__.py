@@ -1,8 +1,8 @@
 """Protein Evolution Simulator with Sequence Tracking."""
 
 __doc__ = """A Python module for evolving proteins."""
-__all__ = ["pesst"]
-__name__ = "pesst"
+# __all__ = ["pesst"]
+# __name__ = "pesst"
 __project__ = "pesst"
 __version__ = "1.0"
 

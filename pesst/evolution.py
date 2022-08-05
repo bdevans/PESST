@@ -222,7 +222,8 @@ def get_stable_protein(stability_start, clone_size, sites, stability_table, omeg
             ranks = list(range(tail_length))  # [0, 1, 2]  # Three lowest (least destabilising)
 
         elif stability_start.lower() == 'mid':
-            ranks = list(range(tail_length, len(amino_acids) - tail_length))  # All except the tails
+            trim_length = tail_length - 1  # TODO: Remove - this is inelegant but needed to reproduce Nic's results
+            ranks = list(range(trim_length, len(amino_acids) - trim_length))  # All except the tails
 
         elif stability_start.lower() == 'low':  # generate super unstable protein
             # TODO: Adjust threshold or allow building proteins above threshold
@@ -241,10 +242,11 @@ def get_stable_protein(stability_start, clone_size, sites, stability_table, omeg
                 )
             sys.exit(1)
 
-        pool = [["M"] * len(ranks)]  # Nested list of candidates amino acids for each position
+        # Nested list of candidates amino acids for each position
+        pool = [["M"] * tail_length]
         for locus in range(1, len(stability_table.index)):  # range(clone_size):
             if locus in sites.invariant:
-                pool.append([current_protein[locus]] * len(ranks))
+                pool.append([current_protein[locus]] * tail_length)
             else:
                 sorted_aa = amino_acids[stability_table.loc[locus].argsort()]
                 # sorted_aa = stability_table.sort_values(stability_table.loc[locus], axis=1).columns.tolist()

@@ -20,7 +20,7 @@ from .dataio import (create_output_folders, save_settings, write_tree,
                      write_roots, write_initial_protein, write_stability_table,
                      write_fasta_alignment, write_final_fasta, load_LG_matrix,
                      write_histogram_statistics, append_ks_statistics,
-                     create_gif, save_history)
+                     create_gif, save_history, Generation)
 from .plotting import (plot_simulation, plot_evolution, plot_gamma_distribution,
                        plot_generation_stability, plot_stability_histograms,
                        plot_all_stabilities, plot_stability_table,
@@ -605,9 +605,10 @@ def evolve(n_generations, population, stability_table, omega, sites,
     write_fasta_alignment(0, population, out_paths)
 
     # Store each generation along with its stability
-    Generation = namedtuple('Generation', ['population', 'stabilities'])
+    # Generation = namedtuple('Generation', ['population', 'stabilities'])
     # Create a list of generations and add initial population and stability
-    history = [Generation(population=population, stabilities=phi_stabilities)]
+    # history = [Generation(population=population, stabilities=phi_stabilities)]
+    history = {0: Generation(population=population, stabilities=phi_stabilities)}
     if record["data"]:
         save_history(0, history, out_paths)
 
@@ -645,7 +646,8 @@ def evolve(n_generations, population, stability_table, omega, sites,
         # The population becomes next_generation only if bifurcations (and deaths) were successful
         population = next_generation
         # Record intermediate stabilities to show existence of unstable proteins
-        history.append(Generation(population=population, stabilities=phi_stabilities))
+        # history.append(Generation(population=population, stabilities=phi_stabilities))
+        history[gen] = Generation(population=population, stabilities=phi_stabilities)
 
         # Write fasta every record["fasta_rate"] generations
         if gen % record["fasta_rate"] == 0:

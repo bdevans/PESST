@@ -5,8 +5,8 @@ import datetime
 import warnings
 import random
 import pkg_resources
-import glob
 from operator import itemgetter
+from collections import namedtuple
 
 import numpy as np
 import scipy as sp
@@ -16,6 +16,8 @@ import imageio
 
 from .utilities import compact_protein
 
+
+Generation = namedtuple('Generation', ['population', 'stabilities'])
 
 def load_LG_matrix(full_file_name=None):
     """Load amino acid transition probabilities matrix.
@@ -327,12 +329,12 @@ def save_history(generation, history, out_paths):
     """Save the last generation to disk."""
 
     stabilities_file = os.path.join(out_paths["data"], f"stabilities_G{generation}.csv")
-    np.savetxt(stabilities_file, history[-1].stabilities, delimiter=',')
+    np.savetxt(stabilities_file, history[generation].stabilities, delimiter=',')
 
     # Save protein sequences
     clones_file = os.path.join(out_paths["data"], f"clones_G{generation}.json")
     population = {key: compact_protein(protein)
-                  for key, protein in history[-1].population.items()}
+                  for key, protein in history[generation].population.items()}
     with open(clones_file, "w") as gf:
         json.dump(population, gf, indent=4, sort_keys=True)
 
@@ -349,15 +351,15 @@ def load_history(data_dir):
     population_files = glob.glob(os.path.join("results", data_dir, "clones_*.json"))
     sorted_files = sorted(zip(generations, population_files, stability_files),
                           key=itemgetter(0))
-    history = []
+    history = {}
     generations = []
     for (generation, population_file, stability_file) in sorted_files:
         # TODO: Write a JSON object_hook to expand sequence strings
         with open(population_file, "r") as pf:
             population = json.load(pf)
         with open(stability_file, "r") as sf:
-            stabilities = np.loadtext(sf, delimiter=",")
-        history.append({"population": population, "stabilities": stabilities})
+        # history.append({"population": population, "stabilities": stabilities})
+        history[generation] = Generation(population=population, stabilities=stabilities)
         generations.append(generation)
     return (history, generations)
 

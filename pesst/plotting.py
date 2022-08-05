@@ -403,7 +403,7 @@ def plot_all_stabilities(generation, history, stability_table, omega,
     pad_factor = 0.1
     density_cap = 0.7
 
-    aa_stabilities = history[-1].stabilities
+    aa_stabilities = history[generation].stabilities
     (n_clones, clone_size) = aa_stabilities.shape
     (clone_size, n_amino_acids) = stability_table.shape
     mean_stability_0 = np.mean(stability_table.values)
@@ -556,7 +556,7 @@ def plot_traces(generation, history, stability_table, omega,
     density_cap = 0.7
     plot_evo_legend = False
 
-    aa_stabilities = history[-1].stabilities
+    aa_stabilities = history[generation].stabilities
     (n_clones, clone_size) = aa_stabilities.shape
     (clone_size, n_amino_acids) = stability_table.shape
     epsilon_r = np.mean(stability_table.values)
@@ -808,7 +808,7 @@ def plot_simulation(generation, history, stability_table, omega,
     pad_factor = 0.1
     density_cap = 0.7
 
-    aa_stabilities = history[-1].stabilities
+    aa_stabilities = history[generation].stabilities
     (n_clones, clone_size) = aa_stabilities.shape
     (clone_size, n_amino_acids) = stability_table.shape
     epsilon_r = np.mean(stability_table.values)

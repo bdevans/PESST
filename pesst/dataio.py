@@ -307,6 +307,10 @@ def load_settings(out_paths):
         settingsfullname = out_paths
     with open(settingsfullname, "r") as sf:  # open file
         settings = json.load(sf)
+    settings["gamma_kwargs"] = settings["gamma"]
+    del settings["gamma"]
+    settings["record_kwargs"] = settings["record"]
+    del settings["record"]
     return settings
 
 

@@ -255,7 +255,7 @@ def write_final_fasta(population, tree, out_paths):
         treefastafile.write(compact_protein(root))
 
 
-def create_output_folders(output_dir=None):
+def create_output_folders(output_dir=None, write_to_disk=True):
     """Create output directory structure.
 
     If no output directory is passed, each run will be saved in a time-stamped
@@ -268,21 +268,22 @@ def create_output_folders(output_dir=None):
     if output_dir is None:
         output_dir = datetime.datetime.now().strftime("%y-%m-%d-%H-%M")
     run_path = os.path.join("results", output_dir)
-    if os.path.isdir(run_path):
-        response = input(f"Warning: the output directory '{run_path}' already exists! Delete? [Y/n]: ")
-        if response.lower() == "y" or response.lower() == "":
-            shutil.rmtree(run_path)
+    if write_to_disk:
+        if os.path.isdir(run_path):
+            response = input(f"Warning: the output directory '{run_path}' already exists! Delete? [Y/n]: ")
+            if response.lower() == "y" or response.lower() == "":
+                shutil.rmtree(run_path)
+            else:
+                exit()
+        os.makedirs(run_path)
+        full_run_path = os.path.join(os.getcwd(), run_path)
+        if os.path.isdir(run_path):
+            print(f"Results directory successfully created: {full_run_path}")
         else:
-            exit()
-    os.makedirs(run_path)
-    full_run_path = os.path.join(os.getcwd(), run_path)
-    if os.path.isdir(run_path):
-        print(f"Results directory successfully created: {full_run_path}")
-    else:
-        warnings.warn(f"Results directory not created: {full_run_path}")
+            warnings.warn(f"Results directory not created: {full_run_path}")
 
-    for path in paths:
-        os.makedirs(os.path.join(run_path, path))
+        for path in paths:
+            os.makedirs(os.path.join(run_path, path))
 
     # innerpaths = ['statistics', 'histograms']
     # for innerpath in innerpaths:

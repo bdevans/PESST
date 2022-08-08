@@ -225,8 +225,7 @@ def write_fasta_alignment(generation, population, out_paths):
     fullname = os.path.join(out_paths["fastas"], fastafilename)
     with open(fullname, "w") as fastafile:  # open file
         # Write fasta header followed by residue in generation string
-        # TODO: This should be an ordered dict or list to preserve the order...
-        for p, protein in list(population.items()):
+        for p, protein in population.items():
             fastafile.write(f">clone_{p+1}\n")
             fastafile.write(compact_protein(protein)+"\n")
 

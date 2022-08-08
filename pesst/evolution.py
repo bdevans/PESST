@@ -700,7 +700,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
         # distributions = [(mu, sigma, skew, 1)]
         distributions = [{"mu": mu, "sigma": sigma, "skew": skew, "proportion": 1}]
     elif isinstance(distributions, str) and distributions.capitalize() == 'Tokuriki':
-        # Calculate the fraction of surface (P1) and core (1-P1) residues 
+        # Calculate the fraction of surface (P1) and core (1-P1) residues
         # according to: Tokuriki et al. 2007. doi:10.1016/j.jmb.2007.03.069
         P1 = 1.13 - (0.3 * np.log10(clone_size))
         P1 = np.clip(P1, 0, 1)  # Ensure 0 <= P1 <= 1
@@ -789,7 +789,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
                        "gamma": gamma,
                        "record": record}
     save_settings(settings_kwargs, out_paths)  # record run settings
-    
+
     LG_matrix = load_LG_matrix()  # Load LG matrix
     if record["figures"]:
         plot_LG_matrix(LG_matrix, out_paths)
@@ -817,7 +817,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
 
     # NOTE: These could be calculated after fixing sites
     # min_stability = np.sum(np.amin(stability_table, axis=1))
-    # mean_stability = np.sum(np.mean(stability_table, axis=1))  # Approximate
+    # mean_stability = np.sum(np.mean(stability_table, axis=1))  # Approximate
     # max_stability = np.sum(np.amax(stability_table, axis=1))
     # print(f"Protein stability bounds: ({min_stability:.3f}, {max_stability:.3f}), "
     #       f"[mean = {mean_stability:.3f}]")
@@ -860,7 +860,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     # is_variant = np.zeros_like(initial_protein, dtype=bool)
     # is_variant[sites.variant] = True
     # is_invariant = ~is_variant
-    # min_stability = np.sum(np.amin(stability_table, axis=1)[is_variant], 
+    # min_stability = np.sum(np.amin(stability_table, axis=1)[is_variant],
     #                        initial_stabiliies[is_invariant])
     # min_stability = np.sum(np.where(is_variant, np.amin(stability_table, axis=1), initial_stabiliies))
     # max_stability = np.sum(np.where(is_variant, np.amax(stability_table, axis=1), initial_stabiliies))

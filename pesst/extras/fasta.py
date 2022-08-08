@@ -13,7 +13,7 @@ from pesst.evolution import calculate_stability
 from pesst.utilities import compact_protein
 
 
-def process_fasta(stability_table, fasta_file, output_path):
+def process_fasta(stability_table, fasta_file, out_paths):
     # stabilitymatrix = input("stability matrix location (must be CSV from previous evolution run): ")
     # fasta = input("input fasta file location (must be a sequence or list of sequences in fasta format): ")
 
@@ -26,7 +26,7 @@ def process_fasta(stability_table, fasta_file, output_path):
                    for seq_id, seq in seqlib.items()}
 
     base_name, _ = os.path.splitext(os.path.basename(fasta_file))
-    calcs_path = os.path.join(output_path, f"fitcalc_{base_name}")
+    calcs_path = os.path.join(out_paths["fastas"], f"fitcalc_{base_name}")
     if not os.path.exists(calcs_path):
         os.makedirs(calcs_path)
     else:

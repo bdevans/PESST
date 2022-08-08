@@ -295,12 +295,14 @@ def create_output_folders(output_dir=None, write_to_disk=True):
 
 
 def save_settings(settings, out_paths):
+    """Write simulation settings to JSON."""
     settingsfullname = os.path.join(out_paths["initial"], "settings.json")
     with open(settingsfullname, "w") as sf:  # open file
         json.dump(settings, sf, indent=4)
 
 
 def load_settings(out_paths):
+    """Write simulation settings from JSON."""
     if isinstance(out_paths, dict):
         settingsfullname = os.path.join(out_paths["initial"], "settings.json")
     else:  # Assume path is passed as string

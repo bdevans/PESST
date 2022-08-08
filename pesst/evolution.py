@@ -20,7 +20,7 @@ from .dataio import (create_output_folders, save_settings, write_tree,
                      write_roots, write_initial_protein, write_stability_table,
                      write_fasta_alignment, write_final_fasta, load_LG_matrix,
                      write_histogram_statistics, append_ks_statistics,
-                     create_gif, save_history, Generation)
+                     create_gif, save_history, save_evolution, Generation)
 from .plotting import (plot_simulation, plot_evolution, plot_gamma_distribution,
                        plot_generation_stability, plot_stability_histograms,
                        plot_all_stabilities, plot_stability_table,
@@ -889,6 +889,8 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     history = evolve(n_generations, initial_population, stability_table, omega,
                      sites, p_mutation, mutation_rate, death_rate, tree,
                      LG_matrix, plot_omega, plot_epsilon, record, out_paths)
+
+    save_evolution(history, out_paths)
 
     if record["figures"]:
         # legend_title = "; ".join([r"$\mu$ = {}".format(mu),

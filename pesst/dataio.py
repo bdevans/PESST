@@ -301,7 +301,10 @@ def save_settings(settings, out_paths):
 
 
 def load_settings(out_paths):
-    settingsfullname = os.path.join(out_paths["initial"], "settings.json")
+    if isinstance(out_paths, dict):
+        settingsfullname = os.path.join(out_paths["initial"], "settings.json")
+    else:  # Assume path is passed as string
+        settingsfullname = out_paths
     with open(settingsfullname, "r") as sf:  # open file
         settings = json.load(sf)
     return settings

@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 from pesst.evolution import pesst
+from pesst.extras.fasta import write_consensus
 
 # NOTE: __path__ is initialized to be a list containing the name of the directory holding the package’s __init__.py
 # mpl.use('TkAgg')
@@ -68,3 +69,5 @@ record = {"rate": 50,           # record generation data and write new figures e
 history = pesst(n_generations, stability_start, omega, mu, sigma, skew, distributions,
                 n_clones, n_roots, clone_size, p_invariant, mutation_rate,
                 death_rate, gamma, record, output_dir, seed)
+
+write_consensus(f"./results/test/fastas/clones_G{n_generations}.fasta")

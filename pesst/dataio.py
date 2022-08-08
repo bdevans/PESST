@@ -5,6 +5,7 @@ import datetime
 import warnings
 import random
 import glob
+import pickle
 import pkg_resources
 from operator import itemgetter
 from collections import namedtuple
@@ -347,6 +348,22 @@ def save_history(generation, history, out_paths):
                   for key, protein in history[generation].population.items()}
     with open(clones_file, "w") as gf:
         json.dump(population, gf, indent=4, sort_keys=True)
+
+
+def save_evolution(history, out_paths):
+    """Save the complete evolutionary history to disk."""
+    # compact_history = {}
+    # for generation, data in history.items():
+    #     population = {key: compact_protein(protein)
+    #                   for key, protein in data.population.items()}
+    #     compact_history[generation] = population
+    # protein_file = os.path.join(out_paths["data"], "history_proteins.json")
+    # with open(protein_file, "w") as phf:
+    #     json.dump(compact_history, phf, indent=4, sort_keys=True)
+
+    history_pickle = os.path.join(out_paths["data"], "history.pkl")
+    with open(history_pickle, "wb") as hpf:
+        pickle.dump(history, hpf)
 
 
 def load_history(data_dir):

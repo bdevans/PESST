@@ -95,13 +95,18 @@ def plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
         colours = default_colours
 
     # Create array of stability values with shape (n_generations, n_clones)
-    n_generations = len(history) - 1  # First entry is the initial state
-    generation_numbers = np.arange(n_generations+1)  # Skip initial generation
+    # n_generations = list(history)[-1]
+    # n_steps = len(history) - 1  # First entry is the initial state
+    # generation_numbers = np.arange(0, n_generations, n_steps)  # Skip initial generation
+    generation_numbers = list(history)
+    n_generations = generation_numbers[-1]
+    # print(generation_numbers)
+    # print(list(history))
     (clone_size, n_amino_acids) = stability_table.shape
     (n_clones, _) = history[0].stabilities.shape
 
     stabilities = np.array([np.sum(history[g].stabilities, axis=1)
-                            for g in range(n_generations+1)])
+                            for g in generation_numbers])
     fig = None
     if ax is None:
         fig, ax = plt.subplots(figsize=(12, 8))

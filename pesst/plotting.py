@@ -304,9 +304,10 @@ def plot_stability_distributions(generation, stabilities, stability_table, initi
     return ax
 
 def plot_stability_histograms(generation, aa_stabilities, stability_table, #omega,
-                              out_paths, orient='vertical', density_cap=0.7, 
+                              out_paths, orient='vertical', density_cap=0.7,
                               colours=None, ax=None):
 
+    # Set density_cap=None to remove y-axis limits
     fig = None
     if ax is None:
         fig, ax = plt.subplots()  # figsize=(8, 12)
@@ -363,12 +364,12 @@ def plot_stability_histograms(generation, aa_stabilities, stability_table, #omeg
     #         label=f"Present distribution\n{stats_g}")
     if orient.lower() == 'vertical':
         sns.histplot(aa_stabilities.ravel(),
-                     color=colours['aa_g'], alpha= 0.8,
+                     color=colours['aa_g'], alpha=0.8,
                      stat='density', ax=ax,
                      label=f"Present distribution\n{stats_g}")
     else:
         sns.histplot(y=aa_stabilities.ravel(),
-                     color=colours['aa_g'], alpha= 0.8,
+                     color=colours['aa_g'], alpha=0.8,
                      stat='density', ax=ax,
                      label=f"Present distribution\n{stats_g}")
     # sns.distplot(aa_stabilities.ravel(), #bins='sqrt', 

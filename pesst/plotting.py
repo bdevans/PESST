@@ -111,18 +111,18 @@ def plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
     if ax is None:
         fig, ax = plt.subplots(figsize=(12, 8))
     # sns.lineplot(generation_numbers, stabiltiies, estimator=None, lw=1)
-    ax.plot(generation_numbers, stabilities, color=colours["phi"], alpha=0.2, lw=1)
+    ax.plot(generation_numbers, stabilities, color=colours["phi"], alpha=0.2, lw=1, zorder=30)
             # color=sns.desaturate(colours["phi"], 0.3), lw=1)
 
     # Average across clones
     ax.plot(generation_numbers, np.mean(stabilities, axis=1), "--",
-            color=colours["phi_mu"], lw=3, zorder=20, label=r"$\mu_\phi$")
+            color=colours["phi_mu"], lw=3, zorder=40, label=r"$\mu_\phi$")
     if xlims is not None:
         ax.set_xlim(xlims)
     else:
         ax.set_xlim([-0.05*n_generations, 1.05*n_generations])
     ax.set_xlabel("Generation")
-    ax.set_ylabel("$\Delta G_e$ (kcal/mol)") #, fontweight='bold')
+    ax.set_ylabel(r"$\Delta G_e$ (kcal/mol)") #, fontweight='bold')
     if fig_title:
         ax.set_title(fill(f"Stability change for {n_clones} clones "
                         f"of {clone_size} amino acids, mutated "

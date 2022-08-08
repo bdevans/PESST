@@ -4,6 +4,7 @@ import json
 import datetime
 import warnings
 import random
+import glob
 import pkg_resources
 from operator import itemgetter
 from collections import namedtuple
@@ -351,13 +352,13 @@ def save_history(generation, history, out_paths):
 def load_history(data_dir):
     """Load data from a previous simulation."""
     # NOTE: Work in progress!
-    stability_files = glob.glob(os.path.join("results", data_dir, "stabilities_*.csv"))
+    stability_files = glob.glob(os.path.join(data_dir, "data", "stabilities_*.csv"))
     generations = []
     for file in stability_files:
         (root, ext) = os.path.splitext(os.path.basename(file))
-        generations.append(root.split('_')[-1])
+        generations.append(int(root.split('_')[-1][1:]))  # Skip the first character (G) of the last string (GXXX)
 
-    population_files = glob.glob(os.path.join("results", data_dir, "clones_*.json"))
+    population_files = glob.glob(os.path.join(data_dir, "data", "clones_*.json"))
     sorted_files = sorted(zip(generations, population_files, stability_files),
                           key=itemgetter(0))
     history = {}
@@ -367,6 +368,7 @@ def load_history(data_dir):
         with open(population_file, "r") as pf:
             population = json.load(pf)
         with open(stability_file, "r") as sf:
+            stabilities = np.loadtxt(sf, delimiter=",")
         # history.append({"population": population, "stabilities": stabilities})
         history[generation] = Generation(population=population, stabilities=stabilities)
         generations.append(generation)

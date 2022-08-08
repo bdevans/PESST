@@ -232,6 +232,77 @@ def plot_generation_stability(generation, stabilities, stability_table, out_path
     plot_phi_stability_table(generation, stabilities, clims, out_paths)
 
 
+def plot_stability_distributions(generation, stabilities, stability_table, initial_stabilities=None, alpha=0.8, density_cap=None, colours=None, ax=None):
+
+    # Set density_cap=None to remove y-axis limits
+    fig = None
+    if ax is None:
+        fig, ax = plt.subplots()  # figsize=(8, 12)
+
+    if colours is None:
+        colours = default_colours
+
+    mean_eps_stability = np.mean(stability_table.ravel())
+
+    # sns.histplot(stability_table.ravel(),
+    #                 color=colours['epsilon'], alpha=alpha,
+    #                 stat='density', ax=ax,
+    #                 label="\n".join([r"$\epsilon$ distribution", rf"$\mu_r^{{\epsilon}}$ = {mean_eps_stability:.2f}"]))
+    sns.kdeplot(stability_table.ravel(),
+                color=colours['epsilon'], alpha=alpha, fill=True, ax=ax,
+                    label="\n".join([r"$\epsilon$ distribution", rf"$\mu_r^{{\epsilon}}$ = {mean_eps_stability:.2f}"]))
+    # for g in generations:
+        # sns.histplot(y=history[g].stabilities.values.ravel(),
+        #             color=colours['aa_0'], alpha=alpha,
+        #             stat='density', ax=ax,
+        #             label=f"Generation {g} distribution")
+    mean_gen_stability = np.mean(stabilities.ravel())
+
+    # sns.histplot(stabilities.ravel(),
+    #             color=colours['aa_g'], alpha=alpha,
+    #             stat='density', ax=ax,
+    #              label="\n".join([f"Generation {generation:,}", rf"$\mu_r^{{(g)}}$ = {mean_gen_stability:.2f}"]))
+    sns.kdeplot(stabilities.ravel(),
+                color=colours['aa_g'], alpha=alpha, fill=True, ax=ax,
+                label="\n".join([f"Generation {generation:,}", rf"$\mu_r^{{(g)}}$ = {mean_gen_stability:.2f}"]))
+
+    if initial_stabilities is not None:
+        mean_initial_stability = np.mean(initial_stabilities.ravel())
+
+        # sns.histplot(initial_stabilities.ravel(),
+        #              color=colours['aa_0'], alpha=alpha,
+        #              stat='density', ax=ax,
+        #              label="\n".join(["Generation 0", rf"$\mu_r^{{(0)}}$ = {mean_initial_stability:.2f}"]))
+        sns.kdeplot(initial_stabilities.ravel(),
+                     color=colours['aa_0'], alpha=alpha, fill=True, ax=ax,
+                     label="\n".join(["Generation 0", rf"$\mu_r^{{(0)}}$ = {mean_initial_stability:.2f}"]))
+
+    
+    ax.axvline(x=mean_eps_stability, color=colours["epsilon"],
+               linestyle="--", lw=3, zorder=20,)
+            #    label=rf"$\epsilon_r$ = {mean_eps_stability:.2f}")
+    # means = [np.mean(history[g].stabilities.values) for g in generations]
+    
+    ax.axvline(x=mean_gen_stability, color=colours["aa_g_mu"],
+               linestyle="--", lw=3, zorder=20,)
+            #    label=rf"$\mu_r^{{(g)}}$ = {mean_gen_stability:.2f}")
+    if initial_stabilities is not None:
+        ax.axvline(x=mean_initial_stability, color=colours["aa_0_mu"],
+                   linestyle="--", lw=3, zorder=20,)
+                #    label=rf"$\mu_r^{{(0)}}$ = {mean_initial_stability:.2f}")
+
+    legend = ax.legend(loc="upper right", frameon=True, fancybox=True, framealpha=0.7, fontsize=8)  # fontsize=6.5,
+    legend.set_zorder(100)
+
+    ax.set_xlabel(r"$\Delta \Delta G_e$ (kcal/mol)")
+    ax.set_ylabel("Density")
+    ax.set_ybound(0, density_cap)
+
+    # if fig is not None:
+    #     fig.savefig(os.path.join(out_paths["figures"],
+    #                              f"histogram_G{generation}.png"))
+    return ax
+
 def plot_stability_histograms(generation, aa_stabilities, stability_table, #omega,
                               out_paths, orient='vertical', density_cap=0.7, 
                               colours=None, ax=None):

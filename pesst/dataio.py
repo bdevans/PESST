@@ -393,6 +393,11 @@ def load_history(data_dir):
 
 
 def load_stability_table(out_paths):
-    return pd.read_csv(os.path.join(out_paths["initial"],
-                                    'stability_table.csv'),
-                       index_label="Position")
+    """Load CSV file containing stabilities of amino acids (columns) for each
+    position (rows)."""
+    if isinstance(out_paths, dict):
+        path_to_file = os.path.join(out_paths["initial"],
+                                    'stability_table.csv')
+    else:
+        path_to_file = out_paths
+    return pd.read_csv(path_to_file, index_col="Position")

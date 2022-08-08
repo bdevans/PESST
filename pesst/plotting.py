@@ -84,8 +84,8 @@ def plot_amino_acid_evolution(history, epsilon_r, out_paths,
 
 
 def plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
-                   out_paths, fig_title=True, legend_title=None, xlims=None,
-                   colours=None, ax=None):
+                   out_paths, fig_title=True, legend_title=None, legend_loc="upper right",
+                   xlims=None, colours=None, ax=None):
     """Plot stability against generation for all clones.
 
     This plots after mutation but before replacement so that subthreshold
@@ -131,7 +131,7 @@ def plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
         ax.axhline(epsilon, color=colours["epsilon"], lw=3, linestyle=":",
                    zorder=20, label=rf"$\epsilon$ = {epsilon:.2f}")
 
-    legend = ax.legend(title=legend_title, loc="upper right", frameon=True, fancybox=True, framealpha=0.7)
+    legend = ax.legend(title=legend_title, loc=legend_loc, frameon=True, fancybox=True, framealpha=0.7)
     legend.set_zorder(100)
 
     if fig is not None:

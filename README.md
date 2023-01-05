@@ -16,7 +16,7 @@ Adam Thomas, Benjamin D. Evans, Mark van der Giezen, Nicholas J. Harmer.
 bioRxiv 2022.11.23.517659; [doi:10.1101/2022.11.23.517659](https://doi.org/10.1101/2022.11.23.517659)
 
 ```
-@article {10.1101/2022.11.23.517659,
+@article{10.1101/2022.11.23.517659,
 	author = {Thomas, Adam and Evans, Benjamin D. and van der Giezen, Mark and Harmer, Nicholas J.},
 	title = {Survivor bias drives overestimation of stability in reconstructed ancestral proteins},
 	elocation-id = {2022.11.23.517659},

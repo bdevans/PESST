@@ -4,7 +4,7 @@ __doc__ = """A Python module for evolving proteins."""
 # __all__ = ["pesst"]
 # __name__ = "pesst"
 __project__ = "pesst"
-__version__ = "1.0"
+__version__ = "1.1"
 
 import os
 

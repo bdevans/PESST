@@ -52,12 +52,12 @@ def write_consensus(fasta_file, n_top=3):  # , out_paths):
 
     base, extension = os.path.splitext(fasta_file)
     consensus_file = f"{base}_consensus.fasta"  # base includes any directories
-    
+
     # Dictionary of id, sequence mappings
     seqlib = SeqIO.to_dict(SeqIO.parse(fasta_file, "fasta"))
     sequences = list(seqlib.values())
     seqlen = len(sequences[0].seq)  # Length of first sequence - assume all are the same
-    
+
     # Group amino acids by position
     position_groups = [[] for s in range(seqlen)]
     for position in range(seqlen):
@@ -94,4 +94,3 @@ def write_consensus(fasta_file, n_top=3):  # , out_paths):
                 previous_protein = protein
             else:
                 break
-            

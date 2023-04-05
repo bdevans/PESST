@@ -528,7 +528,7 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
     while not successful_mutation:  # Mutate until all branches are stable
         successful_mutation = True
         next_generation = copy.deepcopy(current_generation)
-        for q in range(n_mutations_per_gen):  # impliment gamma
+        for _ in range(n_mutations_per_gen):  # impliment gamma
             # Pick random key, clone to make a random generation
             pi, protein = random.choice(list(next_generation.items()))
             # Mutate the copy with the randomly chosen residue

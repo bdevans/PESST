@@ -346,10 +346,10 @@ def plot_stability_histograms(generation, aa_stabilities, stability_table, #omeg
 
     # Plot initial distribution mean
     label = rf"$\epsilon_r$ = {mean_stability_0:.2f}"
-    if orient == 'vertical':
+    if orient.lower() == 'vertical':
         ax.axvline(x=mean_stability_0, color=colours["aa_0_mu"],
                    linestyle="--", lw=3, zorder=20, label=label)
-    elif orient == 'horizontal':
+    elif orient.lower() == 'horizontal':
         ax.axhline(y=mean_stability_0, color=colours["aa_0_mu"],
                    linestyle="--", lw=3, zorder=20, label=label)
 
@@ -378,10 +378,10 @@ def plot_stability_histograms(generation, aa_stabilities, stability_table, #omeg
     #              label=f"Present distribution\n{stats_g}")
     # Plot current distribution mean
     label = rf"$\mu_r$ = {mean_stability:.2f}"
-    if orient == 'vertical':
+    if orient.lower() == 'vertical':
         ax.axvline(x=mean_stability, color=colours["aa_g_mu"],
                    linestyle="--", lw=3, zorder=20, label=label)
-    elif orient == 'horizontal':
+    elif orient.lower() == 'horizontal':
         ax.axhline(y=mean_stability, color=colours["aa_g_mu"],
                    linestyle="--", lw=3, zorder=20, label=label)
 
@@ -398,11 +398,11 @@ def plot_stability_histograms(generation, aa_stabilities, stability_table, #omeg
     legend = ax.legend(loc="upper right", frameon=True, fancybox=True, framealpha=0.7, fontsize=8)  # fontsize=6.5,
     legend.set_zorder(100)
 
-    if orient == 'vertical':
+    if orient.lower() == 'vertical':
         ax.set_xlabel(r"$\Delta \Delta G_e$ (kcal/mol)")
         ax.set_ylabel("Distribution density")
         ax.set_ybound(0, density_cap)
-    elif orient == 'horizontal':
+    elif orient.lower() == 'horizontal':
         ax.set_ylabel(r"$\Delta \Delta G_e$ (kcal/mol)")
         ax.set_xlabel("Distribution density")
         ax.set_xbound(0, density_cap)

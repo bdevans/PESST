@@ -379,7 +379,7 @@ def get_phi_stability_table(population, stability_table, exclude_invariants=Fals
     """
     dist_clone_stability = []
     # Find and plot all stability values in the current generation
-    for pi, protein in population.items():
+    for protein in population.values():
 
         if exclude_invariants:  # record["invariants"]:
             stabilities = [stability_table.loc[loc, amino_acid]

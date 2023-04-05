@@ -326,49 +326,20 @@ def record_generation_statistics(generation, population, sites,
     dictionary. Optionally generate data and figures about stability.
     """
 
-    # # Build distribution of stability values existing in evolving protein
-    # stabilities = get_phi_stability_table(population, stability_table)
-
-    # # TODO: Move plot out
-    # if record["figures"]:
-    #     clims = (np.floor(np.amin(stability_table.values)),
-    #             np.ceil(np.amax(stability_table.values)))
-    #     plot_phi_stability_table(generation, stabilities, clims, out_paths)
-
-    # if record["residues"]:
-    #     # save_dir = os.path.join(out_paths["figures"], "stabilitydotmatrix")
-    #     plot_threshold_stability(generation, population, stabilities,
-    #                            stability_table, omega, out_paths)
-    #     plot_stability_space(generation, population, stabilities, stability_table,
-    #                        omega, out_paths)
-
-    # if record["statistics"]:
     # Record 5 statistical tests on the protein stability space
     stats_file_name = f"normal_distribution_tests_G{generation}.md"
     if generation == 0:
-        # stats_file_name = "normal_distribution_statistics_stability_space.md"
         distributions = stability_table.values
     else:
-        # stats_file_name = f"normal_distribution_statistics_generation{generation}.md"
         # Build distribution of stability values excluding invariant sites
         distributions = get_phi_stability_table(population, stability_table,
                                                 exclude_invariants=True,
                                                 variant_sites=sites.variant)
-                                                # record["invariants"], sites.variant)
     stats_full_name = os.path.join(out_paths["statistics"], stats_file_name)
     write_histogram_statistics(stats_full_name, distributions)
     if generation > 0:
         append_ks_statistics(stats_full_name, distributions.ravel(),
                              stability_table.values.ravel())
-
-    # if record["histograms"] and record["figures"]:
-    #     # TODO: Move out
-    #     # disthistfilename = "generation_{}.png".format(generation)
-    #     # disthistfullname = os.path.join(out_paths["figures"], "histograms", disthistfilename)
-    #     # plot_histogram_of_stability(generation, stabilities.ravel(),
-    #     #                           stability_table.values.ravel(), omega, out_paths)
-    #     plot_stability_histograms(generation, stabilities, stability_table,
-    #                               omega, out_paths)
 
 
 def get_phi_stability_table(population, stability_table, exclude_invariants=False,

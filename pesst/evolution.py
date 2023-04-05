@@ -372,7 +372,7 @@ def record_generation_statistics(generation, population, sites,
 
 def get_phi_stability_table(population, stability_table, exclude_invariants=False,
                             variant_sites=None):
-    """Build a stability table for given generation's population.
+    r"""Build a stability table for given generation's population.
 
     The array has one row for each protein in the population and the stability
     value (\Delta \Delta G_e) for each amino acid in its position.

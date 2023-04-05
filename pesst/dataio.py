@@ -242,7 +242,7 @@ def write_final_fasta(population, tree, out_paths):
     # Choose a random selection of proteins from each branch
     selection = []
     for branch in tree["branches"]:
-        selection.extend(random.sample(set(branch), n_clones_to_take))
+        selection.extend(random.sample(sorted(set(branch)), n_clones_to_take))
 
     full_name = os.path.join(out_paths["treefastas"], "selected_fastas.fasta")
     with open(full_name, "w") as treefastafile:  # open file

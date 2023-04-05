@@ -6,10 +6,10 @@ import warnings
 import random
 import glob
 import pickle
-import pkg_resources
 from operator import itemgetter
 from collections import namedtuple
 
+import pkg_resources
 import numpy as np
 import scipy as sp
 import scipy.stats

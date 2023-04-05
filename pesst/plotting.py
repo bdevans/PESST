@@ -64,7 +64,7 @@ def plot_amino_acid_evolution(history, epsilon_r, out_paths,
     else:
         ax.set_xlim([-0.05*n_generations, 1.05*n_generations])
     ax.set_xlabel("Generation")
-    ax.set_ylabel("$\Delta \Delta G_e$ (kcal/mol)")  # , fontweight='bold')
+    ax.set_ylabel(r"$\Delta \Delta G_e$ (kcal/mol)")  # , fontweight='bold')
     if fig_title:
         ax.set_title(fill(f"Stability change for {n_residues} amino acids, "
                           f"mutated over {n_generations} generations", 60),

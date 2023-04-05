@@ -8,7 +8,7 @@ from pesst.extras.fasta import write_consensus
 # NOTE: __path__ is initialized to be a list containing the name of the directory holding the package’s __init__.py
 # mpl.use('TkAgg')
 mpl.rc('savefig', dpi=300)
-plt.style.use('seaborn-ticks')
+plt.style.use('seaborn-v0_8-ticks')
 
 # parameters of protein evolution
 n_generations = 200  # amount of generations the protein evolves for

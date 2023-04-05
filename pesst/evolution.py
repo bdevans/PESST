@@ -712,10 +712,6 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     # n_boot = kwargs.get("n_boot", 10000)
     # https://github.com/mwaskom/seaborn/blob/3a3ec75befab52c02650c62772a90f8c23046038/seaborn/algorithms.py
 
-    # gamma = {"shape": 1.9,
-    #          "scale": 1/1.9,  # theta = 1/beta NOTE: 1/gamma_shape
-    #          "iterations": 50,
-    #          "samples": 10000}
     # gamma = {}
     # if gamma_kwargs is not None:
     #     gamma.update(gamma_kwargs)

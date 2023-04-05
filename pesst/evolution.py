@@ -78,7 +78,7 @@ def get_stability_table(clone_size, amino_acids, distributions):
                                             size=(n_residues, len(amino_acids))))
 
     values = np.concatenate(values, axis=0)  # vstack
-    assert (clone_size, len(amino_acids)) == values.shape, f"Unexpect shape: {values.shape}"
+    assert (clone_size, len(amino_acids)) == values.shape, f"Unexpected shape: {values.shape}"
     # Shuffle rows in place
     np.random.shuffle(values)
     return pd.DataFrame(values, columns=amino_acids)

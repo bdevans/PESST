@@ -1,3 +1,4 @@
+"""The main module for the evolution of the population of proteins."""
 import copy
 import os
 import sys

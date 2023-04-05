@@ -721,7 +721,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     #     gamma.update(gamma_kwargs)
     # Populate gamma with default values for each key if not already given
     gamma_kwargs.setdefault('shape', 1.9)
-    gamma_kwargs.setdefault('scale', 1/1.9)  # theta = 1/beta NOTE: 1/gamma_shape
+    gamma_kwargs.setdefault('scale', 1 / gamma_kwargs['shape'])  # theta = 1/beta
     gamma_kwargs.setdefault('iterations', 50)
     gamma_kwargs.setdefault('samples', 10000)
     gamma = gamma_kwargs  # TODO: Remove after renaming args and below

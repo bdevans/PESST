@@ -411,10 +411,11 @@ def calc_bifurcation_interval(n_generations, n_clones, n_roots):
 
 
 def bifurcate_branches(branches):
+    """Bifurcate each branch in the tree."""
     new_bifurcations = []  # temporary store for new bifurcations
     for branch in branches:  # bifuricate each set of leaves
         random.shuffle(branch)
-        midpoint = int(len(branch)/2)
+        midpoint = int(len(branch) / 2)
         new_bifurcations.append(branch[:midpoint])
         new_bifurcations.append(branch[midpoint:])
     return new_bifurcations[:]
@@ -433,7 +434,7 @@ def select_from_pool(protein_index, candidates, stabilities, omega):
 
 
 def replace_protein(protein_index, tree, stabilities, omega):
-
+    """Replace a protein with a new one from the pool of candidates."""
     if protein_index in tree["roots"]:
         new_index = select_from_pool(protein_index, tree["roots"],
                                      stabilities, omega)
@@ -531,6 +532,9 @@ def mutate_population(current_generation, n_mutations_per_gen, tree,
 
 
 def kill_proteins(population, tree, death_rate, stability_table, omega):
+    """Kill proteins in the population with probability `death_rate' and
+    replace them with others selected at random from the tree.
+    """
     n_clones = len(population)
     # mortals = random.sample(range(n_clones), int(n_clones*death_rate))
     clones = np.arange(n_clones)

@@ -90,14 +90,27 @@ def clone_protein(protein, n_clones):
     return {l: copy.deepcopy(protein) for l in range(n_clones)}
 
 
-def get_allowed_sites(clone_size, n_invariants):
+def get_allowed_sites(clone_size, invariants):
     """Select invariant sites in the initially generated protein and return
     allowed values.
     """
+
     variant_sites = list(range(1, clone_size))  # keys for mutable sites
-    # Randomly define invariant sites (without replacement)
-    invariant_sites = random.sample(variant_sites, n_invariants)
-    invariant_sites.insert(0, 0)  # First aa is always anchored (Methionine)
+
+    if isinstance(invariants, int):
+        n_invariants = invariants
+        # Randomly define invariant sites (without replacement)
+        invariant_sites = random.sample(variant_sites, n_invariants)
+    elif isinstance(invariants, (list, tuple)):
+        n_invariants = len(invariants)
+        invariant_sites = invariants
+    else:
+        raise TypeError(f"Unexpected type for invariants ({type(invariants)})!"
+                        "Expected an int or (list, tuple).")
+
+    invariant_sites = sorted(invariant_sites)
+    if 0 not in invariant_sites:
+        invariant_sites.insert(0, 0)  # First aa is always anchored (Methionine)
     # Remove the invariant sites from allowed values
     for a in invariant_sites[1:]:
         variant_sites.remove(a)
@@ -655,18 +668,34 @@ def evolve(n_generations, population, stability_table, omega, sites,
 def pesst(n_generations=2000, stability_start='high', omega=0,
           mu=0, sigma=2.5, skew=0, distributions='Tokuriki',
           n_clones=52, n_roots=4, clone_size=100, p_invariant=0.1,
+          initial_protein='', invariant_sites=None,
           mutation_rate=0.001, death_rate=0.02,
           gamma_kwargs=None, record_kwargs=None, output_dir=None, seed=None):
     """The main function to intialise and run PESST evolutionary simulations."""
 
     print('PESST started...')
     # Validate arguments
+    if initial_protein:
+        if isinstance(initial_protein, (list, tuple)):
+            initial_protein = ''.join(initial_protein)
+        assert isinstance(initial_protein, str)
+        assert initial_protein.isalpha()
+        initial_protein = list(initial_protein.upper())
+        clone_size = len(initial_protein)
     assert 1 < clone_size
     assert 2 < n_roots < n_clones
     assert 0.0 <= mutation_rate <= 1.0
     assert 0.0 <= death_rate <= 1.0
+    if invariant_sites:
+        assert all(isinstance(i, int) for i in invariant_sites) \
+            or all(i.isdigit() for i in invariant_sites)
+        n_invariants = len(invariant_sites)
+        p_invariant = n_invariants / clone_size
+        invariants = invariant_sites
+    else:
+        n_invariants = int(p_invariant * clone_size)
+        invariants = n_invariants
     assert 0.0 <= p_invariant < 1.0  # Must be less than 1 for evolution
-    n_invariants = int(p_invariant * clone_size)
     assert 0 <= n_invariants < clone_size
 
     # NOTE: With (\Delta) \Delta G_e, positive is bad (destabilising)
@@ -675,19 +704,23 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     if distributions is None:
         # distributions = [(mu, sigma, skew, 1)]
         distributions = [{"mu": mu, "sigma": sigma, "skew": skew, "proportion": 1}]
-    elif isinstance(distributions, str) and distributions.capitalize() == 'Tokuriki':
-        # Calculate the fraction of surface (P1) and core (1-P1) residues
-        # according to: Tokuriki et al. 2007. doi:10.1016/j.jmb.2007.03.069
-        P1 = 1.13 - (0.3 * np.log10(clone_size))
-        P1 = np.clip(P1, 0, 1)  # Ensure 0 <= P1 <= 1
-        n_surface = int(np.floor(P1 * clone_size))
-        n_core = clone_size - n_surface
-        # Create a list of distributions
-        # Distribution = namedtuple('Distribution', ['mu', 'sigma', 'skew', 'proportion'])
-        # distributions = [Distribution(mu=0.54, sigma=0.98, skew=0, proportion=P1),
-        #                  Distribution(mu=2.05, sigma=1.91, skew=0, proportion=1-P1)]
-        distributions = [{"mu": 0.54, "sigma": 0.98, "skew": 0, "proportion": P1},
-                         {"mu": 2.05, "sigma": 1.91, "skew": 0, "proportion": 1-P1}]
+    elif isinstance(distributions, str):
+        if distributions.capitalize() == 'Tokuriki':
+            # Calculate the fraction of surface (P1) and core (1-P1) residues
+            # according to: Tokuriki et al. 2007. doi:10.1016/j.jmb.2007.03.069
+            P1 = 1.13 - (0.3 * np.log10(clone_size))
+            P1 = np.clip(P1, 0, 1)  # Ensure 0 <= P1 <= 1
+            n_surface = int(np.floor(P1 * clone_size))
+            n_core = clone_size - n_surface
+            # Create a list of distributions
+            # Distribution = namedtuple('Distribution', ['mu', 'sigma', 'skew', 'proportion'])
+            # distributions = [Distribution(mu=0.54, sigma=0.98, skew=0, proportion=P1),
+            #                  Distribution(mu=2.05, sigma=1.91, skew=0, proportion=1-P1)]
+            distributions = [{"mu": 0.54, "sigma": 0.98, "skew": 0, "proportion": P1},
+                            {"mu": 2.05, "sigma": 1.91, "skew": 0, "proportion": 1-P1}]
+        else:
+            assert os.path.isfile(distributions), f"File not found: {distributions}!"
+            load_distributions = True
     else:
         assert isinstance(distributions, (list, tuple))
 
@@ -753,8 +786,10 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
                        "distributions": distributions,
                        "n_clones": n_clones,
                        "clone_size": clone_size,
+                       "initial_protein": initial_protein,
                        "mutation_rate": mutation_rate,
                        "p_invariant": p_invariant,
+                       "invariant_sites": invariant_sites,
                        "death_rate": death_rate,
                        "n_roots": n_roots,
                        "seed": seed,
@@ -768,7 +803,20 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
 
     print('Creating amino acid stability distribution...')
     # Make stability table of \Delta \Delta G_e values
-    stability_table = get_stability_table(clone_size, LG_matrix.columns, distributions)
+    amino_acids = LG_matrix.columns
+
+    if load_distributions:
+        # Load stability table in the same format as write_stability_table expects
+        # The first row should be: Position,A,R,N,D,C,Q,E,G,H,I,L,K,M,F,P,S,T,W,Y,V
+        # The first column should be indices: (0 ... n-1)
+        stability_table = pd.read_csv(distributions, header=0, index_col="Position")
+    else:
+        # Generate stability table
+        stability_table = get_stability_table(clone_size, amino_acids, distributions)
+
+    assert (clone_size, len(amino_acids)) == stability_table.shape, \
+        f"Unexpected shape: {stability_table.shape}"
+    # Ensure output is (still) written to the expected path
     write_stability_table(stability_table, out_paths)
 
     if isinstance(stability_start, str) and stability_start.lower() == "low":
@@ -796,7 +844,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
 
     # Generate variant/invariant sites
     # TODO: return boolean array where True is variant
-    sites = get_allowed_sites(clone_size, n_invariants)
+    sites = get_allowed_sites(clone_size, invariants)
     # Generate mutation probabilities for every site
     p_mutation = gamma_ray(clone_size, sites, gamma, record, out_paths)  # TODO: Move plotting out
 
@@ -804,8 +852,10 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     # sites created (calling variables in this order stops the evolutionary
     # process being biased by superstable invariant sites.)
     # phi
-    initial_protein = get_stable_protein(stability_start, clone_size, sites,
-                                         stability_table, omega)
+    if not initial_protein:
+        initial_protein = get_stable_protein(stability_start, clone_size, sites,
+                                            stability_table, omega)
+    assert set(initial_protein).issubset(amino_acids)
     write_initial_protein(initial_protein, out_paths)  # Record initial protein
     initial_stability = calculate_stability(initial_protein, stability_table)
 

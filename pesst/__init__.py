@@ -8,6 +8,12 @@ __version__ = "1.1"
 
 import os
 
+from pesst.evolution import pesst
+
+
+__all__ = ['pesst']
+AMINO_ACIDS = 'A,R,N,D,C,Q,E,G,H,I,L,K,M,F,P,S,T,W,Y,V'.split(',')
+
 
 def get_data_path():
     # resource = os.path.join("data", "LGaa.csv")

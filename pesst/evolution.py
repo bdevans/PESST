@@ -745,6 +745,8 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     # n_boot = kwargs.get("n_boot", 10000)
     # https://github.com/mwaskom/seaborn/blob/3a3ec75befab52c02650c62772a90f8c23046038/seaborn/algorithms.py
 
+    if gamma_kwargs is None:
+        gamma_kwargs = {}
     # gamma = {}
     # if gamma_kwargs is not None:
     #     gamma.update(gamma_kwargs)
@@ -756,6 +758,8 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     gamma = gamma_kwargs  # TODO: Remove after renaming args and below
 
     # TODO: Put run_path (and subdirs) in record dict
+    if record_kwargs is None:
+        record_kwargs = {}
     # record = {"rate": 50,
     #           "fasta_rate": 50,
     #           "residues": False,

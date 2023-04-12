@@ -711,8 +711,9 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
             # according to: Tokuriki et al. 2007. doi:10.1016/j.jmb.2007.03.069
             P1 = 1.13 - (0.3 * np.log10(clone_size))
             P1 = np.clip(P1, 0, 1)  # Ensure 0 <= P1 <= 1
-            n_surface = int(np.floor(P1 * clone_size))
-            n_core = clone_size - n_surface
+            # n_surface = int(np.round(P1 * clone_size))
+            # n_core = clone_size - n_surface
+            # print(f"Each protein has {n_core} core and {n_surface} surface amino acids.")
             # Create a list of distributions
             # Distribution = namedtuple('Distribution', ['mu', 'sigma', 'skew', 'proportion'])
             # distributions = [Distribution(mu=0.54, sigma=0.98, skew=0, proportion=P1),

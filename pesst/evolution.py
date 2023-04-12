@@ -50,15 +50,15 @@ def get_stability_table(clone_size, amino_acids, distributions):
             assert 'sigma' in params
             mu, sigma = params['mu'], params['sigma']
             skew = params.get("skew", 0)
-            proportion = params.get("proportion", 1/len(distributions))
+            proportion = params.get("proportion", 1 / len(distributions))
         elif isinstance(params, (list, tuple)):
             if len(params) == 2:
                 (mu, sigma) = params
                 skew = 0
-                proportion = 1/len(distributions)
+                proportion = 1 / len(distributions)
             elif len(params) == 3:
                 (mu, sigma, skew) = params
-                proportion = 1/len(distributions)
+                proportion = 1 / len(distributions)
             elif len(params) == 4:
                 (mu, sigma, skew, proportion) = params
             else:
@@ -68,7 +68,7 @@ def get_stability_table(clone_size, amino_acids, distributions):
         else:
             raise RuntimeError("Unexpected data format for distributions parameters!"
                                f"Expected dictionary, tuple or list (got {type(params)})!")
-        if d < len(distributions)-1:
+        if d < len(distributions) - 1:
             n_residues = int(np.round(proportion * clone_size))
             remaining_residues -= n_residues
         else:  # Last distribution
@@ -719,7 +719,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
             # distributions = [Distribution(mu=0.54, sigma=0.98, skew=0, proportion=P1),
             #                  Distribution(mu=2.05, sigma=1.91, skew=0, proportion=1-P1)]
             distributions = [{"mu": 0.54, "sigma": 0.98, "skew": 0, "proportion": P1},
-                            {"mu": 2.05, "sigma": 1.91, "skew": 0, "proportion": 1-P1}]
+                            {"mu": 2.05, "sigma": 1.91, "skew": 0, "proportion": 1 - P1}]
         else:
             assert os.path.isfile(distributions), f"File not found: {distributions}!"
             load_distributions = True

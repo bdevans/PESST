@@ -701,6 +701,7 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
     # NOTE: With (\Delta) \Delta G_e, positive is bad (destabilising)
     # and negative is good (stabilising)
 
+    load_distributions = False
     if distributions is None:
         # distributions = [(mu, sigma, skew, 1)]
         distributions = [{"mu": mu, "sigma": sigma, "skew": skew, "proportion": 1}]

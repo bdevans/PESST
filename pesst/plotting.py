@@ -41,13 +41,13 @@ def plot_amino_acid_evolution(history, epsilon_r, out_paths,
 
     # Create array of stability values with shape (n_generations, n_clones)
     n_generations = len(history) - 1  # First entry is the initial state
-    generation_numbers = np.arange(n_generations+1)  # Skip initial generation
+    generation_numbers = np.arange(n_generations + 1)  # Skip initial generation
     # (clone_size, n_amino_acids) = stability_table.shape
     # (n_clones, _) = history[0].stabilities.shape
     n_residues = history[0].stabilities.size  # == stability_table.shape
 
     stabilities = np.array([history[g].stabilities.ravel()
-                            for g in range(n_generations+1)])
+                            for g in range(n_generations + 1)])
     fig = None
     if ax is None:
         fig, ax = plt.subplots(figsize=(12, 8))
@@ -62,7 +62,7 @@ def plot_amino_acid_evolution(history, epsilon_r, out_paths,
     if xlims is not None:
         ax.set_xlim(xlims)
     else:
-        ax.set_xlim([-0.05*n_generations, 1.05*n_generations])
+        ax.set_xlim([-0.05 * n_generations, 1.05 * n_generations])
     ax.set_xlabel("Generation")
     ax.set_ylabel(r"$\Delta \Delta G_e$ (kcal/mol)")  # , fontweight='bold')
     if fig_title:
@@ -120,7 +120,7 @@ def plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
     if xlims is not None:
         ax.set_xlim(xlims)
     else:
-        ax.set_xlim([-0.05*n_generations, 1.05*n_generations])
+        ax.set_xlim([-0.05 * n_generations, 1.05 * n_generations])
     ax.set_xlabel("Generation")
     ax.set_ylabel(r"$\Delta G_e$ (kcal/mol)") #, fontweight='bold')
     if fig_title:
@@ -156,7 +156,7 @@ def plot_amino_acid_stabilities(aa_stabilities, epsilon_r=None,
         colours = default_colours
 
     (n_clones, clone_size) = aa_stabilities.shape
-    protein_indicies = np.arange(1, n_clones+1)
+    protein_indicies = np.arange(1, n_clones + 1)
     mean_stability = np.mean(aa_stabilities)
 
     ax.plot(protein_indicies, aa_stabilities,
@@ -200,7 +200,7 @@ def plot_initial_amino_acid_stabilities(stability_table, omega, colours=None, ax
 
     clone_size = stability_table.shape[0]
     mean_stability_0 = np.mean(stability_table.values)
-    locus_indicies = np.arange(1, clone_size+1)
+    locus_indicies = np.arange(1, clone_size + 1)
 
     # Plot each column of stability_table as a separate dataseries against 0..N-1
     ax.plot(locus_indicies, stability_table.values, "o", color=colours["aa_0"], markersize=1)

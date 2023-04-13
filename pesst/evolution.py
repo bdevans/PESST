@@ -925,8 +925,8 @@ def pesst(n_generations=2000, stability_start='high', omega=0,
         #                           r"$\sigma$ = {}".format(sigma),
         #                           "skew = {}".format(skew),
         #                           r"$\delta$ = {}".format(mutation_rate)])
-        plot_evolution(history, stability_table, omega, plot_omega, plot_epsilon,
-                    out_paths)  # , legend_title=legend_title)
+        plot_evolution(history, stability_table, omega,
+                       plot_omega, plot_epsilon, out_paths)  # , legend_title=legend_title)
 
         # Create animations
         if record["gif"]:
